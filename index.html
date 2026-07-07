@@ -11,12 +11,13 @@
     <div class="calculator" id="calculator">
       <div class="top-bar">
         <div class="mode-switch">
-          <button class="mode-btn active" data-mode="standard">Standard</button>
-          <button class="mode-btn" data-mode="scientific">Scientific</button>
+          <button class="mode-btn active" data-mode="standard" data-i18n="standard">Standard</button>
+          <button class="mode-btn" data-mode="scientific" data-i18n="scientific">Scientific</button>
         </div>
         <div class="top-actions">
-          <button class="icon-btn" id="historyToggle" title="History">🕘</button>
-          <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+          <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
+          <button class="icon-btn lang-btn" id="langToggle" title="Toggle language" data-i18n-title="langToggleTitle">EN</button>
+          <button class="icon-btn" id="themeToggle" title="Toggle theme" data-i18n-title="themeToggleTitle">🌙</button>
         </div>
       </div>
 
@@ -29,8 +30,8 @@
       <div class="panels">
         <div class="history-panel" id="historyPanel">
           <div class="history-header">
-            <span>History</span>
-            <button id="clearHistory">Clear</button>
+            <span data-i18n="historyLabel">History</span>
+            <button id="clearHistory" data-i18n="clearLabel">Clear</button>
           </div>
           <ul id="historyList" class="history-list"></ul>
         </div>

@@ -12,14 +12,53 @@
   const historyList = document.getElementById('historyList');
   const clearHistoryBtn = document.getElementById('clearHistory');
   const degRadBtn = document.getElementById('degRadBtn');
+  const langToggle = document.getElementById('langToggle');
+
+  const translations = {
+    en: {
+      title: 'Advanced Calculator',
+      standard: 'Standard',
+      scientific: 'Scientific',
+      historyLabel: 'History',
+      clearLabel: 'Clear',
+      noHistory: 'No history yet',
+      error: 'Error',
+      themeToggleTitle: 'Toggle theme',
+      historyToggleTitle: 'Toggle history',
+      langToggleTitle: 'Toggle language',
+      deg: 'DEG',
+      rad: 'RAD',
+      langButton: 'EN',
+    },
+    mr: {
+      title: 'प्रगत कॅल्क्युलेटर',
+      standard: 'मानक',
+      scientific: 'वैज्ञानिक',
+      historyLabel: 'इतिहास',
+      clearLabel: 'साफ करा',
+      noHistory: 'अद्याप इतिहास नाही',
+      error: 'त्रुटी',
+      themeToggleTitle: 'थीम बदला',
+      historyToggleTitle: 'इतिहास दाखवा',
+      langToggleTitle: 'भाषा बदला',
+      deg: 'अंश',
+      rad: 'रेडियन',
+      langButton: 'मर',
+    },
+  };
 
   const state = {
     expression: '',
     justEvaluated: false,
     memory: 0,
     isDegrees: true,
+    language: localStorage.getItem('calc-lang') || 'en',
     history: JSON.parse(localStorage.getItem('calc-history') || '[]'),
   };
+
+  function t(key) {
+    return translations[state.language][key];
+  }
 
   function render() {
     expressionEl.textContent = state.expression
@@ -27,7 +66,23 @@
       .replace(/\//g, '÷') || '';
     resultEl.textContent = state.expression === '' ? '0' : liveEvaluate();
     memoryIndicator.textContent = state.memory !== 0 ? 'M' : '';
-    degRadBtn.textContent = state.isDegrees ? 'DEG' : 'RAD';
+    degRadBtn.textContent = state.isDegrees ? t('deg') : t('rad');
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = state.language;
+    document.title = t('title');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const label = t(el.dataset.i18nTitle);
+      el.title = label;
+      el.setAttribute('aria-label', label);
+    });
+    langToggle.textContent = t('langButton');
+    renderHistory();
+    render();
   }
 
   function liveEvaluate() {
@@ -41,7 +96,7 @@
   }
 
   function formatNumber(n) {
-    if (!isFinite(n)) return 'Error';
+    if (!isFinite(n)) return t('error');
     const rounded = Math.round((n + Number.EPSILON) * 1e10) / 1e10;
     if (Math.abs(rounded) > 1e15 || (Math.abs(rounded) < 1e-9 && rounded !== 0)) {
       return rounded.toExponential(6);
@@ -135,7 +190,7 @@
       let left = this.parseUnary();
       if (this.peek() && this.peek().type === 'op' && this.peek().value === '^') {
         this.next();
-        const right = this.parsePow(); // right-associative
+        const right = this.parsePow();
         return Math.pow(left, right);
       }
       return left;
@@ -294,7 +349,7 @@
       state.justEvaluated = true;
       render();
     } catch (e) {
-      resultEl.textContent = 'Error';
+      resultEl.textContent = t('error');
     }
   }
 
@@ -373,7 +428,7 @@
   function renderHistory() {
     historyList.innerHTML = '';
     if (state.history.length === 0) {
-      historyList.innerHTML = '<li class="empty">No history yet</li>';
+      historyList.innerHTML = `<li class="empty">${t('noHistory')}</li>`;
       return;
     }
     state.history.forEach(({ expr, res }) => {
@@ -451,6 +506,12 @@
     renderHistory();
   });
 
+  langToggle.addEventListener('click', () => {
+    state.language = state.language === 'en' ? 'mr' : 'en';
+    localStorage.setItem('calc-lang', state.language);
+    applyLanguage();
+  });
+
   // ---------- Keyboard support ----------
   window.addEventListener('keydown', (e) => {
     const key = e.key;
@@ -469,7 +530,6 @@
     const savedTheme = localStorage.getItem('calc-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
-    renderHistory();
-    render();
+    applyLanguage();
   })();
 })();
