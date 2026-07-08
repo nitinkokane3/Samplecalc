@@ -13,12 +13,20 @@
   const clearHistoryBtn = document.getElementById('clearHistory');
   const degRadBtn = document.getElementById('degRadBtn');
   const langToggle = document.getElementById('langToggle');
+  const baseTabs = document.getElementById('baseTabs');
+  const progRow = document.getElementById('progRow');
+  const progKeys = document.getElementById('progKeys');
+  const convHexEl = document.getElementById('convHex');
+  const convDecEl = document.getElementById('convDec');
+  const convOctEl = document.getElementById('convOct');
+  const convBinEl = document.getElementById('convBin');
 
   const translations = {
     en: {
       title: 'Advanced Calculator',
       standard: 'Standard',
       scientific: 'Scientific',
+      programmer: 'Programmer',
       historyLabel: 'History',
       clearLabel: 'Clear',
       noHistory: 'No history yet',
@@ -34,6 +42,7 @@
       title: 'प्रगत कॅल्क्युलेटर',
       standard: 'मानक',
       scientific: 'वैज्ञानिक',
+      programmer: 'प्रोग्रामर',
       historyLabel: 'इतिहास',
       clearLabel: 'साफ करा',
       noHistory: 'अद्याप इतिहास नाही',
@@ -115,6 +124,198 @@
     }
     return rounded.toLocaleString('en-US', { maximumFractionDigits: 10 });
   }
+
+  // ---------- Programmer mode (base conversion + bitwise ops) ----------
+  const prog = {
+    base: 10,
+    value: 0,
+    entry: '0',
+    pendingOp: null,
+    pendingValue: null,
+    justEvaluated: true,
+  };
+
+  const progOpSymbols = {
+    add: '+', sub: '−', mul: '×', div: '÷', mod: 'MOD',
+    and: 'AND', or: 'OR', xor: 'XOR', lsh: '<<', rsh: '>>',
+  };
+
+  function isProgrammerMode() {
+    return calculator.classList.contains('programmer');
+  }
+
+  function maskInt32(n) {
+    return n | 0;
+  }
+
+  function unsignedBaseStr(n, base) {
+    return (n >>> 0).toString(base).toUpperCase();
+  }
+
+  function progValueStr(n, base) {
+    return base === 10 ? String(n) : unsignedBaseStr(n, base);
+  }
+
+  function isDigitValidForBase(ch, base) {
+    const val = parseInt(ch, 16);
+    return !isNaN(val) && val < base;
+  }
+
+  const progMaxLen = { 2: 32, 8: 11, 10: 10, 16: 8 };
+
+  function progApplyOp(op, a, b) {
+    switch (op) {
+      case 'add': return maskInt32(a + b);
+      case 'sub': return maskInt32(a - b);
+      case 'mul': return maskInt32(a * b);
+      case 'div': if (b === 0) throw new Error('div0'); return maskInt32(Math.trunc(a / b));
+      case 'mod': if (b === 0) throw new Error('div0'); return maskInt32(a % b);
+      case 'and': return maskInt32(a & b);
+      case 'or': return maskInt32(a | b);
+      case 'xor': return maskInt32(a ^ b);
+      case 'lsh': return maskInt32(a << (b & 31));
+      case 'rsh': return maskInt32(a >> (b & 31));
+      default: throw new Error('unknown op');
+    }
+  }
+
+  function renderProg() {
+    expressionEl.textContent = prog.pendingOp
+      ? localizeDigits(`${progValueStr(prog.pendingValue, prog.base)} ${progOpSymbols[prog.pendingOp]}`)
+      : '';
+    resultEl.textContent = localizeDigits(prog.entry || '0');
+    memoryIndicator.textContent = state.memory !== 0 ? 'M' : '';
+    convHexEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 16));
+    convDecEl.textContent = localizeDigits(String(prog.value));
+    convOctEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 8));
+    convBinEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 2));
+  }
+
+  function progShowError() {
+    resultEl.textContent = t('error');
+    prog.entry = '0';
+    prog.value = 0;
+    prog.pendingOp = null;
+    prog.pendingValue = null;
+    prog.justEvaluated = true;
+  }
+
+  function progAppendDigit(ch) {
+    if (!isDigitValidForBase(ch === '00' ? '0' : ch, prog.base)) return;
+    if (prog.justEvaluated) {
+      prog.entry = '';
+      prog.justEvaluated = false;
+    }
+    const maxLen = progMaxLen[prog.base];
+    if (prog.entry.length >= maxLen) return;
+    prog.entry = (prog.entry === '0' ? '' : prog.entry) + ch;
+    if (prog.entry.length > maxLen) prog.entry = prog.entry.slice(0, maxLen);
+    prog.value = maskInt32(parseInt(prog.entry || '0', prog.base));
+    renderProg();
+  }
+
+  function progClearAll() {
+    prog.entry = '0';
+    prog.value = 0;
+    prog.pendingOp = null;
+    prog.pendingValue = null;
+    prog.justEvaluated = false;
+    renderProg();
+  }
+
+  function progClearEntry() {
+    prog.entry = '0';
+    prog.value = 0;
+    renderProg();
+  }
+
+  function progBackspace() {
+    if (prog.justEvaluated) { progClearAll(); return; }
+    prog.entry = prog.entry.slice(0, -1) || '0';
+    prog.value = maskInt32(parseInt(prog.entry, prog.base));
+    renderProg();
+  }
+
+  function progSetOperator(op) {
+    if (prog.pendingOp && !prog.justEvaluated) {
+      try {
+        prog.value = progApplyOp(prog.pendingOp, prog.pendingValue, prog.value);
+      } catch (e) {
+        progShowError();
+        return;
+      }
+    }
+    prog.pendingValue = prog.value;
+    prog.pendingOp = op;
+    prog.entry = progValueStr(prog.value, prog.base);
+    prog.justEvaluated = true;
+    renderProg();
+  }
+
+  function progApplyNot() {
+    prog.value = maskInt32(~prog.value);
+    prog.entry = progValueStr(prog.value, prog.base);
+    prog.justEvaluated = true;
+    renderProg();
+  }
+
+  function progEquals() {
+    if (prog.pendingOp === null) return;
+    try {
+      prog.value = progApplyOp(prog.pendingOp, prog.pendingValue, prog.value);
+    } catch (e) {
+      progShowError();
+      return;
+    }
+    prog.entry = progValueStr(prog.value, prog.base);
+    prog.pendingOp = null;
+    prog.pendingValue = null;
+    prog.justEvaluated = true;
+    renderProg();
+  }
+
+  function progMemoryClear() { state.memory = 0; renderProg(); }
+  function progMemoryRecall() {
+    prog.value = maskInt32(state.memory);
+    prog.entry = progValueStr(prog.value, prog.base);
+    prog.justEvaluated = true;
+    renderProg();
+  }
+  function progMemoryAdd() {
+    state.memory = maskInt32(state.memory + prog.value);
+    flashKey('mplus');
+    renderProg();
+  }
+  function progMemorySubtract() {
+    state.memory = maskInt32(state.memory - prog.value);
+    flashKey('mminus');
+    renderProg();
+  }
+
+  function updateBaseTabsUI() {
+    document.querySelectorAll('.base-btn').forEach((btn) => {
+      btn.classList.toggle('active', parseInt(btn.dataset.base, 10) === prog.base);
+    });
+  }
+
+  function updateDigitAvailability() {
+    document.querySelectorAll('.key[data-action="progdigit"]').forEach((btn) => {
+      const val = btn.dataset.value;
+      btn.disabled = val === '00' ? false : !isDigitValidForBase(val, prog.base);
+    });
+  }
+
+  baseTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.base-btn');
+    if (!btn) return;
+    const newBase = parseInt(btn.dataset.base, 10);
+    if (newBase === prog.base) return;
+    prog.base = newBase;
+    prog.entry = progValueStr(prog.value, prog.base);
+    updateBaseTabsUI();
+    updateDigitAvailability();
+    renderProg();
+  });
 
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr) {
@@ -463,9 +664,9 @@
       case 'num': inputNumber(value); break;
       case 'decimal': inputDecimal(); break;
       case 'operator': inputOperator(value); break;
-      case 'clear': clearAll(); break;
-      case 'clear-entry': clearEntry(); break;
-      case 'backspace': backspace(); break;
+      case 'clear': isProgrammerMode() ? progClearAll() : clearAll(); break;
+      case 'clear-entry': isProgrammerMode() ? progClearEntry() : clearEntry(); break;
+      case 'backspace': isProgrammerMode() ? progBackspace() : backspace(); break;
       case 'sign': toggleSign(); break;
       case 'percent': percent(); break;
       case 'equals': equals(); break;
@@ -478,14 +679,18 @@
       case 'fact': factValue(); break;
       case 'paren': appendToExpression(value); break;
       case 'deg-rad': state.isDegrees = !state.isDegrees; render(); break;
-      case 'mc': memoryClear(); break;
-      case 'mr': memoryRecall(); break;
-      case 'mplus': memoryAdd(); break;
-      case 'mminus': memorySubtract(); break;
+      case 'mc': isProgrammerMode() ? progMemoryClear() : memoryClear(); break;
+      case 'mr': isProgrammerMode() ? progMemoryRecall() : memoryRecall(); break;
+      case 'mplus': isProgrammerMode() ? progMemoryAdd() : memoryAdd(); break;
+      case 'mminus': isProgrammerMode() ? progMemorySubtract() : memorySubtract(); break;
+      case 'progdigit': progAppendDigit(value); break;
+      case 'bitop': value === 'not' ? progApplyNot() : progSetOperator(value); break;
+      case 'progop': progSetOperator(value); break;
+      case 'progequals': progEquals(); break;
     }
   }
 
-  [keys, sciRow].forEach(container => {
+  [keys, sciRow, progRow, progKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -497,7 +702,14 @@
     btn.addEventListener('click', () => {
       modeButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      calculator.classList.toggle('scientific', btn.dataset.mode === 'scientific');
+      const mode = btn.dataset.mode;
+      calculator.classList.toggle('scientific', mode === 'scientific');
+      calculator.classList.toggle('programmer', mode === 'programmer');
+      if (mode === 'programmer') {
+        updateBaseTabsUI();
+        updateDigitAvailability();
+        renderProg();
+      }
     });
   });
 
@@ -529,6 +741,22 @@
   // ---------- Keyboard support ----------
   window.addEventListener('keydown', (e) => {
     const key = e.key;
+    if (isProgrammerMode()) {
+      if (/[0-9a-fA-F]/.test(key)) { progAppendDigit(key.toUpperCase()); return; }
+      if (key === '+') { progSetOperator('add'); return; }
+      if (key === '-') { progSetOperator('sub'); return; }
+      if (key === '*') { progSetOperator('mul'); return; }
+      if (key === '/') { progSetOperator('div'); return; }
+      if (key === '%') { progSetOperator('mod'); return; }
+      if (key === '&') { progSetOperator('and'); return; }
+      if (key === '|') { progSetOperator('or'); return; }
+      if (key === '^') { progSetOperator('xor'); return; }
+      if (key === '~') { progApplyNot(); return; }
+      if (key === 'Enter' || key === '=') { e.preventDefault(); progEquals(); return; }
+      if (key === 'Backspace') { progBackspace(); return; }
+      if (key === 'Escape') { progClearAll(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }

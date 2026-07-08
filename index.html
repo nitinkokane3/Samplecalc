@@ -13,6 +13,7 @@
         <div class="mode-switch">
           <button class="mode-btn active" data-mode="standard" data-i18n="standard">Standard</button>
           <button class="mode-btn" data-mode="scientific" data-i18n="scientific">Scientific</button>
+          <button class="mode-btn" data-mode="programmer" data-i18n="programmer">Programmer</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
@@ -21,10 +22,24 @@
         </div>
       </div>
 
+      <div class="base-tabs" id="baseTabs">
+        <button class="base-btn" data-base="16">HEX</button>
+        <button class="base-btn active" data-base="10">DEC</button>
+        <button class="base-btn" data-base="8">OCT</button>
+        <button class="base-btn" data-base="2">BIN</button>
+      </div>
+
       <div class="display">
         <div class="expression" id="expression"></div>
         <div class="result" id="result">0</div>
         <div class="memory-indicator" id="memoryIndicator"></div>
+      </div>
+
+      <div class="conv-panel" id="convPanel">
+        <div class="conv-row"><span class="conv-label">HEX</span><span class="conv-value" id="convHex">0</span></div>
+        <div class="conv-row"><span class="conv-label">DEC</span><span class="conv-value" id="convDec">0</span></div>
+        <div class="conv-row"><span class="conv-label">OCT</span><span class="conv-value" id="convOct">0</span></div>
+        <div class="conv-row"><span class="conv-label">BIN</span><span class="conv-value" id="convBin">0</span></div>
       </div>
 
       <div class="panels">
@@ -87,6 +102,53 @@
             <button class="key equals" data-action="equals">=</button>
 
             <button class="key op-light wide" data-action="percent">%</button>
+          </div>
+
+          <div class="prog-row" id="progRow">
+            <button class="key fn" data-action="progdigit" data-value="A">A</button>
+            <button class="key fn" data-action="progdigit" data-value="B">B</button>
+            <button class="key fn" data-action="progdigit" data-value="C">C</button>
+            <button class="key fn" data-action="progdigit" data-value="D">D</button>
+            <button class="key fn" data-action="progdigit" data-value="E">E</button>
+            <button class="key fn" data-action="progdigit" data-value="F">F</button>
+            <button class="key fn" data-action="bitop" data-value="and">AND</button>
+            <button class="key fn" data-action="bitop" data-value="or">OR</button>
+            <button class="key fn" data-action="bitop" data-value="xor">XOR</button>
+            <button class="key fn" data-action="bitop" data-value="not">NOT</button>
+            <button class="key fn" data-action="bitop" data-value="lsh">&lt;&lt;</button>
+            <button class="key fn" data-action="bitop" data-value="rsh">&gt;&gt;</button>
+          </div>
+
+          <div class="keys prog-keys" id="progKeys">
+            <button class="key memory" data-action="mc">MC</button>
+            <button class="key memory" data-action="mr">MR</button>
+            <button class="key memory" data-action="mplus">M+</button>
+            <button class="key memory" data-action="mminus">M-</button>
+
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+            <button class="key operator" data-action="progop" data-value="div">÷</button>
+
+            <button class="key num" data-action="progdigit" data-value="7">7</button>
+            <button class="key num" data-action="progdigit" data-value="8">8</button>
+            <button class="key num" data-action="progdigit" data-value="9">9</button>
+            <button class="key operator" data-action="progop" data-value="mul">×</button>
+
+            <button class="key num" data-action="progdigit" data-value="4">4</button>
+            <button class="key num" data-action="progdigit" data-value="5">5</button>
+            <button class="key num" data-action="progdigit" data-value="6">6</button>
+            <button class="key operator" data-action="progop" data-value="sub">−</button>
+
+            <button class="key num" data-action="progdigit" data-value="1">1</button>
+            <button class="key num" data-action="progdigit" data-value="2">2</button>
+            <button class="key num" data-action="progdigit" data-value="3">3</button>
+            <button class="key operator" data-action="progop" data-value="add">+</button>
+
+            <button class="key op-light" data-action="progop" data-value="mod">MOD</button>
+            <button class="key num" data-action="progdigit" data-value="0">0</button>
+            <button class="key num" data-action="progdigit" data-value="00">00</button>
+            <button class="key equals" data-action="progequals">=</button>
           </div>
         </div>
       </div>
