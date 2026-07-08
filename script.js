@@ -33,6 +33,9 @@
   const statSStdEl = document.getElementById('statSStd');
   const statMinEl = document.getElementById('statMin');
   const statMaxEl = document.getElementById('statMax');
+  const statMedianEl = document.getElementById('statMedian');
+  const statModeEl = document.getElementById('statMode');
+  const statRangeEl = document.getElementById('statRange');
   const statChipsEl = document.getElementById('statChips');
   const statKeys = document.getElementById('statKeys');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -62,8 +65,12 @@
       catData: 'Data',
       swapTitle: 'Swap units',
       statMean: 'Mean',
+      statMedian: 'Median',
+      statMode: 'Mode',
       statMin: 'Min',
       statMax: 'Max',
+      statRange: 'Range',
+      statModeNA: 'N/A',
       statAdd: 'Add',
       statValuesLabel: 'values',
       statNoData: 'No data yet',
@@ -98,8 +105,12 @@
       catData: 'डेटा',
       swapTitle: 'एकके बदला',
       statMean: 'सरासरी',
+      statMedian: 'मध्यम',
+      statMode: 'बहुलक',
       statMin: 'किमान',
       statMax: 'कमाल',
+      statRange: 'व्याप्ती',
+      statModeNA: 'लागू नाही',
       statAdd: 'जोडा',
       statValuesLabel: 'मूल्ये',
       statNoData: 'अद्याप डेटा नाही',
@@ -572,14 +583,26 @@
     const data = stat.data;
     const n = data.length;
     if (n === 0) {
-      return { n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0 };
+      return { n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0, median: 0, mode: [], range: 0 };
     }
     const sum = data.reduce((a, b) => a + b, 0);
     const mean = sum / n;
     const sqDiffSum = data.reduce((a, b) => a + (b - mean) ** 2, 0);
     const popStd = Math.sqrt(sqDiffSum / n);
     const sampleStd = n > 1 ? Math.sqrt(sqDiffSum / (n - 1)) : null;
-    return { n, sum, mean, popStd, sampleStd, min: Math.min(...data), max: Math.max(...data) };
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const sorted = [...data].sort((a, b) => a - b);
+    const mid = Math.floor(n / 2);
+    const median = n % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    const freq = new Map();
+    data.forEach((v) => freq.set(v, (freq.get(v) || 0) + 1));
+    let maxFreq = 0;
+    freq.forEach((c) => { if (c > maxFreq) maxFreq = c; });
+    const mode = maxFreq > 1
+      ? [...freq.entries()].filter(([, c]) => c === maxFreq).map(([v]) => v).sort((a, b) => a - b)
+      : [];
+    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min };
   }
 
   function renderStatChips() {
@@ -618,6 +641,11 @@
     statSStdEl.textContent = s.sampleStd === null ? '—' : localizeDigits(formatNumber(s.sampleStd));
     statMinEl.textContent = localizeDigits(formatNumber(s.min));
     statMaxEl.textContent = localizeDigits(formatNumber(s.max));
+    statMedianEl.textContent = localizeDigits(formatNumber(s.median));
+    statModeEl.textContent = s.mode.length === 0
+      ? t('statModeNA')
+      : localizeDigits(s.mode.map((m) => formatNumber(m)).join(', '));
+    statRangeEl.textContent = localizeDigits(formatNumber(s.range));
     renderStatChips();
   }
 
