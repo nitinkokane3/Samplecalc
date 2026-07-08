@@ -54,6 +54,8 @@
       graphZoomIn: 'Zoom +',
       graphZoomOut: 'Zoom −',
       graphPlot: 'Plot',
+      graphFindRoots: 'Roots',
+      graphNoRoots: 'No roots found',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -88,6 +90,8 @@
       graphZoomIn: 'झूम +',
       graphZoomOut: 'झूम −',
       graphPlot: 'आलेखा करा',
+      graphFindRoots: 'मुळे',
+      graphNoRoots: 'मुळे आढळली नाहीत',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -164,7 +168,7 @@
     if (isProgrammerMode()) renderProg();
     else if (isConverterMode()) renderConv();
     else if (isStatisticsMode()) renderStat();
-    else if (isGraphingMode()) { renderGraphExpr(); drawGraph(); }
+    else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
   }
 
@@ -849,6 +853,9 @@
   const graphState = {
     expression: 'sin(x)',
     xMin: -10, xMax: 10, yMin: -10, yMax: 10,
+    roots: [],
+    rootsSearched: false,
+    rootsError: false,
   };
 
   function isGraphingMode() {
@@ -857,6 +864,75 @@
 
   function renderGraphExpr() {
     expressionEl.textContent = `y = ${localizeDigits(graphState.expression || '')}`;
+  }
+
+  function renderGraphResult() {
+    if (!graphState.rootsSearched) { resultEl.textContent = ''; return; }
+    if (graphState.rootsError) { resultEl.textContent = t('error'); return; }
+    if (graphState.roots.length === 0) { resultEl.textContent = t('graphNoRoots'); return; }
+    const formatted = graphState.roots.map((r) => formatNumber(Math.round(r * 1e6) / 1e6)).join(', ');
+    resultEl.textContent = localizeDigits(formatted);
+  }
+
+  function renderGraphDisplay() {
+    renderGraphExpr();
+    renderGraphResult();
+  }
+
+  function invalidateGraphRoots() {
+    graphState.roots = [];
+    graphState.rootsSearched = false;
+    graphState.rootsError = false;
+  }
+
+  function findGraphRoots() {
+    const { xMin, xMax } = graphState;
+    const samples = 400;
+    const wasDegrees = state.isDegrees;
+    state.isDegrees = false;
+    const f = (x) => {
+      try { return evaluateExpression(graphState.expression, { x }); } catch (e) { return NaN; }
+    };
+    const roots = [];
+    let anyFinite = false;
+    let prevX = null;
+    let prevY = null;
+    for (let i = 0; i <= samples; i++) {
+      const x = xMin + ((xMax - xMin) * i) / samples;
+      const y = f(x);
+      if (isFinite(y)) anyFinite = true;
+      if (prevX !== null && isFinite(prevY) && isFinite(y)) {
+        if (prevY === 0) {
+          roots.push(prevX);
+        } else if ((prevY < 0 && y > 0) || (prevY > 0 && y < 0)) {
+          let a = prevX, b = x, fa = prevY;
+          for (let iter = 0; iter < 40; iter++) {
+            const mid = (a + b) / 2;
+            const fm = f(mid);
+            if (!isFinite(fm)) break;
+            if ((fa < 0 && fm < 0) || (fa > 0 && fm > 0)) { a = mid; fa = fm; } else { b = mid; }
+          }
+          roots.push((a + b) / 2);
+        }
+      }
+      prevX = x; prevY = y;
+    }
+    state.isDegrees = wasDegrees;
+    const resolution = (xMax - xMin) / samples;
+    const deduped = [];
+    roots.forEach((r) => {
+      if (!deduped.some((d) => Math.abs(d - r) < resolution)) deduped.push(r);
+    });
+    return { roots: deduped, anyFinite };
+  }
+
+  function graphFindRoots() {
+    const { roots, anyFinite } = findGraphRoots();
+    graphState.roots = roots;
+    graphState.rootsSearched = true;
+    graphState.rootsError = !anyFinite;
+    renderGraphDisplay();
+    drawGraph();
   }
 
   function formatAxisNumber(n) {
@@ -947,21 +1023,39 @@
     }
     ctx.stroke();
     state.isDegrees = wasDegrees;
+
+    if (graphState.roots.length) {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = curveColor;
+      ctx.lineWidth = 1.5;
+      graphState.roots.forEach((r) => {
+        if (r < xMin || r > xMax) return;
+        const px = xToPx(r);
+        const py = yToPx(0);
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
   }
 
   function graphAppend(value) {
     graphState.expression += value;
-    renderGraphExpr();
+    invalidateGraphRoots();
+    renderGraphDisplay();
   }
 
   function graphBackspace() {
     graphState.expression = graphState.expression.slice(0, -1);
-    renderGraphExpr();
+    invalidateGraphRoots();
+    renderGraphDisplay();
   }
 
   function graphClearAll() {
     graphState.expression = '';
-    renderGraphExpr();
+    invalidateGraphRoots();
+    renderGraphDisplay();
   }
 
   function graphResetView() {
@@ -1245,6 +1339,7 @@
       case 'graphreset': graphResetView(); break;
       case 'graphzoomin': graphZoom(0.7); break;
       case 'graphzoomout': graphZoom(1 / 0.7); break;
+      case 'graphfindroots': graphFindRoots(); break;
     }
   }
 
@@ -1279,7 +1374,7 @@
         renderStat();
       }
       if (mode === 'graphing') {
-        renderGraphExpr();
+        renderGraphDisplay();
         drawGraph();
       }
     });

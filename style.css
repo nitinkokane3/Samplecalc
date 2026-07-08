@@ -276,9 +276,12 @@ body {
   height: 220px;
 }
 
-.calculator.graphing .result,
 .calculator.graphing .memory-indicator {
   display: none;
+}
+
+.calculator.graphing .result {
+  font-size: 1.3rem;
 }
 
 .top-actions {
