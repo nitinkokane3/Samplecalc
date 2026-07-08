@@ -133,7 +133,7 @@
   const state = {
     expression: '',
     justEvaluated: false,
-    memory: 0,
+    memory: parseFloat(localStorage.getItem('calc-memory')) || 0,
     isDegrees: true,
     language: localStorage.getItem('calc-lang') || 'en',
     history: JSON.parse(localStorage.getItem('calc-history') || '[]'),
@@ -206,8 +206,9 @@
   }
 
   // ---------- Programmer mode (base conversion + bitwise ops) ----------
+  const savedProgBase = parseInt(localStorage.getItem('calc-prog-base'), 10);
   const prog = {
-    base: 10,
+    base: [2, 8, 10, 16].includes(savedProgBase) ? savedProgBase : 10,
     value: 0,
     entry: '0',
     pendingOp: null,
@@ -362,7 +363,11 @@
     renderProg();
   }
 
-  function progMemoryClear() { state.memory = 0; renderProg(); }
+  function saveMemory() {
+    localStorage.setItem('calc-memory', String(state.memory));
+  }
+
+  function progMemoryClear() { state.memory = 0; saveMemory(); renderProg(); }
   function progMemoryRecall() {
     prog.value = maskInt32(state.memory);
     prog.entry = progValueStr(prog.value, prog.base);
@@ -371,11 +376,13 @@
   }
   function progMemoryAdd() {
     state.memory = maskInt32(state.memory + prog.value);
+    saveMemory();
     flashKey('mplus');
     renderProg();
   }
   function progMemorySubtract() {
     state.memory = maskInt32(state.memory - prog.value);
+    saveMemory();
     flashKey('mminus');
     renderProg();
   }
@@ -400,6 +407,7 @@
     if (newBase === prog.base) return;
     prog.base = newBase;
     prog.entry = progValueStr(prog.value, prog.base);
+    localStorage.setItem('calc-prog-base', String(prog.base));
     updateBaseTabsUI();
     updateDigitAvailability();
     renderProg();
@@ -573,7 +581,7 @@
 
   // ---------- Statistics mode ----------
   const stat = {
-    data: [],
+    data: JSON.parse(localStorage.getItem('calc-stat-data') || '[]'),
     entry: '0',
     justEntered: false,
   };
@@ -639,6 +647,7 @@
       removeBtn.setAttribute('aria-label', 'Remove');
       removeBtn.addEventListener('click', () => {
         stat.data.splice(idx, 1);
+        saveStatData();
         renderStat();
       });
       chip.appendChild(valueSpan);
@@ -695,10 +704,15 @@
     renderStat();
   }
 
+  function saveStatData() {
+    localStorage.setItem('calc-stat-data', JSON.stringify(stat.data));
+  }
+
   function statClearAll() {
     stat.data = [];
     stat.entry = '0';
     stat.justEntered = false;
+    saveStatData();
     renderStat();
   }
 
@@ -718,6 +732,7 @@
     stat.data.push(value);
     stat.entry = '0';
     stat.justEntered = false;
+    saveStatData();
     renderStat();
   }
 
@@ -900,7 +915,7 @@
 
   // ---------- Graphing mode ----------
   const graphState = {
-    expression: 'sin(x)',
+    expression: localStorage.getItem('calc-graph-expr') || 'sin(x)',
     xMin: -10, xMax: 10, yMin: -10, yMax: 10,
     roots: [],
     rootsSearched: false,
@@ -1133,21 +1148,28 @@
     }
   }
 
+  function saveGraphExpr() {
+    localStorage.setItem('calc-graph-expr', graphState.expression);
+  }
+
   function graphAppend(value) {
     graphState.expression += value;
     invalidateGraphRoots();
+    saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphBackspace() {
     graphState.expression = graphState.expression.slice(0, -1);
     invalidateGraphRoots();
+    saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphClearAll() {
     graphState.expression = '';
     invalidateGraphRoots();
+    saveGraphExpr();
     renderGraphDisplay();
   }
 
@@ -1330,11 +1352,12 @@
   }
 
   // ---------- Memory ----------
-  function memoryClear() { state.memory = 0; render(); }
+  function memoryClear() { state.memory = 0; saveMemory(); render(); }
   function memoryRecall() { appendToExpression(formatNumber(state.memory).replace(/,/g, '')); }
   function memoryAdd() {
     try {
       state.memory += evaluateExpression(state.expression || resultEl.textContent.replace(/,/g, ''));
+      saveMemory();
       flashKey('mplus');
       render();
     } catch (e) { /* ignore */ }
@@ -1342,6 +1365,7 @@
   function memorySubtract() {
     try {
       state.memory -= evaluateExpression(state.expression || resultEl.textContent.replace(/,/g, ''));
+      saveMemory();
       flashKey('mminus');
       render();
     } catch (e) { /* ignore */ }
@@ -1465,33 +1489,34 @@
     });
   });
 
+  function switchToMode(mode) {
+    modeButtons.forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+    calculator.classList.toggle('scientific', mode === 'scientific');
+    calculator.classList.toggle('programmer', mode === 'programmer');
+    calculator.classList.toggle('converter', mode === 'converter');
+    calculator.classList.toggle('statistics', mode === 'statistics');
+    calculator.classList.toggle('graphing', mode === 'graphing');
+    if (mode === 'programmer') {
+      updateBaseTabsUI();
+      updateDigitAvailability();
+      renderProg();
+    }
+    if (mode === 'converter') {
+      populateUnitSelectors();
+      renderConv();
+    }
+    if (mode === 'statistics') {
+      renderStat();
+    }
+    if (mode === 'graphing') {
+      renderGraphDisplay();
+      drawGraph();
+    }
+    localStorage.setItem('calc-active-mode', mode);
+  }
+
   modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      modeButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const mode = btn.dataset.mode;
-      calculator.classList.toggle('scientific', mode === 'scientific');
-      calculator.classList.toggle('programmer', mode === 'programmer');
-      calculator.classList.toggle('converter', mode === 'converter');
-      calculator.classList.toggle('statistics', mode === 'statistics');
-      calculator.classList.toggle('graphing', mode === 'graphing');
-      if (mode === 'programmer') {
-        updateBaseTabsUI();
-        updateDigitAvailability();
-        renderProg();
-      }
-      if (mode === 'converter') {
-        populateUnitSelectors();
-        renderConv();
-      }
-      if (mode === 'statistics') {
-        renderStat();
-      }
-      if (mode === 'graphing') {
-        renderGraphDisplay();
-        drawGraph();
-      }
-    });
+    btn.addEventListener('click', () => switchToMode(btn.dataset.mode));
   });
 
   themeToggle.addEventListener('click', () => {
@@ -1580,5 +1605,8 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'graphing'];
+    const savedMode = localStorage.getItem('calc-active-mode');
+    if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
 })();
