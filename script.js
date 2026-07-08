@@ -83,6 +83,8 @@
     history: JSON.parse(localStorage.getItem('calc-history') || '[]'),
   };
 
+  let lastAnswer = 0;
+
   function t(key) {
     return translations[state.language][key];
   }
@@ -289,6 +291,14 @@
     prog.pendingOp = null;
     prog.pendingValue = null;
     prog.justEvaluated = true;
+    lastAnswer = prog.value;
+    renderProg();
+  }
+
+  function insertAnsProg() {
+    prog.value = maskInt32(Math.trunc(lastAnswer));
+    prog.entry = progValueStr(prog.value, prog.base);
+    prog.justEvaluated = true;
     renderProg();
   }
 
@@ -473,6 +483,12 @@
     [conv.fromUnit, conv.toUnit] = [conv.toUnit, conv.fromUnit];
     conv.entry = convPlainNumber(converted);
     populateUnitSelectors();
+    renderConv();
+  }
+
+  function insertAnsConv() {
+    conv.entry = convPlainNumber(lastAnswer);
+    conv.justEntered = true;
     renderConv();
   }
 
@@ -738,10 +754,15 @@
       addHistory(state.expression, formatted);
       state.expression = formatted;
       state.justEvaluated = true;
+      lastAnswer = value;
       render();
     } catch (e) {
       resultEl.textContent = t('error');
     }
+  }
+
+  function insertAnsStandard() {
+    appendToExpression(formatNumber(lastAnswer).replace(/,/g, ''));
   }
 
   function addFunction(fnToken) {
@@ -880,6 +901,11 @@
       case 'convdigit': convAppendDigit(value); break;
       case 'convdecimal': convAppendDecimal(); break;
       case 'convsign': convToggleSign(); break;
+      case 'ans':
+        if (isProgrammerMode()) insertAnsProg();
+        else if (isConverterMode()) insertAnsConv();
+        else insertAnsStandard();
+        break;
     }
   }
 
