@@ -20,6 +20,12 @@
   const convDecEl = document.getElementById('convDec');
   const convOctEl = document.getElementById('convOct');
   const convBinEl = document.getElementById('convBin');
+  const categoryTabs = document.getElementById('categoryTabs');
+  const unitRow = document.getElementById('unitRow');
+  const fromUnitSelect = document.getElementById('fromUnit');
+  const toUnitSelect = document.getElementById('toUnit');
+  const swapUnitsBtn = document.getElementById('swapUnits');
+  const convKeys = document.getElementById('convKeys');
 
   const translations = {
     en: {
@@ -27,6 +33,12 @@
       standard: 'Standard',
       scientific: 'Scientific',
       programmer: 'Programmer',
+      converter: 'Converter',
+      catLength: 'Length',
+      catWeight: 'Weight',
+      catTemp: 'Temp',
+      catData: 'Data',
+      swapTitle: 'Swap units',
       historyLabel: 'History',
       clearLabel: 'Clear',
       noHistory: 'No history yet',
@@ -43,6 +55,12 @@
       standard: 'मानक',
       scientific: 'वैज्ञानिक',
       programmer: 'प्रोग्रामर',
+      converter: 'रूपांतरक',
+      catLength: 'लांबी',
+      catWeight: 'वजन',
+      catTemp: 'तापमान',
+      catData: 'डेटा',
+      swapTitle: 'एकके बदला',
       historyLabel: 'इतिहास',
       clearLabel: 'साफ करा',
       noHistory: 'अद्याप इतिहास नाही',
@@ -99,7 +117,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -316,6 +334,166 @@
     updateDigitAvailability();
     renderProg();
   });
+
+  // ---------- Converter mode (units) ----------
+  const unitDefs = {
+    length: {
+      units: { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344 },
+      labels: { mm: 'Millimeter', cm: 'Centimeter', m: 'Meter', km: 'Kilometer', in: 'Inch', ft: 'Foot', yd: 'Yard', mi: 'Mile' },
+    },
+    weight: {
+      units: { mg: 0.001, g: 1, kg: 1000, oz: 28.3495, lb: 453.592, t: 1000000 },
+      labels: { mg: 'Milligram', g: 'Gram', kg: 'Kilogram', oz: 'Ounce', lb: 'Pound', t: 'Tonne' },
+    },
+    temperature: {
+      labels: { c: 'Celsius', f: 'Fahrenheit', k: 'Kelvin' },
+    },
+    data: {
+      units: { b: 0.125, B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3, TB: 1024 ** 4 },
+      labels: { b: 'Bit', B: 'Byte', KB: 'Kilobyte', MB: 'Megabyte', GB: 'Gigabyte', TB: 'Terabyte' },
+    },
+  };
+
+  const convCategoryDefaults = {
+    length: ['m', 'ft'],
+    weight: ['kg', 'lb'],
+    temperature: ['c', 'f'],
+    data: ['MB', 'GB'],
+  };
+
+  const conv = {
+    category: 'length',
+    fromUnit: 'm',
+    toUnit: 'ft',
+    entry: '0',
+    justEntered: false,
+  };
+
+  function isConverterMode() {
+    return calculator.classList.contains('converter');
+  }
+
+  function toCelsius(value, unit) {
+    if (unit === 'c') return value;
+    if (unit === 'f') return (value - 32) * 5 / 9;
+    return value - 273.15; // kelvin
+  }
+
+  function fromCelsius(celsius, unit) {
+    if (unit === 'c') return celsius;
+    if (unit === 'f') return celsius * 9 / 5 + 32;
+    return celsius + 273.15; // kelvin
+  }
+
+  function convertValue(value, category, from, to) {
+    if (category === 'temperature') return fromCelsius(toCelsius(value, from), to);
+    const factors = unitDefs[category].units;
+    return value * factors[from] / factors[to];
+  }
+
+  function convPlainNumber(n) {
+    if (!isFinite(n)) return '0';
+    const rounded = Math.round((n + Number.EPSILON) * 1e8) / 1e8;
+    return String(rounded);
+  }
+
+  function populateUnitSelectors() {
+    const def = unitDefs[conv.category];
+    const options = Object.keys(def.labels)
+      .map((key) => `<option value="${key}">${def.labels[key]}</option>`)
+      .join('');
+    fromUnitSelect.innerHTML = options;
+    toUnitSelect.innerHTML = options;
+    fromUnitSelect.value = conv.fromUnit;
+    toUnitSelect.value = conv.toUnit;
+  }
+
+  function renderConv() {
+    const numeric = parseFloat(conv.entry) || 0;
+    const converted = convertValue(numeric, conv.category, conv.fromUnit, conv.toUnit);
+    expressionEl.textContent = localizeDigits(`${conv.entry} ${conv.fromUnit}`);
+    resultEl.textContent = localizeDigits(`${formatNumber(converted)} ${conv.toUnit}`);
+    memoryIndicator.textContent = '';
+  }
+
+  function setCategory(category) {
+    conv.category = category;
+    [conv.fromUnit, conv.toUnit] = convCategoryDefaults[category];
+    conv.entry = '0';
+    conv.justEntered = false;
+    populateUnitSelectors();
+    renderConv();
+  }
+
+  function convAppendDigit(ch) {
+    if (conv.justEntered) {
+      conv.entry = '';
+      conv.justEntered = false;
+    }
+    if (conv.entry.replace(/[-.]/g, '').length >= 15) return;
+    conv.entry = (conv.entry === '0' ? '' : conv.entry) + ch;
+    renderConv();
+  }
+
+  function convAppendDecimal() {
+    if (conv.justEntered) {
+      conv.entry = '0';
+      conv.justEntered = false;
+    }
+    if (conv.entry.includes('.')) return;
+    conv.entry += '.';
+    renderConv();
+  }
+
+  function convToggleSign() {
+    conv.entry = conv.entry.startsWith('-') ? conv.entry.slice(1) : (conv.entry === '0' ? '0' : '-' + conv.entry);
+    renderConv();
+  }
+
+  function convClearAll() {
+    conv.entry = '0';
+    conv.justEntered = false;
+    renderConv();
+  }
+
+  function convClearEntry() {
+    conv.entry = '0';
+    renderConv();
+  }
+
+  function convBackspace() {
+    if (conv.justEntered) { convClearAll(); return; }
+    conv.entry = conv.entry.slice(0, -1) || '0';
+    renderConv();
+  }
+
+  function convSwapUnits() {
+    const numeric = parseFloat(conv.entry) || 0;
+    const converted = convertValue(numeric, conv.category, conv.fromUnit, conv.toUnit);
+    [conv.fromUnit, conv.toUnit] = [conv.toUnit, conv.fromUnit];
+    conv.entry = convPlainNumber(converted);
+    populateUnitSelectors();
+    renderConv();
+  }
+
+  categoryTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.category-btn');
+    if (!btn) return;
+    document.querySelectorAll('.category-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    setCategory(btn.dataset.category);
+  });
+
+  fromUnitSelect.addEventListener('change', () => {
+    conv.fromUnit = fromUnitSelect.value;
+    renderConv();
+  });
+
+  toUnitSelect.addEventListener('change', () => {
+    conv.toUnit = toUnitSelect.value;
+    renderConv();
+  });
+
+  swapUnitsBtn.addEventListener('click', convSwapUnits);
 
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr) {
@@ -664,9 +842,21 @@
       case 'num': inputNumber(value); break;
       case 'decimal': inputDecimal(); break;
       case 'operator': inputOperator(value); break;
-      case 'clear': isProgrammerMode() ? progClearAll() : clearAll(); break;
-      case 'clear-entry': isProgrammerMode() ? progClearEntry() : clearEntry(); break;
-      case 'backspace': isProgrammerMode() ? progBackspace() : backspace(); break;
+      case 'clear':
+        if (isProgrammerMode()) progClearAll();
+        else if (isConverterMode()) convClearAll();
+        else clearAll();
+        break;
+      case 'clear-entry':
+        if (isProgrammerMode()) progClearEntry();
+        else if (isConverterMode()) convClearEntry();
+        else clearEntry();
+        break;
+      case 'backspace':
+        if (isProgrammerMode()) progBackspace();
+        else if (isConverterMode()) convBackspace();
+        else backspace();
+        break;
       case 'sign': toggleSign(); break;
       case 'percent': percent(); break;
       case 'equals': equals(); break;
@@ -687,10 +877,13 @@
       case 'bitop': value === 'not' ? progApplyNot() : progSetOperator(value); break;
       case 'progop': progSetOperator(value); break;
       case 'progequals': progEquals(); break;
+      case 'convdigit': convAppendDigit(value); break;
+      case 'convdecimal': convAppendDecimal(); break;
+      case 'convsign': convToggleSign(); break;
     }
   }
 
-  [keys, sciRow, progRow, progKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -705,10 +898,15 @@
       const mode = btn.dataset.mode;
       calculator.classList.toggle('scientific', mode === 'scientific');
       calculator.classList.toggle('programmer', mode === 'programmer');
+      calculator.classList.toggle('converter', mode === 'converter');
       if (mode === 'programmer') {
         updateBaseTabsUI();
         updateDigitAvailability();
         renderProg();
+      }
+      if (mode === 'converter') {
+        populateUnitSelectors();
+        renderConv();
       }
     });
   });
@@ -757,6 +955,14 @@
       if (key === 'Escape') { progClearAll(); return; }
       return;
     }
+    if (isConverterMode()) {
+      if (/[0-9]/.test(key)) { convAppendDigit(key); return; }
+      if (key === '.') { convAppendDecimal(); return; }
+      if (key === '-') { convToggleSign(); return; }
+      if (key === 'Backspace') { convBackspace(); return; }
+      if (key === 'Escape') { convClearAll(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -772,6 +978,7 @@
     const savedTheme = localStorage.getItem('calc-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
+    populateUnitSelectors();
     applyLanguage();
   })();
 })();

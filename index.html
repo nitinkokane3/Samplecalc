@@ -14,6 +14,7 @@
           <button class="mode-btn active" data-mode="standard" data-i18n="standard">Standard</button>
           <button class="mode-btn" data-mode="scientific" data-i18n="scientific">Scientific</button>
           <button class="mode-btn" data-mode="programmer" data-i18n="programmer">Programmer</button>
+          <button class="mode-btn" data-mode="converter" data-i18n="converter">Converter</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
@@ -27,6 +28,19 @@
         <button class="base-btn active" data-base="10">DEC</button>
         <button class="base-btn" data-base="8">OCT</button>
         <button class="base-btn" data-base="2">BIN</button>
+      </div>
+
+      <div class="category-tabs" id="categoryTabs">
+        <button class="category-btn active" data-category="length" data-i18n="catLength">Length</button>
+        <button class="category-btn" data-category="weight" data-i18n="catWeight">Weight</button>
+        <button class="category-btn" data-category="temperature" data-i18n="catTemp">Temp</button>
+        <button class="category-btn" data-category="data" data-i18n="catData">Data</button>
+      </div>
+
+      <div class="unit-row" id="unitRow">
+        <select class="unit-select" id="fromUnit"></select>
+        <button class="swap-btn" id="swapUnits" title="Swap units" data-i18n-title="swapTitle">⇅</button>
+        <select class="unit-select" id="toUnit"></select>
       </div>
 
       <div class="display">
@@ -149,6 +163,28 @@
             <button class="key num" data-action="progdigit" data-value="0">0</button>
             <button class="key num" data-action="progdigit" data-value="00">00</button>
             <button class="key equals" data-action="progequals">=</button>
+          </div>
+
+          <div class="keys conv-keys" id="convKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="convdigit" data-value="7">7</button>
+            <button class="key num" data-action="convdigit" data-value="8">8</button>
+            <button class="key num" data-action="convdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="convdigit" data-value="4">4</button>
+            <button class="key num" data-action="convdigit" data-value="5">5</button>
+            <button class="key num" data-action="convdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="convdigit" data-value="1">1</button>
+            <button class="key num" data-action="convdigit" data-value="2">2</button>
+            <button class="key num" data-action="convdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="convsign">±</button>
+            <button class="key num" data-action="convdigit" data-value="0">0</button>
+            <button class="key num" data-action="convdecimal">.</button>
           </div>
         </div>
       </div>
