@@ -77,6 +77,10 @@ body {
   max-width: 480px;
 }
 
+.calculator.programmer {
+  max-width: 420px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -107,6 +111,48 @@ body {
 .mode-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
+}
+
+.calculator.programmer .mode-btn {
+  padding: 6px 10px;
+  font-size: 0.72rem;
+}
+
+.base-tabs {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.programmer .base-tabs {
+  display: grid;
+}
+
+.base-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 7px 0;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.base-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+.base-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .top-actions {
@@ -178,6 +224,48 @@ body {
   letter-spacing: 0.5px;
 }
 
+.conv-panel {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+:root[data-theme="light"] .conv-panel {
+  background: rgba(20, 20, 40, 0.04);
+}
+
+.calculator.programmer .conv-panel {
+  display: flex;
+}
+
+.conv-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-dim);
+}
+
+.conv-row .conv-label {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.conv-row .conv-value {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  overflow-x: auto;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .memory-indicator {
   position: absolute;
   top: 10px;
@@ -209,10 +297,32 @@ body {
   display: grid;
 }
 
+.prog-row {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.calculator.programmer .prog-row {
+  display: grid;
+}
+
 .keys {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+}
+
+.prog-keys {
+  display: none;
+}
+
+.calculator.programmer .keys.prog-keys {
+  display: grid;
+}
+
+.calculator.programmer .keys:not(.prog-keys) {
+  display: none;
 }
 
 .key {
@@ -239,6 +349,11 @@ body {
 
 .key:active {
   transform: scale(0.94);
+}
+
+.key:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .key.operator {
