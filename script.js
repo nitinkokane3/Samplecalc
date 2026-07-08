@@ -60,11 +60,20 @@
     return translations[state.language][key];
   }
 
+  const devanagariDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+  function localizeDigits(str) {
+    if (state.language !== 'mr') return String(str);
+    return String(str).replace(/[0-9]/g, (d) => devanagariDigits[d]);
+  }
+
   function render() {
-    expressionEl.textContent = state.expression
+    const exprDisplay = state.expression
       .replace(/\*/g, '×')
       .replace(/\//g, '÷') || '';
-    resultEl.textContent = state.expression === '' ? '0' : liveEvaluate();
+    expressionEl.textContent = localizeDigits(exprDisplay);
+    const resultDisplay = state.expression === '' ? '0' : liveEvaluate();
+    resultEl.textContent = localizeDigits(resultDisplay);
     memoryIndicator.textContent = state.memory !== 0 ? 'M' : '';
     degRadBtn.textContent = state.isDegrees ? t('deg') : t('rad');
   }
@@ -81,6 +90,9 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
+    document.querySelectorAll('.key[data-action="num"]').forEach((btn) => {
+      btn.textContent = localizeDigits(btn.dataset.value);
+    });
     renderHistory();
     render();
   }
@@ -433,7 +445,9 @@
     }
     state.history.forEach(({ expr, res }) => {
       const li = document.createElement('li');
-      li.innerHTML = `<span class="h-expr">${expr.replace(/\*/g, '×').replace(/\//g, '÷')}</span><span class="h-res">= ${res}</span>`;
+      const exprDisplay = localizeDigits(expr.replace(/\*/g, '×').replace(/\//g, '÷'));
+      const resDisplay = localizeDigits(res);
+      li.innerHTML = `<span class="h-expr">${exprDisplay}</span><span class="h-res">= ${resDisplay}</span>`;
       li.addEventListener('click', () => {
         state.expression = res.replace(/,/g, '');
         state.justEvaluated = true;
