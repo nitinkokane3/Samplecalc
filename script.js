@@ -881,10 +881,15 @@
 
   function renderGraphResult() {
     if (graphState.trace) {
-      const { x, y } = graphState.trace;
-      const xStr = localizeDigits(formatNumber(Math.round(x * 1e6) / 1e6));
-      const yStr = isFinite(y) ? localizeDigits(formatNumber(Math.round(y * 1e6) / 1e6)) : t('error');
-      resultEl.textContent = `x=${xStr}, y=${yStr}`;
+      const { x, y, slope } = graphState.trace;
+      const xStr = localizeDigits(formatNumber(Math.round(x * 1e4) / 1e4));
+      if (!isFinite(y)) {
+        resultEl.textContent = `x=${xStr}, y=${t('error')}`;
+        return;
+      }
+      const yStr = localizeDigits(formatNumber(Math.round(y * 1e4) / 1e4));
+      const slopeStr = isFinite(slope) ? localizeDigits(formatNumber(Math.round(slope * 1e4) / 1e4)) : t('error');
+      resultEl.textContent = `x=${xStr}, y=${yStr}, dy/dx=${slopeStr}`;
       return;
     }
     if (!graphState.rootsSearched) { resultEl.textContent = ''; return; }
@@ -1047,8 +1052,19 @@
     }
 
     if (graphState.trace && isFinite(graphState.trace.y)) {
-      const { x: tx, y: ty } = graphState.trace;
+      const { x: tx, y: ty, slope } = graphState.trace;
       if (tx >= xMin && tx <= xMax && ty >= yMin && ty <= yMax) {
+        if (isFinite(slope)) {
+          const halfSpan = (xMax - xMin) * 0.15;
+          const x1 = tx - halfSpan, x2 = tx + halfSpan;
+          const y1t = ty - slope * halfSpan, y2t = ty + slope * halfSpan;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(xToPx(x1), yToPx(y1t));
+          ctx.lineTo(xToPx(x2), yToPx(y2t));
+          ctx.stroke();
+        }
         const px = xToPx(tx);
         const py = yToPx(ty);
         ctx.strokeStyle = axisColor;
@@ -1112,12 +1128,23 @@
     handleAction(btn.dataset.action, btn.dataset.value);
   });
 
+  function computeGraphSlope(x, y) {
+    if (!isFinite(y)) return NaN;
+    const range = graphState.xMax - graphState.xMin;
+    const h = Math.max(range / 10000, 1e-6);
+    const y1 = evalGraphAt(x - h);
+    const y2 = evalGraphAt(x + h);
+    if (!isFinite(y1) || !isFinite(y2)) return NaN;
+    return (y2 - y1) / (2 * h);
+  }
+
   graphCanvas.addEventListener('click', (e) => {
     if (!graphState.expression) return;
     const rect = graphCanvas.getBoundingClientRect();
     const pxX = e.clientX - rect.left;
     const dataX = graphState.xMin + (pxX / rect.width) * (graphState.xMax - graphState.xMin);
-    graphState.trace = { x: dataX, y: evalGraphAt(dataX) };
+    const y = evalGraphAt(dataX);
+    graphState.trace = { x: dataX, y, slope: computeGraphSlope(dataX, y) };
     renderGraphDisplay();
     drawGraph();
   });
