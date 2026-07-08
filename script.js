@@ -856,6 +856,7 @@
     roots: [],
     rootsSearched: false,
     rootsError: false,
+    trace: null,
   };
 
   function isGraphingMode() {
@@ -866,7 +867,26 @@
     expressionEl.textContent = `y = ${localizeDigits(graphState.expression || '')}`;
   }
 
+  function evalGraphAt(dataX) {
+    const wasDegrees = state.isDegrees;
+    state.isDegrees = false;
+    try {
+      return evaluateExpression(graphState.expression, { x: dataX });
+    } catch (e) {
+      return NaN;
+    } finally {
+      state.isDegrees = wasDegrees;
+    }
+  }
+
   function renderGraphResult() {
+    if (graphState.trace) {
+      const { x, y } = graphState.trace;
+      const xStr = localizeDigits(formatNumber(Math.round(x * 1e6) / 1e6));
+      const yStr = isFinite(y) ? localizeDigits(formatNumber(Math.round(y * 1e6) / 1e6)) : t('error');
+      resultEl.textContent = `x=${xStr}, y=${yStr}`;
+      return;
+    }
     if (!graphState.rootsSearched) { resultEl.textContent = ''; return; }
     if (graphState.rootsError) { resultEl.textContent = t('error'); return; }
     if (graphState.roots.length === 0) { resultEl.textContent = t('graphNoRoots'); return; }
@@ -883,23 +903,19 @@
     graphState.roots = [];
     graphState.rootsSearched = false;
     graphState.rootsError = false;
+    graphState.trace = null;
   }
 
   function findGraphRoots() {
     const { xMin, xMax } = graphState;
     const samples = 400;
-    const wasDegrees = state.isDegrees;
-    state.isDegrees = false;
-    const f = (x) => {
-      try { return evaluateExpression(graphState.expression, { x }); } catch (e) { return NaN; }
-    };
     const roots = [];
     let anyFinite = false;
     let prevX = null;
     let prevY = null;
     for (let i = 0; i <= samples; i++) {
       const x = xMin + ((xMax - xMin) * i) / samples;
-      const y = f(x);
+      const y = evalGraphAt(x);
       if (isFinite(y)) anyFinite = true;
       if (prevX !== null && isFinite(prevY) && isFinite(y)) {
         if (prevY === 0) {
@@ -908,7 +924,7 @@
           let a = prevX, b = x, fa = prevY;
           for (let iter = 0; iter < 40; iter++) {
             const mid = (a + b) / 2;
-            const fm = f(mid);
+            const fm = evalGraphAt(mid);
             if (!isFinite(fm)) break;
             if ((fa < 0 && fm < 0) || (fa > 0 && fm > 0)) { a = mid; fa = fm; } else { b = mid; }
           }
@@ -917,7 +933,6 @@
       }
       prevX = x; prevY = y;
     }
-    state.isDegrees = wasDegrees;
     const resolution = (xMax - xMin) / samples;
     const deduped = [];
     roots.forEach((r) => {
@@ -931,6 +946,7 @@
     graphState.roots = roots;
     graphState.rootsSearched = true;
     graphState.rootsError = !anyFinite;
+    graphState.trace = null;
     renderGraphDisplay();
     drawGraph();
   }
@@ -996,8 +1012,6 @@
       ctx.fillText(localizeDigits(formatAxisNumber(v)), 2, Math.min(Math.max(yToPx(v) - 10, 0), h - 12));
     });
 
-    const wasDegrees = state.isDegrees;
-    state.isDegrees = false;
     ctx.strokeStyle = curveColor;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -1006,13 +1020,7 @@
     const yRange = yMax - yMin;
     for (let i = 0; i <= samples; i++) {
       const dataX = xMin + ((xMax - xMin) * i) / samples;
-      let y;
-      try {
-        y = evaluateExpression(graphState.expression, { x: dataX });
-      } catch (e) {
-        drawing = false;
-        continue;
-      }
+      const y = evalGraphAt(dataX);
       if (!isFinite(y) || y < yMin - yRange * 2 || y > yMax + yRange * 2) {
         drawing = false;
         continue;
@@ -1022,7 +1030,6 @@
       if (!drawing) { ctx.moveTo(px, py); drawing = true; } else { ctx.lineTo(px, py); }
     }
     ctx.stroke();
-    state.isDegrees = wasDegrees;
 
     if (graphState.roots.length) {
       ctx.fillStyle = '#ffffff';
@@ -1037,6 +1044,27 @@
         ctx.fill();
         ctx.stroke();
       });
+    }
+
+    if (graphState.trace && isFinite(graphState.trace.y)) {
+      const { x: tx, y: ty } = graphState.trace;
+      if (tx >= xMin && tx <= xMax && ty >= yMin && ty <= yMax) {
+        const px = xToPx(tx);
+        const py = yToPx(ty);
+        ctx.strokeStyle = axisColor;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = curveColor;
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
   }
 
@@ -1082,6 +1110,16 @@
     const btn = e.target.closest('.graph-tool-btn');
     if (!btn) return;
     handleAction(btn.dataset.action, btn.dataset.value);
+  });
+
+  graphCanvas.addEventListener('click', (e) => {
+    if (!graphState.expression) return;
+    const rect = graphCanvas.getBoundingClientRect();
+    const pxX = e.clientX - rect.left;
+    const dataX = graphState.xMin + (pxX / rect.width) * (graphState.xMax - graphState.xMin);
+    graphState.trace = { x: dataX, y: evalGraphAt(dataX) };
+    renderGraphDisplay();
+    drawGraph();
   });
 
   // ---------- Input handling ----------
