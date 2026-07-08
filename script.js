@@ -35,6 +35,11 @@
   const statMaxEl = document.getElementById('statMax');
   const statChipsEl = document.getElementById('statChips');
   const statKeys = document.getElementById('statKeys');
+  const graphToolbar = document.getElementById('graphToolbar');
+  const graphCanvasWrap = document.getElementById('graphCanvasWrap');
+  const graphCanvas = document.getElementById('graphCanvas');
+  const graphRow = document.getElementById('graphRow');
+  const graphKeys = document.getElementById('graphKeys');
 
   const translations = {
     en: {
@@ -44,6 +49,11 @@
       programmer: 'Programmer',
       converter: 'Converter',
       statistics: 'Statistics',
+      graphing: 'Graph',
+      graphReset: 'Reset',
+      graphZoomIn: 'Zoom +',
+      graphZoomOut: 'Zoom −',
+      graphPlot: 'Plot',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -73,6 +83,11 @@
       programmer: 'प्रोग्रामर',
       converter: 'रूपांतरक',
       statistics: 'सांख्यिकी',
+      graphing: 'आलेख',
+      graphReset: 'रीसेट',
+      graphZoomIn: 'झूम +',
+      graphZoomOut: 'झूम −',
+      graphPlot: 'आलेखा करा',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -142,13 +157,14 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="graphdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
     if (isProgrammerMode()) renderProg();
     else if (isConverterMode()) renderConv();
     else if (isStatisticsMode()) renderStat();
+    else if (isGraphingMode()) { renderGraphExpr(); drawGraph(); }
     else render();
   }
 
@@ -659,12 +675,12 @@
   }
 
   // ---------- Safe expression parser (recursive descent) ----------
-  function evaluateExpression(expr) {
+  function evaluateExpression(expr, scope) {
     const prepped = expr
       .replace(/π/g, 'pi')
       .replace(/e(?![a-zA-Z])/g, 'E_CONST');
     const tokens = tokenize(prepped);
-    const parser = new Parser(tokens);
+    const parser = new Parser(tokens, scope);
     const value = parser.parseExpression();
     parser.expectEnd();
     return value;
@@ -699,6 +715,11 @@
         i += 7;
         continue;
       }
+      if (ch === 'x') {
+        tokens.push({ type: 'var', value: 'x' });
+        i++;
+        continue;
+      }
       if ('+-*/^()%!'.includes(ch)) {
         tokens.push({ type: 'op', value: ch });
         i++;
@@ -710,9 +731,10 @@
   }
 
   class Parser {
-    constructor(tokens) {
+    constructor(tokens, scope) {
       this.tokens = tokens;
       this.pos = 0;
+      this.scope = scope || {};
     }
     peek() { return this.tokens[this.pos]; }
     next() { return this.tokens[this.pos++]; }
@@ -775,6 +797,10 @@
         this.next();
         return token.value;
       }
+      if (token.type === 'var') {
+        this.next();
+        return this.scope[token.value] ?? 0;
+      }
       if (token.type === 'func') {
         this.next();
         this.consumeOp('(');
@@ -818,6 +844,151 @@
       default: throw new Error('Unknown function: ' + name);
     }
   }
+
+  // ---------- Graphing mode ----------
+  const graphState = {
+    expression: 'sin(x)',
+    xMin: -10, xMax: 10, yMin: -10, yMax: 10,
+  };
+
+  function isGraphingMode() {
+    return calculator.classList.contains('graphing');
+  }
+
+  function renderGraphExpr() {
+    expressionEl.textContent = `y = ${localizeDigits(graphState.expression || '')}`;
+  }
+
+  function formatAxisNumber(n) {
+    return String(Math.round(n * 100) / 100);
+  }
+
+  function resizeGraphCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = graphCanvas.getBoundingClientRect();
+    graphCanvas.width = Math.max(1, Math.round(rect.width * dpr));
+    graphCanvas.height = Math.max(1, Math.round(rect.height * dpr));
+  }
+
+  function drawGraph() {
+    if (!isGraphingMode()) return;
+    resizeGraphCanvas();
+    const ctx = graphCanvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = graphCanvas.width / dpr;
+    const h = graphCanvas.height / dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const styles = getComputedStyle(document.documentElement);
+    const gridColor = styles.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,0.12)';
+    const axisColor = styles.getPropertyValue('--text-dim').trim() || '#9aa0b4';
+    const curveColor = styles.getPropertyValue('--accent-2').trim() || '#ff6fa5';
+
+    const { xMin, xMax, yMin, yMax } = graphState;
+    const xToPx = (x) => ((x - xMin) / (xMax - xMin)) * w;
+    const yToPx = (y) => h - ((y - yMin) / (yMax - yMin)) * h;
+
+    const divisions = 10;
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= divisions; i++) {
+      const gx = (w / divisions) * i;
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+      const gy = (h / divisions) * i;
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+    }
+
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1.5;
+    if (xMin <= 0 && xMax >= 0) {
+      const axisX = xToPx(0);
+      ctx.beginPath(); ctx.moveTo(axisX, 0); ctx.lineTo(axisX, h); ctx.stroke();
+    }
+    if (yMin <= 0 && yMax >= 0) {
+      const axisY = yToPx(0);
+      ctx.beginPath(); ctx.moveTo(0, axisY); ctx.lineTo(w, axisY); ctx.stroke();
+    }
+
+    ctx.fillStyle = axisColor;
+    ctx.font = '10px sans-serif';
+    ctx.textBaseline = 'top';
+    [xMin, 0, xMax].forEach((v) => {
+      ctx.fillText(localizeDigits(formatAxisNumber(v)), Math.min(Math.max(xToPx(v) + 2, 2), w - 24), h - 12);
+    });
+    [yMin, 0, yMax].forEach((v) => {
+      ctx.fillText(localizeDigits(formatAxisNumber(v)), 2, Math.min(Math.max(yToPx(v) - 10, 0), h - 12));
+    });
+
+    const wasDegrees = state.isDegrees;
+    state.isDegrees = false;
+    ctx.strokeStyle = curveColor;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let drawing = false;
+    const samples = Math.max(100, Math.floor(w));
+    const yRange = yMax - yMin;
+    for (let i = 0; i <= samples; i++) {
+      const dataX = xMin + ((xMax - xMin) * i) / samples;
+      let y;
+      try {
+        y = evaluateExpression(graphState.expression, { x: dataX });
+      } catch (e) {
+        drawing = false;
+        continue;
+      }
+      if (!isFinite(y) || y < yMin - yRange * 2 || y > yMax + yRange * 2) {
+        drawing = false;
+        continue;
+      }
+      const px = xToPx(dataX);
+      const py = yToPx(y);
+      if (!drawing) { ctx.moveTo(px, py); drawing = true; } else { ctx.lineTo(px, py); }
+    }
+    ctx.stroke();
+    state.isDegrees = wasDegrees;
+  }
+
+  function graphAppend(value) {
+    graphState.expression += value;
+    renderGraphExpr();
+  }
+
+  function graphBackspace() {
+    graphState.expression = graphState.expression.slice(0, -1);
+    renderGraphExpr();
+  }
+
+  function graphClearAll() {
+    graphState.expression = '';
+    renderGraphExpr();
+  }
+
+  function graphResetView() {
+    graphState.xMin = -10; graphState.xMax = 10;
+    graphState.yMin = -10; graphState.yMax = 10;
+    drawGraph();
+  }
+
+  function graphZoom(factor) {
+    const cx = (graphState.xMin + graphState.xMax) / 2;
+    const cy = (graphState.yMin + graphState.yMax) / 2;
+    const halfX = ((graphState.xMax - graphState.xMin) / 2) * factor;
+    const halfY = ((graphState.yMax - graphState.yMin) / 2) * factor;
+    graphState.xMin = cx - halfX; graphState.xMax = cx + halfX;
+    graphState.yMin = cy - halfY; graphState.yMax = cy + halfY;
+    drawGraph();
+  }
+
+  window.addEventListener('resize', () => {
+    if (isGraphingMode()) drawGraph();
+  });
+
+  graphToolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.graph-tool-btn');
+    if (!btn) return;
+    handleAction(btn.dataset.action, btn.dataset.value);
+  });
 
   // ---------- Input handling ----------
   function appendToExpression(value) {
@@ -1061,10 +1232,23 @@
         else if (isStatisticsMode()) insertAnsStat();
         else insertAnsStandard();
         break;
+      case 'graphdigit': graphAppend(value); break;
+      case 'graphdecimal': graphAppend('.'); break;
+      case 'graphop': graphAppend(value); break;
+      case 'graphfn': graphAppend(value); break;
+      case 'graphconst': graphAppend(value); break;
+      case 'graphparen': graphAppend(value); break;
+      case 'graphvar': graphAppend('x'); break;
+      case 'graphclear': graphClearAll(); break;
+      case 'graphbackspace': graphBackspace(); break;
+      case 'graphplot': drawGraph(); break;
+      case 'graphreset': graphResetView(); break;
+      case 'graphzoomin': graphZoom(0.7); break;
+      case 'graphzoomout': graphZoom(1 / 0.7); break;
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, graphRow, graphKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -1081,6 +1265,7 @@
       calculator.classList.toggle('programmer', mode === 'programmer');
       calculator.classList.toggle('converter', mode === 'converter');
       calculator.classList.toggle('statistics', mode === 'statistics');
+      calculator.classList.toggle('graphing', mode === 'graphing');
       if (mode === 'programmer') {
         updateBaseTabsUI();
         updateDigitAvailability();
@@ -1093,6 +1278,10 @@
       if (mode === 'statistics') {
         renderStat();
       }
+      if (mode === 'graphing') {
+        renderGraphExpr();
+        drawGraph();
+      }
     });
   });
 
@@ -1103,6 +1292,7 @@
     root.setAttribute('data-theme', next);
     themeToggle.textContent = next === 'light' ? '☀️' : '🌙';
     localStorage.setItem('calc-theme', next);
+    if (isGraphingMode()) drawGraph();
   });
 
   historyToggle.addEventListener('click', () => {
@@ -1155,6 +1345,13 @@
       if (key === 'Backspace') { statBackspace(); return; }
       if (key === 'Escape') { statClearAll(); return; }
       if (key === 'Enter' || key === '=') { e.preventDefault(); statAddEntry(); return; }
+      return;
+    }
+    if (isGraphingMode()) {
+      if (/[0-9]/.test(key) || key === 'x' || key === '.' || '+-*/^()'.includes(key)) { graphAppend(key); return; }
+      if (key === 'Backspace') { graphBackspace(); return; }
+      if (key === 'Escape') { graphClearAll(); return; }
+      if (key === 'Enter' || key === '=') { e.preventDefault(); drawGraph(); return; }
       return;
     }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
