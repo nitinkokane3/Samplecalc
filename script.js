@@ -26,6 +26,15 @@
   const toUnitSelect = document.getElementById('toUnit');
   const swapUnitsBtn = document.getElementById('swapUnits');
   const convKeys = document.getElementById('convKeys');
+  const statNEl = document.getElementById('statN');
+  const statSumEl = document.getElementById('statSum');
+  const statMeanEl = document.getElementById('statMean');
+  const statPStdEl = document.getElementById('statPStd');
+  const statSStdEl = document.getElementById('statSStd');
+  const statMinEl = document.getElementById('statMin');
+  const statMaxEl = document.getElementById('statMax');
+  const statChipsEl = document.getElementById('statChips');
+  const statKeys = document.getElementById('statKeys');
 
   const translations = {
     en: {
@@ -34,11 +43,18 @@
       scientific: 'Scientific',
       programmer: 'Programmer',
       converter: 'Converter',
+      statistics: 'Statistics',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
       catData: 'Data',
       swapTitle: 'Swap units',
+      statMean: 'Mean',
+      statMin: 'Min',
+      statMax: 'Max',
+      statAdd: 'Add',
+      statValuesLabel: 'values',
+      statNoData: 'No data yet',
       historyLabel: 'History',
       clearLabel: 'Clear',
       noHistory: 'No history yet',
@@ -56,11 +72,18 @@
       scientific: 'वैज्ञानिक',
       programmer: 'प्रोग्रामर',
       converter: 'रूपांतरक',
+      statistics: 'सांख्यिकी',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
       catData: 'डेटा',
       swapTitle: 'एकके बदला',
+      statMean: 'सरासरी',
+      statMin: 'किमान',
+      statMax: 'कमाल',
+      statAdd: 'जोडा',
+      statValuesLabel: 'मूल्ये',
+      statNoData: 'अद्याप डेटा नाही',
       historyLabel: 'इतिहास',
       clearLabel: 'साफ करा',
       noHistory: 'अद्याप इतिहास नाही',
@@ -119,11 +142,14 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
-    render();
+    if (isProgrammerMode()) renderProg();
+    else if (isConverterMode()) renderConv();
+    else if (isStatisticsMode()) renderStat();
+    else render();
   }
 
   function liveEvaluate() {
@@ -511,6 +537,127 @@
 
   swapUnitsBtn.addEventListener('click', convSwapUnits);
 
+  // ---------- Statistics mode ----------
+  const stat = {
+    data: [],
+    entry: '0',
+    justEntered: false,
+  };
+
+  function isStatisticsMode() {
+    return calculator.classList.contains('statistics');
+  }
+
+  function computeStats() {
+    const data = stat.data;
+    const n = data.length;
+    if (n === 0) {
+      return { n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0 };
+    }
+    const sum = data.reduce((a, b) => a + b, 0);
+    const mean = sum / n;
+    const sqDiffSum = data.reduce((a, b) => a + (b - mean) ** 2, 0);
+    const popStd = Math.sqrt(sqDiffSum / n);
+    const sampleStd = n > 1 ? Math.sqrt(sqDiffSum / (n - 1)) : null;
+    return { n, sum, mean, popStd, sampleStd, min: Math.min(...data), max: Math.max(...data) };
+  }
+
+  function renderStatChips() {
+    statChipsEl.innerHTML = '';
+    if (stat.data.length === 0) {
+      statChipsEl.innerHTML = `<span class="stat-chips-empty">${t('statNoData')}</span>`;
+      return;
+    }
+    stat.data.forEach((val, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'stat-chip';
+      const valueSpan = document.createElement('span');
+      valueSpan.textContent = localizeDigits(formatNumber(val));
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+      removeBtn.setAttribute('aria-label', 'Remove');
+      removeBtn.addEventListener('click', () => {
+        stat.data.splice(idx, 1);
+        renderStat();
+      });
+      chip.appendChild(valueSpan);
+      chip.appendChild(removeBtn);
+      statChipsEl.appendChild(chip);
+    });
+  }
+
+  function renderStat() {
+    const s = computeStats();
+    expressionEl.textContent = `${localizeDigits(String(s.n))} ${t('statValuesLabel')}`;
+    resultEl.textContent = localizeDigits(stat.entry || '0');
+    memoryIndicator.textContent = '';
+    statNEl.textContent = localizeDigits(String(s.n));
+    statSumEl.textContent = localizeDigits(formatNumber(s.sum));
+    statMeanEl.textContent = localizeDigits(formatNumber(s.mean));
+    statPStdEl.textContent = localizeDigits(formatNumber(s.popStd));
+    statSStdEl.textContent = s.sampleStd === null ? '—' : localizeDigits(formatNumber(s.sampleStd));
+    statMinEl.textContent = localizeDigits(formatNumber(s.min));
+    statMaxEl.textContent = localizeDigits(formatNumber(s.max));
+    renderStatChips();
+  }
+
+  function statAppendDigit(ch) {
+    if (stat.justEntered) {
+      stat.entry = '';
+      stat.justEntered = false;
+    }
+    if (stat.entry.replace(/[-.]/g, '').length >= 15) return;
+    stat.entry = (stat.entry === '0' ? '' : stat.entry) + ch;
+    renderStat();
+  }
+
+  function statAppendDecimal() {
+    if (stat.justEntered) {
+      stat.entry = '0';
+      stat.justEntered = false;
+    }
+    if (stat.entry.includes('.')) return;
+    stat.entry += '.';
+    renderStat();
+  }
+
+  function statToggleSign() {
+    stat.entry = stat.entry.startsWith('-') ? stat.entry.slice(1) : (stat.entry === '0' ? '0' : '-' + stat.entry);
+    renderStat();
+  }
+
+  function statClearAll() {
+    stat.data = [];
+    stat.entry = '0';
+    stat.justEntered = false;
+    renderStat();
+  }
+
+  function statClearEntry() {
+    stat.entry = '0';
+    renderStat();
+  }
+
+  function statBackspace() {
+    if (stat.justEntered) { statClearAll(); return; }
+    stat.entry = stat.entry.slice(0, -1) || '0';
+    renderStat();
+  }
+
+  function statAddEntry() {
+    const value = parseFloat(stat.entry) || 0;
+    stat.data.push(value);
+    stat.entry = '0';
+    stat.justEntered = false;
+    renderStat();
+  }
+
+  function insertAnsStat() {
+    stat.entry = convPlainNumber(lastAnswer);
+    stat.justEntered = true;
+    renderStat();
+  }
+
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr) {
     const prepped = expr
@@ -866,16 +1013,19 @@
       case 'clear':
         if (isProgrammerMode()) progClearAll();
         else if (isConverterMode()) convClearAll();
+        else if (isStatisticsMode()) statClearAll();
         else clearAll();
         break;
       case 'clear-entry':
         if (isProgrammerMode()) progClearEntry();
         else if (isConverterMode()) convClearEntry();
+        else if (isStatisticsMode()) statClearEntry();
         else clearEntry();
         break;
       case 'backspace':
         if (isProgrammerMode()) progBackspace();
         else if (isConverterMode()) convBackspace();
+        else if (isStatisticsMode()) statBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -901,15 +1051,20 @@
       case 'convdigit': convAppendDigit(value); break;
       case 'convdecimal': convAppendDecimal(); break;
       case 'convsign': convToggleSign(); break;
+      case 'statdigit': statAppendDigit(value); break;
+      case 'statdecimal': statAppendDecimal(); break;
+      case 'statsign': statToggleSign(); break;
+      case 'statadd': statAddEntry(); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
+        else if (isStatisticsMode()) insertAnsStat();
         else insertAnsStandard();
         break;
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -925,6 +1080,7 @@
       calculator.classList.toggle('scientific', mode === 'scientific');
       calculator.classList.toggle('programmer', mode === 'programmer');
       calculator.classList.toggle('converter', mode === 'converter');
+      calculator.classList.toggle('statistics', mode === 'statistics');
       if (mode === 'programmer') {
         updateBaseTabsUI();
         updateDigitAvailability();
@@ -933,6 +1089,9 @@
       if (mode === 'converter') {
         populateUnitSelectors();
         renderConv();
+      }
+      if (mode === 'statistics') {
+        renderStat();
       }
     });
   });
@@ -987,6 +1146,15 @@
       if (key === '-') { convToggleSign(); return; }
       if (key === 'Backspace') { convBackspace(); return; }
       if (key === 'Escape') { convClearAll(); return; }
+      return;
+    }
+    if (isStatisticsMode()) {
+      if (/[0-9]/.test(key)) { statAppendDigit(key); return; }
+      if (key === '.') { statAppendDecimal(); return; }
+      if (key === '-') { statToggleSign(); return; }
+      if (key === 'Backspace') { statBackspace(); return; }
+      if (key === 'Escape') { statClearAll(); return; }
+      if (key === 'Enter' || key === '=') { e.preventDefault(); statAddEntry(); return; }
       return;
     }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }

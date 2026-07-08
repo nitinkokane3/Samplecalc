@@ -15,6 +15,7 @@
           <button class="mode-btn" data-mode="scientific" data-i18n="scientific">Scientific</button>
           <button class="mode-btn" data-mode="programmer" data-i18n="programmer">Programmer</button>
           <button class="mode-btn" data-mode="converter" data-i18n="converter">Converter</button>
+          <button class="mode-btn" data-mode="statistics" data-i18n="statistics">Statistics</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
@@ -55,6 +56,18 @@
         <div class="conv-row"><span class="conv-label">OCT</span><span class="conv-value" id="convOct">0</span></div>
         <div class="conv-row"><span class="conv-label">BIN</span><span class="conv-value" id="convBin">0</span></div>
       </div>
+
+      <div class="conv-panel stat-panel" id="statPanel">
+        <div class="conv-row"><span class="conv-label">N</span><span class="conv-value" id="statN">0</span></div>
+        <div class="conv-row"><span class="conv-label">Σx</span><span class="conv-value" id="statSum">0</span></div>
+        <div class="conv-row"><span class="conv-label" data-i18n="statMean">Mean</span><span class="conv-value" id="statMean">0</span></div>
+        <div class="conv-row"><span class="conv-label">σ</span><span class="conv-value" id="statPStd">0</span></div>
+        <div class="conv-row"><span class="conv-label">s</span><span class="conv-value" id="statSStd">—</span></div>
+        <div class="conv-row"><span class="conv-label" data-i18n="statMin">Min</span><span class="conv-value" id="statMin">0</span></div>
+        <div class="conv-row"><span class="conv-label" data-i18n="statMax">Max</span><span class="conv-value" id="statMax">0</span></div>
+      </div>
+
+      <div class="stat-chips" id="statChips"></div>
 
       <div class="panels">
         <div class="history-panel" id="historyPanel">
@@ -188,6 +201,31 @@
             <button class="key num" data-action="convdecimal">.</button>
 
             <button class="key op-light wide-3" data-action="ans">ANS</button>
+          </div>
+
+          <div class="keys stat-keys" id="statKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="statdigit" data-value="7">7</button>
+            <button class="key num" data-action="statdigit" data-value="8">8</button>
+            <button class="key num" data-action="statdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="statdigit" data-value="4">4</button>
+            <button class="key num" data-action="statdigit" data-value="5">5</button>
+            <button class="key num" data-action="statdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="statdigit" data-value="1">1</button>
+            <button class="key num" data-action="statdigit" data-value="2">2</button>
+            <button class="key num" data-action="statdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="statsign">±</button>
+            <button class="key num" data-action="statdigit" data-value="0">0</button>
+            <button class="key num" data-action="statdecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="statadd" data-i18n="statAdd">Add</button>
           </div>
         </div>
       </div>
