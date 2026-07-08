@@ -16,6 +16,7 @@
           <button class="mode-btn" data-mode="programmer" data-i18n="programmer">Programmer</button>
           <button class="mode-btn" data-mode="converter" data-i18n="converter">Converter</button>
           <button class="mode-btn" data-mode="statistics" data-i18n="statistics">Statistics</button>
+          <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
@@ -44,10 +45,20 @@
         <select class="unit-select" id="toUnit"></select>
       </div>
 
+      <div class="graph-toolbar" id="graphToolbar">
+        <button class="graph-tool-btn" data-action="graphreset" data-i18n="graphReset">Reset</button>
+        <button class="graph-tool-btn" data-action="graphzoomin" data-i18n="graphZoomIn">Zoom +</button>
+        <button class="graph-tool-btn" data-action="graphzoomout" data-i18n="graphZoomOut">Zoom −</button>
+      </div>
+
       <div class="display">
         <div class="expression" id="expression"></div>
         <div class="result" id="result">0</div>
         <div class="memory-indicator" id="memoryIndicator"></div>
+      </div>
+
+      <div class="graph-canvas-wrap" id="graphCanvasWrap">
+        <canvas id="graphCanvas"></canvas>
       </div>
 
       <div class="conv-panel" id="convPanel">
@@ -226,6 +237,48 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="statadd" data-i18n="statAdd">Add</button>
+          </div>
+
+          <div class="prog-row graph-row" id="graphRow">
+            <button class="key fn" data-action="graphvar">x</button>
+            <button class="key fn" data-action="graphfn" data-value="sin(">sin</button>
+            <button class="key fn" data-action="graphfn" data-value="cos(">cos</button>
+            <button class="key fn" data-action="graphfn" data-value="tan(">tan</button>
+
+            <button class="key fn" data-action="graphfn" data-value="log(">log</button>
+            <button class="key fn" data-action="graphfn" data-value="ln(">ln</button>
+            <button class="key fn" data-action="graphfn" data-value="sqrt(">√</button>
+            <button class="key fn" data-action="graphop" data-value="^">^</button>
+
+            <button class="key fn" data-action="graphparen" data-value="(">(</button>
+            <button class="key fn" data-action="graphparen" data-value=")">)</button>
+            <button class="key fn" data-action="graphconst" data-value="π">π</button>
+            <button class="key fn" data-action="graphconst" data-value="e">e</button>
+          </div>
+
+          <div class="keys graph-keys" id="graphKeys">
+            <button class="key op-light" data-action="graphclear">C</button>
+            <button class="key op-light" data-action="graphbackspace">⌫</button>
+            <button class="key operator" data-action="graphop" data-value="/">÷</button>
+            <button class="key operator" data-action="graphop" data-value="*">×</button>
+
+            <button class="key num" data-action="graphdigit" data-value="7">7</button>
+            <button class="key num" data-action="graphdigit" data-value="8">8</button>
+            <button class="key num" data-action="graphdigit" data-value="9">9</button>
+            <button class="key operator" data-action="graphop" data-value="-">−</button>
+
+            <button class="key num" data-action="graphdigit" data-value="4">4</button>
+            <button class="key num" data-action="graphdigit" data-value="5">5</button>
+            <button class="key num" data-action="graphdigit" data-value="6">6</button>
+            <button class="key operator" data-action="graphop" data-value="+">+</button>
+
+            <button class="key num" data-action="graphdigit" data-value="1">1</button>
+            <button class="key num" data-action="graphdigit" data-value="2">2</button>
+            <button class="key num" data-action="graphdigit" data-value="3">3</button>
+            <button class="key num" data-action="graphdecimal">.</button>
+
+            <button class="key num" data-action="graphdigit" data-value="0">0</button>
+            <button class="key equals wide-3" data-action="graphplot" data-i18n="graphPlot">Plot</button>
           </div>
         </div>
       </div>

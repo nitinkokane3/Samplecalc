@@ -89,6 +89,10 @@ body {
   max-width: 400px;
 }
 
+.calculator.graphing {
+  max-width: 420px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -216,6 +220,65 @@ body {
 .swap-btn:hover {
   background: var(--fn-bg-hover);
   transform: rotate(180deg);
+}
+
+.graph-toolbar {
+  display: none;
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.graphing .graph-toolbar {
+  display: flex;
+}
+
+.graph-tool-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 7px 0;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.graph-tool-btn:hover {
+  background: var(--fn-bg-hover);
+  color: var(--text);
+}
+
+.graph-canvas-wrap {
+  display: none;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .graph-canvas-wrap {
+  background: rgba(20, 20, 40, 0.04);
+}
+
+.calculator.graphing .graph-canvas-wrap {
+  display: block;
+}
+
+#graphCanvas {
+  display: block;
+  width: 100%;
+  height: 220px;
+}
+
+.calculator.graphing .result,
+.calculator.graphing .memory-indicator {
+  display: none;
 }
 
 .top-actions {
@@ -432,8 +495,17 @@ body {
 
 .prog-keys,
 .conv-keys,
-.stat-keys {
+.stat-keys,
+.graph-keys {
   display: none;
+}
+
+.graph-row {
+  display: none;
+}
+
+.calculator.graphing .graph-row {
+  display: grid;
 }
 
 .calculator.programmer .keys.prog-keys {
@@ -459,6 +531,14 @@ body {
 }
 
 .calculator.statistics .keys:not(.stat-keys) {
+  display: none;
+}
+
+.calculator.graphing .keys.graph-keys {
+  display: grid;
+}
+
+.calculator.graphing .keys:not(.graph-keys) {
   display: none;
 }
 
