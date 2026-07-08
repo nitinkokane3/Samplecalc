@@ -36,6 +36,9 @@
   const statMedianEl = document.getElementById('statMedian');
   const statModeEl = document.getElementById('statMode');
   const statRangeEl = document.getElementById('statRange');
+  const statQ1El = document.getElementById('statQ1');
+  const statQ3El = document.getElementById('statQ3');
+  const statIQREl = document.getElementById('statIQR');
   const statChipsEl = document.getElementById('statChips');
   const statKeys = document.getElementById('statKeys');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -579,11 +582,21 @@
     return calculator.classList.contains('statistics');
   }
 
+  function medianOf(sortedArr) {
+    const len = sortedArr.length;
+    if (len === 0) return null;
+    const mid = Math.floor(len / 2);
+    return len % 2 === 0 ? (sortedArr[mid - 1] + sortedArr[mid]) / 2 : sortedArr[mid];
+  }
+
   function computeStats() {
     const data = stat.data;
     const n = data.length;
     if (n === 0) {
-      return { n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0, median: 0, mode: [], range: 0 };
+      return {
+        n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0,
+        median: 0, mode: [], range: 0, q1: null, q3: null, iqr: null,
+      };
     }
     const sum = data.reduce((a, b) => a + b, 0);
     const mean = sum / n;
@@ -593,8 +606,7 @@
     const min = Math.min(...data);
     const max = Math.max(...data);
     const sorted = [...data].sort((a, b) => a - b);
-    const mid = Math.floor(n / 2);
-    const median = n % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    const median = medianOf(sorted);
     const freq = new Map();
     data.forEach((v) => freq.set(v, (freq.get(v) || 0) + 1));
     let maxFreq = 0;
@@ -602,7 +614,13 @@
     const mode = maxFreq > 1
       ? [...freq.entries()].filter(([, c]) => c === maxFreq).map(([v]) => v).sort((a, b) => a - b)
       : [];
-    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min };
+    const halfLen = Math.floor(n / 2);
+    const lowerHalf = sorted.slice(0, halfLen);
+    const upperHalf = n % 2 === 0 ? sorted.slice(halfLen) : sorted.slice(halfLen + 1);
+    const q1 = medianOf(lowerHalf);
+    const q3 = medianOf(upperHalf);
+    const iqr = q1 !== null && q3 !== null ? q3 - q1 : null;
+    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min, q1, q3, iqr };
   }
 
   function renderStatChips() {
@@ -646,6 +664,9 @@
       ? t('statModeNA')
       : localizeDigits(s.mode.map((m) => formatNumber(m)).join(', '));
     statRangeEl.textContent = localizeDigits(formatNumber(s.range));
+    statQ1El.textContent = s.q1 === null ? '—' : localizeDigits(formatNumber(s.q1));
+    statQ3El.textContent = s.q3 === null ? '—' : localizeDigits(formatNumber(s.q3));
+    statIQREl.textContent = s.iqr === null ? '—' : localizeDigits(formatNumber(s.iqr));
     renderStatChips();
   }
 
