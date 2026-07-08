@@ -7,6 +7,10 @@
   const sciRow = document.getElementById('sciRow');
   const modeButtons = document.querySelectorAll('.mode-btn');
   const themeToggle = document.getElementById('themeToggle');
+  const helpToggle = document.getElementById('helpToggle');
+  const helpOverlay = document.getElementById('helpOverlay');
+  const helpClose = document.getElementById('helpClose');
+  const helpBody = document.getElementById('helpBody');
   const historyToggle = document.getElementById('historyToggle');
   const historyPanel = document.getElementById('historyPanel');
   const historyList = document.getElementById('historyList');
@@ -84,6 +88,8 @@
       themeToggleTitle: 'Toggle theme',
       historyToggleTitle: 'Toggle history',
       langToggleTitle: 'Toggle language',
+      helpToggleTitle: 'Keyboard shortcuts',
+      helpTitle: 'Keyboard Shortcuts',
       deg: 'DEG',
       rad: 'RAD',
       langButton: 'EN',
@@ -124,6 +130,8 @@
       themeToggleTitle: 'थीम बदला',
       historyToggleTitle: 'इतिहास दाखवा',
       langToggleTitle: 'भाषा बदला',
+      helpToggleTitle: 'कीबोर्ड शॉर्टकट',
+      helpTitle: 'कीबोर्ड शॉर्टकट',
       deg: 'अंश',
       rad: 'रेडियन',
       langButton: 'मर',
@@ -184,6 +192,7 @@
     else if (isStatisticsMode()) renderStat();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
+    if (helpOverlay.classList.contains('open')) renderHelpContent();
   }
 
   function liveEvaluate() {
@@ -1582,10 +1591,129 @@
       drawGraph();
     }
     localStorage.setItem('calc-active-mode', mode);
+    if (helpOverlay.classList.contains('open')) renderHelpContent();
   }
 
   modeButtons.forEach(btn => {
     btn.addEventListener('click', () => switchToMode(btn.dataset.mode));
+  });
+
+  const helpText = {
+    en: {
+      standard: [
+        ['0–9', 'Enter digits'],
+        ['.', 'Decimal point'],
+        ['+ − × ÷ ^ %', 'Operators'],
+        ['( )', 'Parentheses'],
+        ['Enter / =', 'Calculate'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear'],
+        ['!', 'Factorial'],
+      ],
+      programmer: [
+        ['0–9, A–F', 'Enter digits'],
+        ['+ − × ÷ %', 'Arithmetic operators'],
+        ['& | ^ ~', 'AND / OR / XOR / NOT'],
+        ['Enter / =', 'Calculate'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear'],
+      ],
+      converter: [
+        ['0–9', 'Enter digits'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear'],
+      ],
+      statistics: [
+        ['0–9', 'Enter digits'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Enter / =', 'Add value to dataset'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear all data'],
+      ],
+      graphing: [
+        ['0–9', 'Enter digits'],
+        ['x', 'Insert variable x'],
+        ['+ − × ÷ ^ ( )', 'Operators and parentheses'],
+        ['.', 'Decimal point'],
+        ['Enter / =', 'Plot'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear function'],
+        ['Click graph', 'Trace point (x, y, dy/dx)'],
+      ],
+    },
+    mr: {
+      standard: [
+        ['0–9', 'अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['+ − × ÷ ^ %', 'क्रिया चिन्हे'],
+        ['( )', 'कंस'],
+        ['Enter / =', 'गणना करा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'साफ करा'],
+        ['!', 'क्रमगुणित (Factorial)'],
+      ],
+      programmer: [
+        ['0–9, A–F', 'अंक टाका'],
+        ['+ − × ÷ %', 'गणिती क्रिया'],
+        ['& | ^ ~', 'AND / OR / XOR / NOT'],
+        ['Enter / =', 'गणना करा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'साफ करा'],
+      ],
+      converter: [
+        ['0–9', 'अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'साफ करा'],
+      ],
+      statistics: [
+        ['0–9', 'अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Enter / =', 'डेटामध्ये मूल्य जोडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'सर्व डेटा साफ करा'],
+      ],
+      graphing: [
+        ['0–9', 'अंक टाका'],
+        ['x', 'x चल टाका'],
+        ['+ − × ÷ ^ ( )', 'क्रिया चिन्हे आणि कंस'],
+        ['.', 'दशांश बिंदू'],
+        ['Enter / =', 'आलेखा करा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'फंक्शन साफ करा'],
+        ['Click graph', 'बिंदू ट्रेस करा (x, y, dy/dx)'],
+      ],
+    },
+  };
+
+  function renderHelpContent() {
+    const activeBtn = document.querySelector('.mode-btn.active');
+    const activeMode = activeBtn ? activeBtn.dataset.mode : 'standard';
+    const bucket = activeMode === 'scientific' ? 'standard' : activeMode;
+    const rows = helpText[state.language][bucket] || [];
+    helpBody.innerHTML = rows.map(([keyLabel, desc]) =>
+      `<div class="help-row"><span class="help-keys">${keyLabel}</span><span class="help-desc">${desc}</span></div>`
+    ).join('');
+  }
+
+  function openHelp() {
+    renderHelpContent();
+    helpOverlay.classList.add('open');
+  }
+
+  function closeHelp() {
+    helpOverlay.classList.remove('open');
+  }
+
+  helpToggle.addEventListener('click', openHelp);
+  helpClose.addEventListener('click', closeHelp);
+  helpOverlay.addEventListener('click', (e) => {
+    if (e.target === helpOverlay) closeHelp();
   });
 
   themeToggle.addEventListener('click', () => {
@@ -1617,6 +1745,10 @@
   // ---------- Keyboard support ----------
   window.addEventListener('keydown', (e) => {
     const key = e.key;
+    if (helpOverlay.classList.contains('open')) {
+      if (key === 'Escape') closeHelp();
+      return;
+    }
     if (isProgrammerMode()) {
       if (/[0-9a-fA-F]/.test(key)) { progAppendDigit(key.toUpperCase()); return; }
       if (key === '+') { progSetOperator('add'); return; }

@@ -19,6 +19,7 @@
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
         </div>
         <div class="top-actions">
+          <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
           <button class="icon-btn lang-btn" id="langToggle" title="Toggle language" data-i18n-title="langToggleTitle">EN</button>
           <button class="icon-btn" id="themeToggle" title="Toggle theme" data-i18n-title="themeToggleTitle">🌙</button>
@@ -290,6 +291,16 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="help-overlay" id="helpOverlay">
+    <div class="help-modal">
+      <div class="help-header">
+        <span data-i18n="helpTitle">Keyboard Shortcuts</span>
+        <button id="helpClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="help-body" id="helpBody"></div>
     </div>
   </div>
 
