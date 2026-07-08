@@ -921,6 +921,9 @@
     rootsSearched: false,
     rootsError: false,
     trace: null,
+    integralComputed: false,
+    integralValue: 0,
+    integralError: false,
   };
 
   function isGraphingMode() {
@@ -956,6 +959,12 @@
       resultEl.textContent = `x=${xStr}, y=${yStr}, dy/dx=${slopeStr}`;
       return;
     }
+    if (graphState.integralComputed) {
+      resultEl.textContent = graphState.integralError
+        ? t('error')
+        : `∫dx=${localizeDigits(formatNumber(Math.round(graphState.integralValue * 1e4) / 1e4))}`;
+      return;
+    }
     if (!graphState.rootsSearched) { resultEl.textContent = ''; return; }
     if (graphState.rootsError) { resultEl.textContent = t('error'); return; }
     if (graphState.roots.length === 0) { resultEl.textContent = t('graphNoRoots'); return; }
@@ -968,11 +977,14 @@
     renderGraphResult();
   }
 
-  function invalidateGraphRoots() {
+  function clearGraphAnalysis() {
     graphState.roots = [];
     graphState.rootsSearched = false;
     graphState.rootsError = false;
     graphState.trace = null;
+    graphState.integralComputed = false;
+    graphState.integralValue = 0;
+    graphState.integralError = false;
   }
 
   function findGraphRoots() {
@@ -1012,10 +1024,37 @@
 
   function graphFindRoots() {
     const { roots, anyFinite } = findGraphRoots();
+    clearGraphAnalysis();
     graphState.roots = roots;
     graphState.rootsSearched = true;
     graphState.rootsError = !anyFinite;
-    graphState.trace = null;
+    renderGraphDisplay();
+    drawGraph();
+  }
+
+  function computeGraphIntegral() {
+    const { xMin, xMax } = graphState;
+    const n = 1000;
+    const h = (xMax - xMin) / n;
+    let sum = 0;
+    let anyFinite = false;
+    for (let i = 0; i <= n; i++) {
+      const x = xMin + i * h;
+      const y = evalGraphAt(x);
+      const finite = isFinite(y);
+      if (finite) anyFinite = true;
+      const weight = (i === 0 || i === n) ? 1 : (i % 2 === 0 ? 2 : 4);
+      sum += (finite ? y : 0) * weight;
+    }
+    return { integral: (h / 3) * sum, anyFinite };
+  }
+
+  function graphComputeIntegral() {
+    const { integral, anyFinite } = computeGraphIntegral();
+    clearGraphAnalysis();
+    graphState.integralComputed = true;
+    graphState.integralValue = integral;
+    graphState.integralError = !anyFinite;
     renderGraphDisplay();
     drawGraph();
   }
@@ -1080,6 +1119,34 @@
     [yMin, 0, yMax].forEach((v) => {
       ctx.fillText(localizeDigits(formatAxisNumber(v)), 2, Math.min(Math.max(yToPx(v) - 10, 0), h - 12));
     });
+
+    if (graphState.integralComputed && !graphState.integralError) {
+      const zeroPy = yToPx(Math.max(yMin, Math.min(yMax, 0)));
+      ctx.fillStyle = curveColor;
+      ctx.globalAlpha = 0.25;
+      const shadeSamples = Math.max(100, Math.floor(w));
+      let segment = [];
+      const flushSegment = () => {
+        if (segment.length >= 2) {
+          ctx.beginPath();
+          ctx.moveTo(segment[0].px, zeroPy);
+          segment.forEach((pt) => ctx.lineTo(pt.px, pt.py));
+          ctx.lineTo(segment[segment.length - 1].px, zeroPy);
+          ctx.closePath();
+          ctx.fill();
+        }
+        segment = [];
+      };
+      for (let i = 0; i <= shadeSamples; i++) {
+        const dataX = xMin + ((xMax - xMin) * i) / shadeSamples;
+        const y = evalGraphAt(dataX);
+        if (!isFinite(y)) { flushSegment(); continue; }
+        const clampedY = Math.max(yMin, Math.min(yMax, y));
+        segment.push({ px: xToPx(dataX), py: yToPx(clampedY) });
+      }
+      flushSegment();
+      ctx.globalAlpha = 1;
+    }
 
     ctx.strokeStyle = curveColor;
     ctx.lineWidth = 2.5;
@@ -1154,21 +1221,21 @@
 
   function graphAppend(value) {
     graphState.expression += value;
-    invalidateGraphRoots();
+    clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphBackspace() {
     graphState.expression = graphState.expression.slice(0, -1);
-    invalidateGraphRoots();
+    clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphClearAll() {
     graphState.expression = '';
-    invalidateGraphRoots();
+    clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
   }
@@ -1215,6 +1282,7 @@
     const pxX = e.clientX - rect.left;
     const dataX = graphState.xMin + (pxX / rect.width) * (graphState.xMax - graphState.xMin);
     const y = evalGraphAt(dataX);
+    clearGraphAnalysis();
     graphState.trace = { x: dataX, y, slope: computeGraphSlope(dataX, y) };
     renderGraphDisplay();
     drawGraph();
@@ -1478,6 +1546,7 @@
       case 'graphzoomin': graphZoom(0.7); break;
       case 'graphzoomout': graphZoom(1 / 0.7); break;
       case 'graphfindroots': graphFindRoots(); break;
+      case 'graphintegral': graphComputeIntegral(); break;
     }
   }
 
