@@ -7,6 +7,7 @@
   --text-dim: #9aa0b4;
   --accent: #7c5cff;
   --accent-2: #ff6fa5;
+  --accent-3: #43d9c8;
   --num-bg: rgba(255, 255, 255, 0.06);
   --num-bg-hover: rgba(255, 255, 255, 0.12);
   --op-bg: rgba(124, 92, 255, 0.18);
@@ -254,6 +255,37 @@ body {
 }
 
 .solver-type-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+.graph-fn-tabs {
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.graphing .graph-fn-tabs {
+  display: grid;
+}
+
+.graph-fn-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 7px 0;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.graph-fn-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
 }
