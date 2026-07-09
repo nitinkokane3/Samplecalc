@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none';" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Advanced Calculator</title>
 <meta name="description" content="A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Vector, Complex, Regression, and Finance modes." />
@@ -643,7 +644,7 @@
         <p class="data-desc" data-i18n="dataDesc">Save every mode's data (history, memory, matrices, complex numbers, regression points, and more) to a file, or restore it on another device or after clearing browser data.</p>
         <button class="data-action-btn" id="exportDataBtn" data-i18n="dataExport">Export Data</button>
         <button class="data-action-btn" id="importDataBtn" data-i18n="dataImport">Import Data</button>
-        <input type="file" id="importFileInput" accept="application/json" style="display:none" />
+        <input type="file" id="importFileInput" class="visually-hidden" accept="application/json" />
         <div class="data-status" id="dataStatus"></div>
         <button class="data-action-btn data-danger" id="resetDataBtn" data-i18n="dataReset">Reset All Data</button>
       </div>

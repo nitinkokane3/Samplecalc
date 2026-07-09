@@ -36,6 +36,8 @@
 
 * { box-sizing: border-box; }
 
+.visually-hidden { display: none; }
+
 html, body {
   min-height: 100%;
   margin: 0;
