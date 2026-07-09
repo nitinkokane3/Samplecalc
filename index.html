@@ -21,6 +21,7 @@
           <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
           <button class="mode-btn" data-mode="complex" data-i18n="complexMode">Complex</button>
           <button class="mode-btn" data-mode="regression" data-i18n="regressionMode">Regression</button>
+          <button class="mode-btn" data-mode="finance" data-i18n="financeMode">Finance</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
@@ -59,6 +60,15 @@
         <button class="solver-type-btn active" data-type="linear" data-i18n="solverLinear">Linear</button>
         <button class="solver-type-btn" data-type="quadratic" data-i18n="solverQuadratic">Quadratic</button>
         <button class="solver-type-btn" data-type="cubic" data-i18n="solverCubic">Cubic</button>
+      </div>
+
+      <div class="finance-tabs" id="financeTabs">
+        <button class="finance-type-btn active" data-type="percentof" data-i18n="financePercentOf">% Of</button>
+        <button class="finance-type-btn" data-type="percentchange" data-i18n="financePercentChange">% Change</button>
+        <button class="finance-type-btn" data-type="discount" data-i18n="financeDiscount">Discount</button>
+        <button class="finance-type-btn" data-type="simpleinterest" data-i18n="financeSimpleInterest">Simple Int.</button>
+        <button class="finance-type-btn" data-type="compoundinterest" data-i18n="financeCompoundInterest">Compound Int.</button>
+        <button class="finance-type-btn" data-type="tip" data-i18n="financeTip">Tip Split</button>
       </div>
 
       <div class="graph-fn-tabs" id="graphFnTabs">
@@ -109,7 +119,7 @@
         <div class="graph-table" id="graphTable"></div>
       </div>
 
-      <div class="conv-panel" id="convPanel">
+      <div class="conv-panel prog-panel" id="convPanel">
         <div class="conv-row"><span class="conv-label">HEX</span><span class="conv-value" id="convHex">0</span></div>
         <div class="conv-row"><span class="conv-label">DEC</span><span class="conv-value" id="convDec">0</span></div>
         <div class="conv-row"><span class="conv-label">OCT</span><span class="conv-value" id="convOct">0</span></div>
@@ -180,6 +190,19 @@
       </div>
 
       <div class="stat-chips regr-chips" id="regrChips"></div>
+
+      <div class="finance-panel" id="financeInputPanel">
+        <div class="conv-row finance-field" data-field="a"><span class="conv-label" id="financeALabel">a</span><span class="conv-value" id="financeA">1</span></div>
+        <div class="conv-row finance-field" data-field="b"><span class="conv-label" id="financeBLabel">b</span><span class="conv-value" id="financeB">0</span></div>
+        <div class="conv-row finance-field" data-field="c" id="financeCRow"><span class="conv-label" id="financeCLabel">c</span><span class="conv-value" id="financeC">0</span></div>
+        <div class="conv-row finance-field" data-field="d" id="financeDRow"><span class="conv-label" id="financeDLabel">d</span><span class="conv-value" id="financeD">0</span></div>
+      </div>
+
+      <div class="finance-panel" id="financeOutputPanel">
+        <div class="conv-row"><span class="conv-label" id="financeOut1Label">Result</span><span class="conv-value" id="financeOut1">—</span></div>
+        <div class="conv-row" id="financeOut2Row"><span class="conv-label" id="financeOut2Label">Result</span><span class="conv-value" id="financeOut2">—</span></div>
+        <div class="conv-row" id="financeOut3Row"><span class="conv-label" id="financeOut3Label">Result</span><span class="conv-value" id="financeOut3">—</span></div>
+      </div>
 
       <div class="panels">
         <div class="history-panel" id="historyPanel">
@@ -491,6 +514,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="regradd" data-i18n="statAdd">Add</button>
+          </div>
+
+          <div class="keys finance-keys" id="financeKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="financedigit" data-value="7">7</button>
+            <button class="key num" data-action="financedigit" data-value="8">8</button>
+            <button class="key num" data-action="financedigit" data-value="9">9</button>
+
+            <button class="key num" data-action="financedigit" data-value="4">4</button>
+            <button class="key num" data-action="financedigit" data-value="5">5</button>
+            <button class="key num" data-action="financedigit" data-value="6">6</button>
+
+            <button class="key num" data-action="financedigit" data-value="1">1</button>
+            <button class="key num" data-action="financedigit" data-value="2">2</button>
+            <button class="key num" data-action="financedigit" data-value="3">3</button>
+
+            <button class="key num" data-action="financesign">±</button>
+            <button class="key num" data-action="financedigit" data-value="0">0</button>
+            <button class="key num" data-action="financedecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="financenext" data-i18n="matrixNext">Next</button>
           </div>
         </div>
       </div>

@@ -91,6 +91,27 @@
   const regrInterceptEl = document.getElementById('regrIntercept');
   const regrREl = document.getElementById('regrR');
   const regrR2El = document.getElementById('regrR2');
+  const financeTabs = document.getElementById('financeTabs');
+  const financeKeys = document.getElementById('financeKeys');
+  const financeInputPanel = document.getElementById('financeInputPanel');
+  const financeAEl = document.getElementById('financeA');
+  const financeBEl = document.getElementById('financeB');
+  const financeCEl = document.getElementById('financeC');
+  const financeDEl = document.getElementById('financeD');
+  const financeALabelEl = document.getElementById('financeALabel');
+  const financeBLabelEl = document.getElementById('financeBLabel');
+  const financeCLabelEl = document.getElementById('financeCLabel');
+  const financeDLabelEl = document.getElementById('financeDLabel');
+  const financeCRow = document.getElementById('financeCRow');
+  const financeDRow = document.getElementById('financeDRow');
+  const financeOut1El = document.getElementById('financeOut1');
+  const financeOut2El = document.getElementById('financeOut2');
+  const financeOut3El = document.getElementById('financeOut3');
+  const financeOut1LabelEl = document.getElementById('financeOut1Label');
+  const financeOut2LabelEl = document.getElementById('financeOut2Label');
+  const financeOut3LabelEl = document.getElementById('financeOut3Label');
+  const financeOut2Row = document.getElementById('financeOut2Row');
+  const financeOut3Row = document.getElementById('financeOut3Row');
 
   const translations = {
     en: {
@@ -135,6 +156,38 @@
       regrPointsLabel: 'points',
       regrNeedMore: 'Need at least 2 points',
       regrVertical: 'x values must vary',
+      financeMode: 'Finance',
+      financePercentOf: '% Of',
+      financePercentChange: '% Change',
+      financeDiscount: 'Discount',
+      financeSimpleInterest: 'Simple Int.',
+      financeCompoundInterest: 'Compound Int.',
+      financeTip: 'Tip Split',
+      financeFieldPercent: 'Percent %',
+      financeFieldValue: 'Value',
+      financeFieldFrom: 'From',
+      financeFieldTo: 'To',
+      financeFieldPrice: 'Price',
+      financeFieldDiscountPct: 'Discount %',
+      financeFieldPrincipal: 'Principal',
+      financeFieldRatePct: 'Rate %',
+      financeFieldYears: 'Years',
+      financeFieldCompounds: 'Compounds/yr',
+      financeFieldBill: 'Bill',
+      financeFieldTipPct: 'Tip %',
+      financeFieldPeople: 'People',
+      financeOutResult: 'Result',
+      financeOutChange: 'Change',
+      financeOutSaved: 'Amount Saved',
+      financeOutFinalPrice: 'Final Price',
+      financeOutInterest: 'Interest',
+      financeOutTotal: 'Total Amount',
+      financeOutTip: 'Tip Amount',
+      financeOutTotalBill: 'Total Bill',
+      financeOutPerPerson: 'Per Person',
+      financeIncrease: 'increase',
+      financeDecrease: 'decrease',
+      financeNeedNonZero: 'Value can\'t be zero',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -223,6 +276,38 @@
       regrPointsLabel: 'बिंदू',
       regrNeedMore: 'किमान २ बिंदू आवश्यक',
       regrVertical: 'x मूल्ये भिन्न असावीत',
+      financeMode: 'वित्त',
+      financePercentOf: '% चे',
+      financePercentChange: '% बदल',
+      financeDiscount: 'सवलत',
+      financeSimpleInterest: 'साधे व्याज',
+      financeCompoundInterest: 'चक्रवाढ व्याज',
+      financeTip: 'टिप वाटणी',
+      financeFieldPercent: 'टक्केवारी %',
+      financeFieldValue: 'मूल्य',
+      financeFieldFrom: 'सुरुवात',
+      financeFieldTo: 'शेवट',
+      financeFieldPrice: 'किंमत',
+      financeFieldDiscountPct: 'सवलत %',
+      financeFieldPrincipal: 'मुद्दल',
+      financeFieldRatePct: 'दर %',
+      financeFieldYears: 'वर्षे',
+      financeFieldCompounds: 'चक्रवाढ/वर्ष',
+      financeFieldBill: 'बिल',
+      financeFieldTipPct: 'टिप %',
+      financeFieldPeople: 'लोक',
+      financeOutResult: 'निकाल',
+      financeOutChange: 'बदल',
+      financeOutSaved: 'बचत रक्कम',
+      financeOutFinalPrice: 'अंतिम किंमत',
+      financeOutInterest: 'व्याज',
+      financeOutTotal: 'एकूण रक्कम',
+      financeOutTip: 'टिप रक्कम',
+      financeOutTotalBill: 'एकूण बिल',
+      financeOutPerPerson: 'प्रत्येकी',
+      financeIncrease: 'वाढ',
+      financeDecrease: 'घट',
+      financeNeedNonZero: 'मूल्य शून्य असू शकत नाही',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -316,7 +401,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"], .key[data-action="financedigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -327,6 +412,7 @@
     else if (isMatrixMode()) renderMatrix();
     else if (isComplexMode()) renderComplex();
     else if (isRegressionMode()) renderRegr();
+    else if (isFinanceMode()) renderFinance();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -1684,6 +1770,212 @@
     renderRegr();
   });
 
+  // ---------- Percentage & Finance mode ----------
+  const financeFieldConfig = {
+    percentof: { fields: ['a', 'b'], labels: ['financeFieldPercent', 'financeFieldValue'] },
+    percentchange: { fields: ['a', 'b'], labels: ['financeFieldFrom', 'financeFieldTo'] },
+    discount: { fields: ['a', 'b'], labels: ['financeFieldPrice', 'financeFieldDiscountPct'] },
+    simpleinterest: { fields: ['a', 'b', 'c'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears'] },
+    compoundinterest: { fields: ['a', 'b', 'c', 'd'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears', 'financeFieldCompounds'] },
+    tip: { fields: ['a', 'b', 'c'], labels: ['financeFieldBill', 'financeFieldTipPct', 'financeFieldPeople'] },
+  };
+  const financeDefaultCoeffs = () => ({ a: '0', b: '0', c: '0', d: '1' });
+  const savedFinanceType = localStorage.getItem('calc-finance-type');
+  const savedFinanceCoeffs = JSON.parse(localStorage.getItem('calc-finance-coeffs') || 'null');
+  const finance = {
+    type: Object.prototype.hasOwnProperty.call(financeFieldConfig, savedFinanceType) ? savedFinanceType : 'percentof',
+    coeffs: Object.assign(financeDefaultCoeffs(), savedFinanceCoeffs || {}),
+    activeField: 'a',
+  };
+
+  function isFinanceMode() {
+    return calculator.classList.contains('finance');
+  }
+
+  function saveFinance() {
+    localStorage.setItem('calc-finance-type', finance.type);
+    localStorage.setItem('calc-finance-coeffs', JSON.stringify(finance.coeffs));
+  }
+
+  function computeFinance() {
+    const a = parseFloat(finance.coeffs.a) || 0;
+    const b = parseFloat(finance.coeffs.b) || 0;
+    const c = parseFloat(finance.coeffs.c) || 0;
+    const d = parseFloat(finance.coeffs.d) || 0;
+    switch (finance.type) {
+      case 'percentof':
+        return { outputs: [{ label: t('financeOutResult'), value: (a * b) / 100 }] };
+      case 'percentchange': {
+        if (a === 0) return { error: t('financeNeedNonZero') };
+        const change = ((b - a) / a) * 100;
+        const dir = change >= 0 ? t('financeIncrease') : t('financeDecrease');
+        return { outputs: [{ label: t('financeOutChange'), text: `${formatNumber(Math.abs(change))}% (${dir})` }] };
+      }
+      case 'discount': {
+        const saved = (a * b) / 100;
+        return { outputs: [{ label: t('financeOutSaved'), value: saved }, { label: t('financeOutFinalPrice'), value: a - saved }] };
+      }
+      case 'simpleinterest': {
+        const interest = (a * b * c) / 100;
+        return { outputs: [{ label: t('financeOutInterest'), value: interest }, { label: t('financeOutTotal'), value: a + interest }] };
+      }
+      case 'compoundinterest': {
+        if (d === 0) return { error: t('financeNeedNonZero') };
+        const amount = a * Math.pow(1 + (b / 100) / d, d * c);
+        return { outputs: [{ label: t('financeOutInterest'), value: amount - a }, { label: t('financeOutTotal'), value: amount }] };
+      }
+      case 'tip': {
+        if (c === 0) return { error: t('financeNeedNonZero') };
+        const tipAmt = (a * b) / 100;
+        const total = a + tipAmt;
+        return { outputs: [
+          { label: t('financeOutTip'), value: tipAmt },
+          { label: t('financeOutTotalBill'), value: total },
+          { label: t('financeOutPerPerson'), value: total / c },
+        ] };
+      }
+      default:
+        return { error: t('error') };
+    }
+  }
+
+  function formatFinanceExpression() {
+    const cfg = financeFieldConfig[finance.type];
+    return cfg.fields.map((f, i) => `${t(cfg.labels[i])}=${finance.coeffs[f]}`).join(', ');
+  }
+
+  function updateFinanceTabsUI() {
+    document.querySelectorAll('.finance-type-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.type === finance.type);
+    });
+    const cfg = financeFieldConfig[finance.type];
+    financeCRow.style.display = cfg.fields.includes('c') ? '' : 'none';
+    financeDRow.style.display = cfg.fields.includes('d') ? '' : 'none';
+  }
+
+  function setFinanceType(type) {
+    finance.type = type;
+    finance.activeField = 'a';
+    updateFinanceTabsUI();
+    saveFinance();
+    renderFinance();
+  }
+
+  function renderFinance() {
+    const cfg = financeFieldConfig[finance.type];
+    const labelEls = { a: financeALabelEl, b: financeBLabelEl, c: financeCLabelEl, d: financeDLabelEl };
+    cfg.fields.forEach((f, i) => { labelEls[f].textContent = t(cfg.labels[i]); });
+
+    expressionEl.textContent = localizeDigits(formatFinanceExpression());
+    const res = computeFinance();
+    const outSlots = [
+      { labelEl: financeOut1LabelEl, valEl: financeOut1El, row: null },
+      { labelEl: financeOut2LabelEl, valEl: financeOut2El, row: financeOut2Row },
+      { labelEl: financeOut3LabelEl, valEl: financeOut3El, row: financeOut3Row },
+    ];
+    if (res.error) {
+      resultEl.textContent = localizeDigits(res.error);
+      financeOut1LabelEl.textContent = t('financeOutResult');
+      financeOut1El.textContent = '—';
+      if (financeOut2Row) financeOut2Row.style.display = 'none';
+      if (financeOut3Row) financeOut3Row.style.display = 'none';
+    } else {
+      const outputs = res.outputs;
+      const primary = outputs[0];
+      resultEl.textContent = localizeDigits(primary.text !== undefined ? primary.text : formatNumber(primary.value));
+      outSlots.forEach((slot, i) => {
+        const out = outputs[i];
+        if (!out) {
+          if (slot.row) slot.row.style.display = 'none';
+          return;
+        }
+        if (slot.row) slot.row.style.display = '';
+        slot.labelEl.textContent = out.label;
+        slot.valEl.textContent = localizeDigits(out.text !== undefined ? out.text : formatNumber(out.value));
+      });
+    }
+    memoryIndicator.textContent = '';
+    financeAEl.textContent = localizeDigits(finance.coeffs.a);
+    financeBEl.textContent = localizeDigits(finance.coeffs.b);
+    financeCEl.textContent = localizeDigits(finance.coeffs.c);
+    financeDEl.textContent = localizeDigits(finance.coeffs.d);
+    document.querySelectorAll('.finance-field').forEach((row) => {
+      row.classList.toggle('active', row.dataset.field === finance.activeField);
+    });
+  }
+
+  function financeFieldOrder() {
+    return financeFieldConfig[finance.type].fields;
+  }
+
+  function financeNextField() {
+    const order = financeFieldOrder();
+    const idx = order.indexOf(finance.activeField);
+    finance.activeField = order[(idx + 1) % order.length];
+    renderFinance();
+  }
+
+  function financeAppendDigit(ch) {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = (cur === '0' ? '' : cur) + ch;
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeAppendDecimal() {
+    const cur = finance.coeffs[finance.activeField];
+    if (cur.includes('.')) return;
+    finance.coeffs[finance.activeField] = cur + '.';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeToggleSign() {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur);
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeBackspace() {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = cur.slice(0, -1) || '0';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeClearEntry() {
+    finance.coeffs[finance.activeField] = '0';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeClearAll() {
+    finance.coeffs = financeDefaultCoeffs();
+    finance.activeField = 'a';
+    saveFinance();
+    renderFinance();
+  }
+
+  function insertAnsFinance() {
+    finance.coeffs[finance.activeField] = convPlainNumber(lastAnswer);
+    saveFinance();
+    renderFinance();
+  }
+
+  financeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.finance-type-btn');
+    if (!btn) return;
+    setFinanceType(btn.dataset.type);
+  });
+
+  financeInputPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.finance-field');
+    if (!row) return;
+    finance.activeField = row.dataset.field;
+    renderFinance();
+  });
+
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr, scope) {
     const prepped = expr
@@ -2627,6 +2919,7 @@
         else if (isMatrixMode()) matrixClearAll();
         else if (isComplexMode()) complexClearAll();
         else if (isRegressionMode()) regrClearAll();
+        else if (isFinanceMode()) financeClearAll();
         else clearAll();
         break;
       case 'clear-entry':
@@ -2637,6 +2930,7 @@
         else if (isMatrixMode()) matrixClearEntry();
         else if (isComplexMode()) complexClearEntry();
         else if (isRegressionMode()) regrClearEntry();
+        else if (isFinanceMode()) financeClearEntry();
         else clearEntry();
         break;
       case 'backspace':
@@ -2647,6 +2941,7 @@
         else if (isMatrixMode()) matrixBackspace();
         else if (isComplexMode()) complexBackspace();
         else if (isRegressionMode()) regrBackspace();
+        else if (isFinanceMode()) financeBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -2705,6 +3000,10 @@
       case 'regrdecimal': regrAppendDecimal(); break;
       case 'regrsign': regrToggleSign(); break;
       case 'regradd': regrAddPoint(); break;
+      case 'financedigit': financeAppendDigit(value); break;
+      case 'financedecimal': financeAppendDecimal(); break;
+      case 'financesign': financeToggleSign(); break;
+      case 'financenext': financeNextField(); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
@@ -2713,6 +3012,7 @@
         else if (isMatrixMode()) insertAnsMatrix();
         else if (isComplexMode()) insertAnsComplex();
         else if (isRegressionMode()) insertAnsRegr();
+        else if (isFinanceMode()) insertAnsFinance();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -2735,7 +3035,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys, financeKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -2754,6 +3054,7 @@
     calculator.classList.toggle('matrix', mode === 'matrix');
     calculator.classList.toggle('complex', mode === 'complex');
     calculator.classList.toggle('regression', mode === 'regression');
+    calculator.classList.toggle('finance', mode === 'finance');
     if (mode === 'programmer') {
       updateBaseTabsUI();
       updateDigitAvailability();
@@ -2782,6 +3083,10 @@
     }
     if (mode === 'regression') {
       renderRegr();
+    }
+    if (mode === 'finance') {
+      updateFinanceTabsUI();
+      renderFinance();
     }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -2862,6 +3167,14 @@
           { steps: 'Add: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (a perfect fit)' },
         ],
       },
+      finance: {
+        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, and splitting a tip. Pick a tab, tap a field to edit it.',
+        examples: [
+          { steps: '% Of: Percent=20, Value=150', result: '= 30' },
+          { steps: 'Discount: Price=200, Discount %=15', result: 'Saved = 30, Final Price = 170' },
+          { steps: 'Tip Split: Bill=100, Tip %=18, People=4', result: 'Tip = 18, Total = 118, Per Person = 29.5' },
+        ],
+      },
     },
     mr: {
       standard: {
@@ -2931,6 +3244,14 @@
         description: '(x, y) जोड्या जोडून किमान-वर्ग रेषा y=mx+b बसवा, सोबत सहसंबंध गुणांक r आणि r² दाखवले जातात.',
         examples: [
           { steps: 'जोडा: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (परिपूर्ण जुळणी)' },
+        ],
+      },
+      finance: {
+        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, आणि टिप वाटणी. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
+        examples: [
+          { steps: '% चे: टक्केवारी=20, मूल्य=150', result: '= 30' },
+          { steps: 'सवलत: किंमत=200, सवलत %=15', result: 'बचत = 30, अंतिम किंमत = 170' },
+          { steps: 'टिप वाटणी: बिल=100, टिप %=18, लोक=4', result: 'टिप = 18, एकूण = 118, प्रत्येकी = 29.5' },
         ],
       },
     },
@@ -3018,6 +3339,15 @@
         ['Backspace', 'Delete last character'],
         ['Escape', 'Clear all points'],
       ],
+      finance: [
+        ['0–9', 'Enter digits into the active field'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next field'],
+        ['Click field', 'Select that field to edit'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset all fields'],
+      ],
     },
     mr: {
       standard: [
@@ -3100,6 +3430,15 @@
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'सर्व बिंदू साफ करा'],
       ],
+      finance: [
+        ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील फील्डवर जा'],
+        ['फील्डवर क्लिक करा', 'ते फील्ड संपादित करण्यासाठी निवडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'सर्व फील्ड रीसेट करा'],
+      ],
     },
   };
 
@@ -3147,10 +3486,11 @@
 
   // ---------- Backup & Restore ----------
   const backupKeys = [
-    'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-graph-expr',
-    'calc-graph-expr-g', 'calc-history', 'calc-lang', 'calc-matrix-a', 'calc-matrix-b',
-    'calc-memory', 'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs',
-    'calc-solver-type', 'calc-stat-data', 'calc-theme',
+    'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-finance-coeffs',
+    'calc-finance-type', 'calc-graph-expr', 'calc-graph-expr-g', 'calc-history',
+    'calc-lang', 'calc-matrix-a', 'calc-matrix-b', 'calc-memory', 'calc-prog-base',
+    'calc-regr-points', 'calc-solver-coeffs', 'calc-solver-type', 'calc-stat-data',
+    'calc-theme',
   ];
 
   function setDataStatus(msg, isError) {
@@ -3383,6 +3723,15 @@
       if (key === 'Enter' || key === '=') { e.preventDefault(); regrAddPoint(); return; }
       return;
     }
+    if (isFinanceMode()) {
+      if (/[0-9]/.test(key)) { financeAppendDigit(key); return; }
+      if (key === '.') { financeAppendDecimal(); return; }
+      if (key === '-') { financeToggleSign(); return; }
+      if (key === 'Backspace') { financeBackspace(); return; }
+      if (key === 'Escape') { financeClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); financeNextField(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -3400,7 +3749,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression', 'finance'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();

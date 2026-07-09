@@ -110,6 +110,10 @@ body {
   max-width: 400px;
 }
 
+.calculator.finance {
+  max-width: 400px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -253,6 +257,20 @@ body {
   display: grid;
 }
 
+.finance-tabs {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.finance .finance-tabs {
+  display: grid;
+}
+
 .solver-type-btn {
   border: none;
   background: transparent;
@@ -267,6 +285,24 @@ body {
 }
 
 .solver-type-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+.finance-type-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 7px 0;
+  border-radius: 8px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.finance-type-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
 }
@@ -539,7 +575,7 @@ body {
   background: rgba(20, 20, 40, 0.04);
 }
 
-.calculator.programmer .conv-panel {
+.calculator.programmer .prog-panel {
   display: flex;
 }
 
@@ -565,6 +601,23 @@ body {
 
 .solver-field.active .conv-label,
 .solver-field.active .conv-value {
+  color: var(--accent);
+}
+
+.finance-field {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.finance-field.active {
+  background: var(--op-bg);
+}
+
+.finance-field.active .conv-label,
+.finance-field.active .conv-value {
   color: var(--accent);
 }
 
@@ -612,6 +665,25 @@ body {
 }
 
 .calculator.regression .regr-chips {
+  display: flex;
+}
+
+.finance-panel {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+:root[data-theme="light"] .finance-panel {
+  background: rgba(20, 20, 40, 0.04);
+}
+
+.calculator.finance .finance-panel {
   display: flex;
 }
 
@@ -799,7 +871,8 @@ body {
 .graph-keys,
 .matrix-keys,
 .complex-keys,
-.regr-keys {
+.regr-keys,
+.finance-keys {
   display: none;
 }
 
@@ -878,6 +951,15 @@ body {
 }
 
 .calculator.regression .keys:not(.regr-keys) {
+  display: none;
+}
+
+.calculator.finance .keys.finance-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calculator.finance .keys:not(.finance-keys) {
   display: none;
 }
 
