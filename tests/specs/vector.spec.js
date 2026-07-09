@@ -181,4 +181,17 @@ module.exports = [
       assertEqual(JSON.parse(restoredA), { x: '1', y: '2', z: '3' }, 'vector A restored after import');
     },
   },
+  {
+    name: 'vector toolbar wraps without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="vector"]');
+      const fits = await page.evaluate(() => {
+        const tb = document.getElementById('vectorToolbar');
+        return tb.scrollWidth <= tb.clientWidth;
+      });
+      assertEqual(fits, true, 'vector toolbar must not overflow horizontally at 350px width');
+    },
+  },
 ];

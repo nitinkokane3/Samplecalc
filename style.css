@@ -405,6 +405,7 @@ body {
 
 .matrix-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -418,6 +419,7 @@ body {
 
 .complex-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -431,6 +433,7 @@ body {
 
 .vector-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;

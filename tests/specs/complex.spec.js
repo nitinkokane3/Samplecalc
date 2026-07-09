@@ -115,4 +115,17 @@ module.exports = [
       assertEqual(await page.textContent('#result'), '5 ∠ -90°', 'polar(0-5i) result');
     },
   },
+  {
+    name: 'complex toolbar (now 8 buttons, including Polar) wraps without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      const fits = await page.evaluate(() => {
+        const tb = document.getElementById('complexToolbar');
+        return tb.scrollWidth <= tb.clientWidth;
+      });
+      assertEqual(fits, true, 'complex toolbar must not overflow horizontally at 350px width');
+    },
+  },
 ];
