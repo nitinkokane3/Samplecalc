@@ -243,6 +243,7 @@
       catVolume: 'Volume',
       catSpeed: 'Speed',
       catTime: 'Time',
+      catAngle: 'Angle',
       catCurrency: 'Currency',
       currencyNote: 'Rates are static (not live) so this works fully offline.',
       swapTitle: 'Swap units',
@@ -375,6 +376,7 @@
       catVolume: 'घनफळ',
       catSpeed: 'वेग',
       catTime: 'वेळ',
+      catAngle: 'कोन',
       catCurrency: 'चलन',
       currencyNote: 'दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे हे पूर्णपणे ऑफलाइन काम करते.',
       swapTitle: 'एकके बदला',
@@ -757,6 +759,10 @@
       units: { sec: 1, min: 60, hour: 3600, day: 86400, week: 604800 },
       labels: { sec: 'Second', min: 'Minute', hour: 'Hour', day: 'Day', week: 'Week' },
     },
+    angle: {
+      units: { deg: 1, rad: 180 / Math.PI, grad: 0.9 },
+      labels: { deg: 'Degree', rad: 'Radian', grad: 'Gradian' },
+    },
     // Static, illustrative rates (relative to USD) as of this app's last update -- not live.
     // Kept static deliberately: the app works fully offline (see sw.js), and a live rate
     // API would silently go stale or fail the moment the network is unavailable.
@@ -783,6 +789,7 @@
     volume: ['l', 'gal'],
     speed: ['kmh', 'mph'],
     time: ['min', 'sec'],
+    angle: ['deg', 'rad'],
     currency: ['USD', 'EUR'],
   };
 
@@ -3653,10 +3660,11 @@
         ],
       },
       converter: {
-        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
+        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, Angle, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
         examples: [
           { steps: 'Length: 1 Meter → Foot', result: '= 3.280839895 ft' },
           { steps: 'Temperature: 0 Celsius → Fahrenheit', result: '= 32 °F' },
+          { steps: 'Angle: 180 Degree → Radian', result: '= 3.1415926536 rad' },
           { steps: 'Currency: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
@@ -3745,10 +3753,11 @@
         ],
       },
       converter: {
-        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
+        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ, कोन आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
         examples: [
           { steps: 'लांबी: 1 मीटर → फूट', result: '= 3.280839895 ft' },
           { steps: 'तापमान: 0 सेल्सिअस → फॅरनहाइट', result: '= 32 °F' },
+          { steps: 'कोन: 180 अंश → रेडियन', result: '= 3.1415926536 rad' },
           { steps: 'चलन: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
