@@ -185,6 +185,7 @@
       matrixMode: 'Matrix',
       matrixDet: 'Det',
       matrixInv: 'Inverse',
+      matrixTranspose: 'Transpose',
       matrixNext: 'Next',
       matrixSingular: 'Singular matrix',
       vectorMode: 'Vector',
@@ -316,6 +317,7 @@
       matrixMode: 'मॅट्रिक्स',
       matrixDet: 'निर्धारक',
       matrixInv: 'व्यस्त',
+      matrixTranspose: 'स्थानांतर',
       matrixNext: 'पुढे',
       matrixSingular: 'व्यस्त अस्तित्वात नाही',
       vectorMode: 'सदिश',
@@ -1515,6 +1517,9 @@
     }
     return result;
   }
+  function matrixTranspose(A) {
+    return A.map((row, i) => row.map((_, j) => A[j][i]));
+  }
   function matrixDet(A) {
     const n = A.length;
     if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
@@ -1574,6 +1579,10 @@
         matrix.resultText = inv ? formatMatrixResult(inv) : t('matrixSingular');
         break;
       }
+      case 'trans':
+        matrix.opLabel = `${activeLabel}ᵀ`;
+        matrix.resultText = formatMatrixResult(matrixTranspose(activeM));
+        break;
     }
     renderMatrix();
   }
@@ -3491,6 +3500,7 @@
       case 'matrixmul': matrixCompute('mul'); break;
       case 'matrixdet': matrixCompute('det'); break;
       case 'matrixinv': matrixCompute('inv'); break;
+      case 'matrixtrans': matrixCompute('trans'); break;
       case 'vectordigit': vectorAppendDigit(value); break;
       case 'vectordecimal': vectorAppendDecimal(); break;
       case 'vectorsign': vectorToggleSign(); break;
@@ -3673,11 +3683,12 @@
         ],
       },
       matrix: {
-        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse (via cofactor expansion for 3×3) of whichever matrix is active.',
+        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, Inverse (via cofactor expansion for 3×3), or Transpose of whichever matrix is active.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
           { steps: '3×3: Det of A=[1,0,2;-1,3,1;0,2,4]', result: '= 6' },
+          { steps: 'Transpose of A=[1,2;3,4]', result: '= [1, 3; 2, 4]' },
         ],
       },
       vector: {
@@ -3764,11 +3775,12 @@
         ],
       },
       matrix: {
-        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे) काढा.',
+        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे), किंवा Transpose काढा.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
           { steps: '3×3: A=[1,0,2;-1,3,1;0,2,4] चा Det', result: '= 6' },
+          { steps: 'A=[1,2;3,4] चा Transpose', result: '= [1, 3; 2, 4]' },
         ],
       },
       vector: {
