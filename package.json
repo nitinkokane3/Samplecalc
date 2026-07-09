@@ -1,0 +1,12 @@
+{
+  "name": "advanced-calculator",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Advanced Calculator - a multi-mode, offline-capable vanilla JS calculator with no build step.",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
