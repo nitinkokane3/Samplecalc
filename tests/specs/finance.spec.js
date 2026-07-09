@@ -70,6 +70,21 @@ module.exports = [
     },
   },
   {
+    name: 'Tip split: keyboard-only entry (Tab across all 3 fields) computes correctly',
+    fn: async (page, baseURL) => {
+      await gotoFinanceType(page, baseURL, 'tip');
+      await page.click('.finance-field[data-field="a"]');
+      await page.keyboard.press('Escape');
+      await page.keyboard.type('100');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('18');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('4');
+      const output = await page.evaluate(() => document.getElementById('financeOutputPanel').textContent);
+      assertEqual(output.includes('18') && output.includes('29.5'), true, 'keyboard-only tip/per-person amounts present');
+    },
+  },
+  {
     name: 'Tip split with 0 people shows an error instead of Infinity',
     fn: async (page, baseURL) => {
       await gotoFinanceType(page, baseURL, 'tip');

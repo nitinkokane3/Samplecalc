@@ -61,6 +61,31 @@ module.exports = [
     },
   },
   {
+    name: 'system2x2: keyboard-only entry (Tab across all 6 fields) solves correctly',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system2x2"]');
+      await page.keyboard.press('Escape');
+      // Field 'a' defaults to '1' (leading-coefficient convention); Backspace clears it
+      // to '0' first, same as a real calculator keypad requires before a fresh entry.
+      await page.keyboard.press('Backspace');
+      await page.keyboard.type('2');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('1');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('5');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('1');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('1');
+      await page.keyboard.press('-');
+      await page.keyboard.press('Tab');
+      await page.keyboard.type('1');
+      assertEqual(await page.textContent('#result'), 'x = 2, y = 1', 'keyboard-only system2x2 result');
+    },
+  },
+  {
     name: 'system2x2: parallel lines report no solution',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
