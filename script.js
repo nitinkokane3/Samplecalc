@@ -52,6 +52,8 @@
   const solverBEl = document.getElementById('solverB');
   const solverCEl = document.getElementById('solverC');
   const solverCRow = document.getElementById('solverCRow');
+  const solverDEl = document.getElementById('solverD');
+  const solverDRow = document.getElementById('solverDRow');
   const solverKeys = document.getElementById('solverKeys');
   const graphFnTabs = document.getElementById('graphFnTabs');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -76,9 +78,12 @@
       solverMode: 'Solver',
       solverLinear: 'Linear',
       solverQuadratic: 'Quadratic',
+      solverCubic: 'Cubic',
       solverNext: 'Next',
       solverNoSolution: 'No solution',
       solverInfiniteSolutions: 'Infinite solutions',
+      solverComplexNote: '2 complex roots',
+      solverRepeatedNote: 'repeated root',
       graphing: 'Graph',
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
@@ -138,9 +143,12 @@
       solverMode: 'सोडव',
       solverLinear: 'रेषीय',
       solverQuadratic: 'द्विघात',
+      solverCubic: 'घन',
       solverNext: 'पुढे',
       solverNoSolution: 'उपाय नाही',
       solverInfiniteSolutions: 'अनंत उपाय',
+      solverComplexNote: '२ सम्मिश्र मुळे',
+      solverRepeatedNote: 'पुनरावृत्त मूळ',
       graphing: 'आलेख',
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
@@ -828,10 +836,12 @@
   }
 
   // ---------- Equation solver mode ----------
+  const solverTypes = ['linear', 'quadratic', 'cubic'];
   const savedSolverCoeffs = JSON.parse(localStorage.getItem('calc-solver-coeffs') || 'null');
+  const savedSolverType = localStorage.getItem('calc-solver-type');
   const solver = {
-    type: localStorage.getItem('calc-solver-type') === 'quadratic' ? 'quadratic' : 'linear',
-    coeffs: savedSolverCoeffs || { a: '1', b: '0', c: '0' },
+    type: solverTypes.includes(savedSolverType) ? savedSolverType : 'linear',
+    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0' }, savedSolverCoeffs || {}),
     activeField: 'a',
   };
 
@@ -840,7 +850,9 @@
   }
 
   function solverFieldOrder() {
-    return solver.type === 'quadratic' ? ['a', 'b', 'c'] : ['a', 'b'];
+    if (solver.type === 'cubic') return ['a', 'b', 'c', 'd'];
+    if (solver.type === 'quadratic') return ['a', 'b', 'c'];
+    return ['a', 'b'];
   }
 
   function saveSolver() {
@@ -855,33 +867,88 @@
   }
 
   function formatSolverEquation() {
-    const { a, b, c } = solver.coeffs;
+    const { a, b, c, d } = solver.coeffs;
     const leadTerm = `${formatNumber(parseFloat(a) || 0)}x`;
+    if (solver.type === 'cubic') {
+      return `${leadTerm}³${eqTerm(b, 'x²')}${eqTerm(c, 'x')}${eqTerm(d, '')} = 0`;
+    }
     if (solver.type === 'quadratic') {
       return `${leadTerm}²${eqTerm(b, 'x')}${eqTerm(c, '')} = 0`;
     }
     return `${leadTerm}${eqTerm(b, '')} = 0`;
   }
 
+  function computeLinearResult(a, b) {
+    if (a === 0) return b === 0 ? { kind: 'infinite' } : { kind: 'none' };
+    return { kind: 'single', x: -b / a };
+  }
+
+  function computeQuadraticResult(a, b, c) {
+    if (a === 0) return computeLinearResult(b, c);
+    const disc = b * b - 4 * a * c;
+    if (disc === 0) return { kind: 'repeated', x: -b / (2 * a) };
+    if (disc > 0) {
+      const sqrtD = Math.sqrt(disc);
+      return { kind: 'two', x1: (-b + sqrtD) / (2 * a), x2: (-b - sqrtD) / (2 * a) };
+    }
+    return { kind: 'complex', re: -b / (2 * a), im: Math.sqrt(-disc) / (2 * a) };
+  }
+
+  function cubicFn(a, b, c, d, x) {
+    return a * x * x * x + b * x * x + c * x + d;
+  }
+
+  function cubicDiscriminant(a, b, c, d) {
+    return 18 * a * b * c * d - 4 * b * b * b * d + b * b * c * c - 4 * a * c * c * c - 27 * a * a * d * d;
+  }
+
+  function findCubicRealRoots(a, b, c, d) {
+    const range = 1000;
+    const samples = 20000;
+    const roots = [];
+    let prevX = null;
+    let prevY = null;
+    for (let i = 0; i <= samples; i++) {
+      const x = -range + (2 * range * i) / samples;
+      const y = cubicFn(a, b, c, d, x);
+      if (prevX !== null) {
+        if (prevY === 0) {
+          roots.push(prevX);
+        } else if ((prevY < 0 && y > 0) || (prevY > 0 && y < 0)) {
+          let lo = prevX, hi = x, flo = prevY;
+          for (let iter = 0; iter < 60; iter++) {
+            const mid = (lo + hi) / 2;
+            const fm = cubicFn(a, b, c, d, mid);
+            if ((flo < 0 && fm < 0) || (flo > 0 && fm > 0)) { lo = mid; flo = fm; } else { hi = mid; }
+          }
+          roots.push((lo + hi) / 2);
+        }
+      }
+      prevX = x; prevY = y;
+    }
+    const dedupEpsilon = 1e-6;
+    const deduped = [];
+    roots.forEach((r) => {
+      if (!deduped.some((d2) => Math.abs(d2 - r) < dedupEpsilon)) deduped.push(r);
+    });
+    return deduped.sort((x, y) => x - y);
+  }
+
+  function computeCubicResult(a, b, c, d) {
+    if (a === 0) return computeQuadraticResult(b, c, d);
+    const roots = findCubicRealRoots(a, b, c, d);
+    const repeatedReal = Math.abs(cubicDiscriminant(a, b, c, d)) < 1e-6;
+    return { kind: 'cubic', roots, repeatedReal };
+  }
+
   function computeSolverResult() {
     const a = parseFloat(solver.coeffs.a) || 0;
     const b = parseFloat(solver.coeffs.b) || 0;
-    if (solver.type === 'linear') {
-      if (a === 0) return b === 0 ? { kind: 'infinite' } : { kind: 'none' };
-      return { kind: 'single', x: -b / a };
-    }
+    if (solver.type === 'linear') return computeLinearResult(a, b);
     const c = parseFloat(solver.coeffs.c) || 0;
-    if (a === 0) {
-      if (b === 0) return c === 0 ? { kind: 'infinite' } : { kind: 'none' };
-      return { kind: 'single', x: -c / b };
-    }
-    const d = b * b - 4 * a * c;
-    if (d === 0) return { kind: 'repeated', x: -b / (2 * a) };
-    if (d > 0) {
-      const sqrtD = Math.sqrt(d);
-      return { kind: 'two', x1: (-b + sqrtD) / (2 * a), x2: (-b - sqrtD) / (2 * a) };
-    }
-    return { kind: 'complex', re: -b / (2 * a), im: Math.sqrt(-d) / (2 * a) };
+    if (solver.type === 'quadratic') return computeQuadraticResult(a, b, c);
+    const d = parseFloat(solver.coeffs.d) || 0;
+    return computeCubicResult(a, b, c, d);
   }
 
   function formatSolverResult(res) {
@@ -890,6 +957,15 @@
       case 'repeated': return `x₁ = x₂ = ${formatNumber(res.x)}`;
       case 'two': return `x₁ = ${formatNumber(res.x1)}, x₂ = ${formatNumber(res.x2)}`;
       case 'complex': return `x = ${formatNumber(res.re)} ± ${formatNumber(res.im)}i`;
+      case 'cubic': {
+        if (res.roots.length === 0) return t('error');
+        if (res.roots.length === 1) {
+          const note = res.repeatedReal ? t('solverRepeatedNote') : t('solverComplexNote');
+          return `x = ${formatNumber(res.roots[0])} (${note})`;
+        }
+        const labels = ['x₁', 'x₂', 'x₃'];
+        return res.roots.map((r, i) => `${labels[i]} = ${formatNumber(r)}`).join(', ');
+      }
       case 'none': return t('solverNoSolution');
       case 'infinite': return t('solverInfiniteSolutions');
       default: return '';
@@ -903,6 +979,7 @@
     solverAEl.textContent = localizeDigits(solver.coeffs.a);
     solverBEl.textContent = localizeDigits(solver.coeffs.b);
     solverCEl.textContent = localizeDigits(solver.coeffs.c);
+    solverDEl.textContent = localizeDigits(solver.coeffs.d);
     document.querySelectorAll('.solver-field').forEach((row) => {
       row.classList.toggle('active', row.dataset.field === solver.activeField);
     });
@@ -912,7 +989,8 @@
     document.querySelectorAll('.solver-type-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.type === solver.type);
     });
-    solverCRow.style.display = solver.type === 'quadratic' ? '' : 'none';
+    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' ? '' : 'none';
+    solverDRow.style.display = solver.type === 'cubic' ? '' : 'none';
   }
 
   function setSolverType(type) {
@@ -966,7 +1044,7 @@
   }
 
   function solverClearAll() {
-    solver.coeffs = { a: '1', b: '0', c: '0' };
+    solver.coeffs = { a: '1', b: '0', c: '0', d: '0' };
     solver.activeField = 'a';
     saveSolver();
     renderSolver();
@@ -1203,6 +1281,8 @@
     return value;
   }
 
+  const combinOpNames = ['nCr', 'nPr', 'gcd', 'lcm', 'logb'];
+
   function tokenize(str) {
     const tokens = [];
     let i = 0;
@@ -1214,6 +1294,12 @@
         let num = '';
         while (i < str.length && /[0-9.]/.test(str[i])) { num += str[i]; i++; }
         tokens.push({ type: 'num', value: parseFloat(num) });
+        continue;
+      }
+      const matchedCombinOp = combinOpNames.find((op) => str.startsWith(op, i));
+      if (matchedCombinOp) {
+        tokens.push({ type: 'op', value: matchedCombinOp });
+        i += matchedCombinOp.length;
         continue;
       }
       let matchedFunc = funcs.find(f => str.startsWith(f, i));
@@ -1230,11 +1316,6 @@
       if (str.startsWith('E_CONST', i)) {
         tokens.push({ type: 'num', value: Math.E });
         i += 7;
-        continue;
-      }
-      if (str.startsWith('nCr', i) || str.startsWith('nPr', i) || str.startsWith('gcd', i) || str.startsWith('lcm', i)) {
-        tokens.push({ type: 'op', value: str.slice(i, i + 3) });
-        i += 3;
         continue;
       }
       if (ch === 'x') {
@@ -1286,14 +1367,14 @@
     }
     parseCombin() {
       let left = this.parsePow();
-      const combinOps = ['nCr', 'nPr', 'gcd', 'lcm'];
-      while (this.peek() && this.peek().type === 'op' && combinOps.includes(this.peek().value)) {
+      while (this.peek() && this.peek().type === 'op' && combinOpNames.includes(this.peek().value)) {
         const op = this.next().value;
         const right = this.parsePow();
         if (op === 'nCr') left = combinations(left, right);
         else if (op === 'nPr') left = permutations(left, right);
         else if (op === 'gcd') left = gcdOf(left, right);
-        else left = lcmOf(left, right);
+        else if (op === 'lcm') left = lcmOf(left, right);
+        else left = logBase(left, right);
       }
       return left;
     }
@@ -1388,6 +1469,11 @@
     if (!Number.isInteger(a) || !Number.isInteger(b)) return NaN;
     if (a === 0 || b === 0) return 0;
     return Math.abs(a * b) / gcdOf(a, b);
+  }
+
+  function logBase(x, base) {
+    if (x <= 0 || base <= 0 || base === 1) return NaN;
+    return Math.log(x) / Math.log(base);
   }
 
   function applyFunc(name, arg) {
