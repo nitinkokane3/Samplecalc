@@ -210,6 +210,7 @@
       financeSimpleInterest: 'Simple Int.',
       financeCompoundInterest: 'Compound Int.',
       financeTip: 'Tip Split',
+      financeMargin: 'Margin',
       financeFieldPercent: 'Percent %',
       financeFieldValue: 'Value',
       financeFieldFrom: 'From',
@@ -223,6 +224,8 @@
       financeFieldBill: 'Bill',
       financeFieldTipPct: 'Tip %',
       financeFieldPeople: 'People',
+      financeFieldCost: 'Cost',
+      financeFieldSellPrice: 'Sell Price',
       financeOutResult: 'Result',
       financeOutChange: 'Change',
       financeOutSaved: 'Amount Saved',
@@ -232,6 +235,9 @@
       financeOutTip: 'Tip Amount',
       financeOutTotalBill: 'Total Bill',
       financeOutPerPerson: 'Per Person',
+      financeOutProfit: 'Profit',
+      financeOutMarginPct: 'Margin %',
+      financeOutMarkupPct: 'Markup %',
       financeIncrease: 'increase',
       financeDecrease: 'decrease',
       financeNeedNonZero: 'Value can\'t be zero',
@@ -343,6 +349,7 @@
       financeSimpleInterest: 'साधे व्याज',
       financeCompoundInterest: 'चक्रवाढ व्याज',
       financeTip: 'टिप वाटणी',
+      financeMargin: 'मार्जिन',
       financeFieldPercent: 'टक्केवारी %',
       financeFieldValue: 'मूल्य',
       financeFieldFrom: 'सुरुवात',
@@ -356,6 +363,8 @@
       financeFieldBill: 'बिल',
       financeFieldTipPct: 'टिप %',
       financeFieldPeople: 'लोक',
+      financeFieldCost: 'खर्च',
+      financeFieldSellPrice: 'विक्री किंमत',
       financeOutResult: 'निकाल',
       financeOutChange: 'बदल',
       financeOutSaved: 'बचत रक्कम',
@@ -365,6 +374,9 @@
       financeOutTip: 'टिप रक्कम',
       financeOutTotalBill: 'एकूण बिल',
       financeOutPerPerson: 'प्रत्येकी',
+      financeOutProfit: 'नफा',
+      financeOutMarginPct: 'मार्जिन %',
+      financeOutMarkupPct: 'मार्कअप %',
       financeIncrease: 'वाढ',
       financeDecrease: 'घट',
       financeNeedNonZero: 'मूल्य शून्य असू शकत नाही',
@@ -2284,6 +2296,7 @@
     simpleinterest: { fields: ['a', 'b', 'c'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears'] },
     compoundinterest: { fields: ['a', 'b', 'c', 'd'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears', 'financeFieldCompounds'] },
     tip: { fields: ['a', 'b', 'c'], labels: ['financeFieldBill', 'financeFieldTipPct', 'financeFieldPeople'] },
+    margin: { fields: ['a', 'b'], labels: ['financeFieldCost', 'financeFieldSellPrice'] },
   };
   const financeDefaultCoeffs = () => ({ a: '0', b: '0', c: '0', d: '1' });
   const savedFinanceType = localStorage.getItem('calc-finance-type');
@@ -2338,6 +2351,15 @@
           { label: t('financeOutTip'), value: tipAmt },
           { label: t('financeOutTotalBill'), value: total },
           { label: t('financeOutPerPerson'), value: total / c },
+        ] };
+      }
+      case 'margin': {
+        if (a === 0 || b === 0) return { error: t('financeNeedNonZero') };
+        const profit = b - a;
+        return { outputs: [
+          { label: t('financeOutProfit'), value: profit },
+          { label: t('financeOutMarginPct'), text: `${formatNumber((profit / b) * 100)}%` },
+          { label: t('financeOutMarkupPct'), text: `${formatNumber((profit / a) * 100)}%` },
         ] };
       }
       default:
@@ -3721,11 +3743,12 @@
         ],
       },
       finance: {
-        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, and splitting a tip. Pick a tab, tap a field to edit it.',
+        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, splitting a tip, and margin/markup on a cost and sell price. Pick a tab, tap a field to edit it.',
         examples: [
           { steps: '% Of: Percent=20, Value=150', result: '= 30' },
           { steps: 'Discount: Price=200, Discount %=15', result: 'Saved = 30, Final Price = 170' },
           { steps: 'Tip Split: Bill=100, Tip %=18, People=4', result: 'Tip = 18, Total = 118, Per Person = 29.5' },
+          { steps: 'Margin: Cost=80, Sell Price=100', result: 'Profit = 20, Margin = 20%, Markup = 25%' },
         ],
       },
     },
@@ -3814,11 +3837,12 @@
         ],
       },
       finance: {
-        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, आणि टिप वाटणी. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
+        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, टिप वाटणी, आणि खर्च व विक्री किंमतीवरील मार्जिन/मार्कअप. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
         examples: [
           { steps: '% चे: टक्केवारी=20, मूल्य=150', result: '= 30' },
           { steps: 'सवलत: किंमत=200, सवलत %=15', result: 'बचत = 30, अंतिम किंमत = 170' },
           { steps: 'टिप वाटणी: बिल=100, टिप %=18, लोक=4', result: 'टिप = 18, एकूण = 118, प्रत्येकी = 29.5' },
+          { steps: 'मार्जिन: खर्च=80, विक्री किंमत=100', result: 'नफा = 20, मार्जिन = 20%, मार्कअप = 25%' },
         ],
       },
     },
