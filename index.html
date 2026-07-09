@@ -63,6 +63,11 @@
         <button class="solver-type-btn" data-type="system2x2" data-i18n="solverSystem2x2">System 2×2</button>
       </div>
 
+      <div class="matrix-size-tabs" id="matrixSizeTabs">
+        <button class="matrix-size-btn active" data-size="2">2×2</button>
+        <button class="matrix-size-btn" data-size="3">3×3</button>
+      </div>
+
       <div class="finance-tabs" id="financeTabs">
         <button class="finance-type-btn active" data-type="percentof" data-i18n="financePercentOf">% Of</button>
         <button class="finance-type-btn" data-type="percentchange" data-i18n="financePercentChange">% Change</button>
@@ -157,20 +162,30 @@
       <div class="matrix-panel" id="matrixPanel">
         <div class="matrix-block">
           <div class="matrix-label">A</div>
-          <div class="matrix-grid">
+          <div class="matrix-grid" id="matrixGridA">
             <span class="matrix-cell" data-mat="a" data-r="0" data-c="0">1</span>
             <span class="matrix-cell" data-mat="a" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="0" data-c="2">0</span>
             <span class="matrix-cell" data-mat="a" data-r="1" data-c="0">0</span>
             <span class="matrix-cell" data-mat="a" data-r="1" data-c="1">1</span>
+            <span class="matrix-cell" data-mat="a" data-r="1" data-c="2">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="2">1</span>
           </div>
         </div>
         <div class="matrix-block">
           <div class="matrix-label">B</div>
-          <div class="matrix-grid">
+          <div class="matrix-grid" id="matrixGridB">
             <span class="matrix-cell" data-mat="b" data-r="0" data-c="0">1</span>
             <span class="matrix-cell" data-mat="b" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="0" data-c="2">0</span>
             <span class="matrix-cell" data-mat="b" data-r="1" data-c="0">0</span>
             <span class="matrix-cell" data-mat="b" data-r="1" data-c="1">1</span>
+            <span class="matrix-cell" data-mat="b" data-r="1" data-c="2">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="2">1</span>
           </div>
         </div>
       </div>

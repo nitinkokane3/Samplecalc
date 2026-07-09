@@ -83,6 +83,7 @@
   const graphKeys = document.getElementById('graphKeys');
   const matrixToolbar = document.getElementById('matrixToolbar');
   const matrixPanel = document.getElementById('matrixPanel');
+  const matrixSizeTabs = document.getElementById('matrixSizeTabs');
   const matrixKeys = document.getElementById('matrixKeys');
   const complexToolbar = document.getElementById('complexToolbar');
   const complexPanel = document.getElementById('complexPanel');
@@ -1281,12 +1282,26 @@
     renderSolver();
   });
 
-  // ---------- Matrix calculator mode (2x2) ----------
-  const identity2 = () => [['1', '0'], ['0', '1']];
+  // ---------- Matrix calculator mode (2x2 / 3x3) ----------
+  const matrixSizes = [2, 3];
+  const identity3 = () => [['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']];
+  function padMatrixTo3x3(mat) {
+    if (Array.isArray(mat) && mat.length === 3 && mat.every((row) => row.length === 3)) return mat;
+    const id = identity3();
+    if (Array.isArray(mat)) {
+      mat.forEach((row, i) => row.forEach((v, j) => { if (i < 3 && j < 3) id[i][j] = v; }));
+    }
+    return id;
+  }
   const savedMatrixA = JSON.parse(localStorage.getItem('calc-matrix-a') || 'null');
   const savedMatrixB = JSON.parse(localStorage.getItem('calc-matrix-b') || 'null');
+  const savedMatrixSize = parseInt(localStorage.getItem('calc-matrix-size'), 10);
   const matrix = {
-    entries: { a: savedMatrixA || identity2(), b: savedMatrixB || identity2() },
+    entries: {
+      a: savedMatrixA ? padMatrixTo3x3(savedMatrixA) : identity3(),
+      b: savedMatrixB ? padMatrixTo3x3(savedMatrixB) : identity3(),
+    },
+    size: matrixSizes.includes(savedMatrixSize) ? savedMatrixSize : 2,
     activeMat: 'a',
     activeR: 0,
     activeC: 0,
@@ -1301,10 +1316,12 @@
   function saveMatrix() {
     localStorage.setItem('calc-matrix-a', JSON.stringify(matrix.entries.a));
     localStorage.setItem('calc-matrix-b', JSON.stringify(matrix.entries.b));
+    localStorage.setItem('calc-matrix-size', String(matrix.size));
   }
 
   function matrixNumeric(mat) {
-    return matrix.entries[mat].map((row) => row.map((v) => parseFloat(v) || 0));
+    const n = matrix.size;
+    return matrix.entries[mat].slice(0, n).map((row) => row.slice(0, n).map((v) => parseFloat(v) || 0));
   }
 
   function matrixAdd(A, B) {
@@ -1314,25 +1331,44 @@
     return A.map((row, i) => row.map((v, j) => v - B[i][j]));
   }
   function matrixMul(A, B) {
-    const result = [[0, 0], [0, 0]];
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 2; j++) {
-        for (let k = 0; k < 2; k++) result[i][j] += A[i][k] * B[k][j];
+    const n = A.length;
+    const result = Array.from({ length: n }, () => Array(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        for (let k = 0; k < n; k++) result[i][j] += A[i][k] * B[k][j];
       }
     }
     return result;
   }
   function matrixDet(A) {
-    return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    const n = A.length;
+    if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    return (
+      A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) -
+      A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) +
+      A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0])
+    );
+  }
+  function matrixMinor(A, row, col) {
+    return A.filter((_, i) => i !== row).map((r) => r.filter((_, j) => j !== col));
   }
   function matrixInverse(A) {
+    const n = A.length;
     const d = matrixDet(A);
     if (d === 0) return null;
-    return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]];
+    if (n === 2) {
+      return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]];
+    }
+    const cofactors = A.map((row, i) => row.map((_, j) => {
+      const sign = (i + j) % 2 === 0 ? 1 : -1;
+      return sign * matrixDet(matrixMinor(A, i, j));
+    }));
+    const adjugate = cofactors[0].map((_, j) => cofactors.map((row) => row[j]));
+    return adjugate.map((row) => row.map((v) => v / d));
   }
 
   function formatMatrixResult(M) {
-    return `[${formatNumber(M[0][0])}, ${formatNumber(M[0][1])}; ${formatNumber(M[1][0])}, ${formatNumber(M[1][1])}]`;
+    return `[${M.map((row) => row.map((v) => formatNumber(v)).join(', ')).join('; ')}]`;
   }
 
   function matrixCompute(op) {
@@ -1367,6 +1403,32 @@
     renderMatrix();
   }
 
+  function updateMatrixSizeUI() {
+    document.querySelectorAll('.matrix-size-btn').forEach((b) => {
+      b.classList.toggle('active', parseInt(b.dataset.size, 10) === matrix.size);
+    });
+    document.querySelectorAll('.matrix-grid').forEach((grid) => {
+      grid.classList.toggle('size3', matrix.size === 3);
+    });
+    matrixPanel.classList.toggle('size3', matrix.size === 3);
+    document.querySelectorAll('.matrix-cell').forEach((el) => {
+      const r = parseInt(el.dataset.r, 10);
+      const c = parseInt(el.dataset.c, 10);
+      el.style.display = (r < matrix.size && c < matrix.size) ? '' : 'none';
+    });
+  }
+
+  function setMatrixSize(size) {
+    matrix.size = size;
+    matrix.activeR = 0;
+    matrix.activeC = 0;
+    matrix.opLabel = '';
+    matrix.resultText = '';
+    updateMatrixSizeUI();
+    saveMatrix();
+    renderMatrix();
+  }
+
   function renderMatrixGrids() {
     document.querySelectorAll('.matrix-cell').forEach((el) => {
       const m = el.dataset.mat;
@@ -1393,11 +1455,12 @@
 
   function matrixNextCell() {
     let { activeMat: m, activeR: r, activeC: c } = matrix;
+    const max = matrix.size - 1;
     c += 1;
-    if (c > 1) {
+    if (c > max) {
       c = 0;
       r += 1;
-      if (r > 1) {
+      if (r > max) {
         r = 0;
         m = m === 'a' ? 'b' : 'a';
       }
@@ -1452,8 +1515,8 @@
   }
 
   function matrixClearAll() {
-    matrix.entries.a = identity2();
-    matrix.entries.b = identity2();
+    matrix.entries.a = identity3();
+    matrix.entries.b = identity3();
     matrix.activeMat = 'a';
     matrix.activeR = 0;
     matrix.activeC = 0;
@@ -1479,6 +1542,12 @@
     const btn = e.target.closest('.graph-tool-btn');
     if (!btn) return;
     handleAction(btn.dataset.action, btn.dataset.value);
+  });
+
+  matrixSizeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.matrix-size-btn');
+    if (!btn) return;
+    setMatrixSize(parseInt(btn.dataset.size, 10));
   });
 
   // ---------- Complex number mode ----------
@@ -3129,6 +3198,7 @@
       drawGraph();
     }
     if (mode === 'matrix') {
+      updateMatrixSizeUI();
       renderMatrix();
     }
     if (mode === 'complex') {
@@ -3202,10 +3272,11 @@
         ],
       },
       matrix: {
-        description: 'Enter values into 2×2 matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse of whichever matrix is active.',
+        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse (via cofactor expansion for 3×3) of whichever matrix is active.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
+          { steps: '3×3: Det of A=[1,0,2;-1,3,1;0,2,4]', result: '= 6' },
         ],
       },
       complex: {
@@ -3282,10 +3353,11 @@
         ],
       },
       matrix: {
-        description: 'सेलवर टॅप करून 2×2 मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse काढा.',
+        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे) काढा.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
+          { steps: '3×3: A=[1,0,2;-1,3,1;0,2,4] चा Det', result: '= 6' },
         ],
       },
       complex: {
@@ -3543,9 +3615,9 @@
   const backupKeys = [
     'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-finance-coeffs',
     'calc-finance-type', 'calc-graph-expr', 'calc-graph-expr-g', 'calc-history',
-    'calc-lang', 'calc-matrix-a', 'calc-matrix-b', 'calc-memory', 'calc-prog-base',
-    'calc-regr-points', 'calc-solver-coeffs', 'calc-solver-type', 'calc-stat-data',
-    'calc-theme',
+    'calc-lang', 'calc-matrix-a', 'calc-matrix-b', 'calc-matrix-size', 'calc-memory',
+    'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs', 'calc-solver-type',
+    'calc-stat-data', 'calc-theme',
   ];
 
   function setDataStatus(msg, isError) {
