@@ -1225,6 +1225,11 @@
         i += 7;
         continue;
       }
+      if (str.startsWith('nCr', i) || str.startsWith('nPr', i)) {
+        tokens.push({ type: 'op', value: str.slice(i, i + 3) });
+        i += 3;
+        continue;
+      }
       if (ch === 'x') {
         tokens.push({ type: 'var', value: 'x' });
         i++;
@@ -1262,13 +1267,22 @@
       return left;
     }
     parseMulDiv() {
-      let left = this.parsePow();
+      let left = this.parseCombin();
       while (this.peek() && this.peek().type === 'op' && (this.peek().value === '*' || this.peek().value === '/' || this.peek().value === '%')) {
         const op = this.next().value;
-        const right = this.parsePow();
+        const right = this.parseCombin();
         if (op === '*') left = left * right;
         else if (op === '/') left = left / right;
         else left = left % right;
+      }
+      return left;
+    }
+    parseCombin() {
+      let left = this.parsePow();
+      while (this.peek() && this.peek().type === 'op' && (this.peek().value === 'nCr' || this.peek().value === 'nPr')) {
+        const op = this.next().value;
+        const right = this.parsePow();
+        left = op === 'nCr' ? combinations(left, right) : permutations(left, right);
       }
       return left;
     }
@@ -1340,6 +1354,16 @@
     let result = 1;
     for (let i = 2; i <= n; i++) result *= i;
     return result;
+  }
+
+  function combinations(n, r) {
+    if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) return NaN;
+    return Math.round(factorial(n) / (factorial(r) * factorial(n - r)));
+  }
+
+  function permutations(n, r) {
+    if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) return NaN;
+    return Math.round(factorial(n) / factorial(n - r));
   }
 
   function applyFunc(name, arg) {
@@ -2071,6 +2095,7 @@
       case 'const': addConstant(value); break;
       case 'pow2': squareValue(); break;
       case 'pow': powValue(); break;
+      case 'combin': inputOperator(value); break;
       case 'sqrt': sqrtValue(); break;
       case 'inv': invValue(); break;
       case 'fact': factValue(); break;
