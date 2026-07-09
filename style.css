@@ -989,6 +989,7 @@ body {
 .graph-keys,
 .matrix-keys,
 .complex-keys,
+.vector-keys,
 .regr-keys,
 .finance-keys {
   display: none;
