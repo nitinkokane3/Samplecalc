@@ -89,6 +89,10 @@ body {
   max-width: 400px;
 }
 
+.calculator.solver {
+  max-width: 400px;
+}
+
 .calculator.graphing {
   max-width: 420px;
 }
@@ -222,6 +226,38 @@ body {
   transform: rotate(180deg);
 }
 
+.solver-tabs {
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.solver .solver-tabs {
+  display: grid;
+}
+
+.solver-type-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 7px 0;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.solver-type-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
 .graph-toolbar {
   display: none;
   gap: 6px;
@@ -283,6 +319,10 @@ body {
 
 .calculator.graphing .result {
   font-size: 1.05rem;
+}
+
+.calculator.solver .result {
+  font-size: 1.3rem;
 }
 
 .top-actions {
@@ -376,6 +416,27 @@ body {
 
 .calculator.statistics .stat-panel {
   display: flex;
+}
+
+.calculator.solver .solver-panel {
+  display: flex;
+}
+
+.solver-field {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.solver-field.active {
+  background: var(--op-bg);
+}
+
+.solver-field.active .conv-label,
+.solver-field.active .conv-value {
+  color: var(--accent);
 }
 
 .stat-chips {
@@ -500,6 +561,7 @@ body {
 .prog-keys,
 .conv-keys,
 .stat-keys,
+.solver-keys,
 .graph-keys {
   display: none;
 }
@@ -535,6 +597,15 @@ body {
 }
 
 .calculator.statistics .keys:not(.stat-keys) {
+  display: none;
+}
+
+.calculator.solver .keys.solver-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calculator.solver .keys:not(.solver-keys) {
   display: none;
 }
 
