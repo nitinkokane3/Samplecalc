@@ -12,6 +12,14 @@
   const helpOverlay = document.getElementById('helpOverlay');
   const helpClose = document.getElementById('helpClose');
   const helpBody = document.getElementById('helpBody');
+  const dataToggle = document.getElementById('dataToggle');
+  const dataOverlay = document.getElementById('dataOverlay');
+  const dataClose = document.getElementById('dataClose');
+  const exportDataBtn = document.getElementById('exportDataBtn');
+  const importDataBtn = document.getElementById('importDataBtn');
+  const importFileInput = document.getElementById('importFileInput');
+  const resetDataBtn = document.getElementById('resetDataBtn');
+  const dataStatus = document.getElementById('dataStatus');
   const historyToggle = document.getElementById('historyToggle');
   const historyPanel = document.getElementById('historyPanel');
   const historyList = document.getElementById('historyList');
@@ -158,6 +166,17 @@
       helpShortcutsTitle: 'Keyboard Shortcuts',
       helpExampleLabel: 'Example',
       copyResultTitle: 'Copy result',
+      dataToggleTitle: 'Backup & Restore',
+      dataTitle: 'Backup & Restore',
+      dataDesc: "Save every mode's data (history, memory, matrices, complex numbers, regression points, and more) to a file, or restore it on another device or after clearing browser data.",
+      dataExport: 'Export Data',
+      dataImport: 'Import Data',
+      dataReset: 'Reset All Data',
+      dataExportedMsg: 'Backup file downloaded.',
+      dataImportedMsg: 'Data restored. Reloading…',
+      dataImportErrorMsg: 'That file is not a valid backup.',
+      dataResetConfirm: 'This clears all history, memory, and every mode\'s saved data on this device. This cannot be undone. Continue?',
+      dataResetDoneMsg: 'All data cleared. Reloading…',
       deg: 'DEG',
       rad: 'RAD',
       langButton: 'EN',
@@ -235,6 +254,17 @@
       helpShortcutsTitle: 'कीबोर्ड शॉर्टकट',
       helpExampleLabel: 'उदाहरण',
       copyResultTitle: 'निकाल कॉपी करा',
+      dataToggleTitle: 'बॅकअप आणि रिस्टोर',
+      dataTitle: 'बॅकअप आणि रिस्टोर',
+      dataDesc: 'प्रत्येक मोडचा डेटा (इतिहास, मेमरी, मॅट्रिक्स, सम्मिश्र संख्या, समाश्रयण बिंदू, आणि बरेच काही) फाइलमध्ये जतन करा, किंवा दुसऱ्या डिव्हाइसवर किंवा ब्राउझर डेटा साफ केल्यानंतर तो पुनर्संचयित करा.',
+      dataExport: 'डेटा एक्सपोर्ट करा',
+      dataImport: 'डेटा इंपोर्ट करा',
+      dataReset: 'सर्व डेटा रीसेट करा',
+      dataExportedMsg: 'बॅकअप फाइल डाउनलोड झाली.',
+      dataImportedMsg: 'डेटा पुनर्संचयित झाला. पुन्हा लोड करत आहे…',
+      dataImportErrorMsg: 'ही फाइल वैध बॅकअप नाही.',
+      dataResetConfirm: 'हे या डिव्हाइसवरील सर्व इतिहास, मेमरी आणि प्रत्येक मोडचा जतन केलेला डेटा साफ करेल. हे पूर्ववत करता येणार नाही. सुरू ठेवायचे?',
+      dataResetDoneMsg: 'सर्व डेटा साफ झाला. पुन्हा लोड करत आहे…',
       deg: 'अंश',
       rad: 'रेडियन',
       langButton: 'मर',
@@ -3115,6 +3145,100 @@
     if (e.target === helpOverlay) closeHelp();
   });
 
+  // ---------- Backup & Restore ----------
+  const backupKeys = [
+    'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-graph-expr',
+    'calc-graph-expr-g', 'calc-history', 'calc-lang', 'calc-matrix-a', 'calc-matrix-b',
+    'calc-memory', 'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs',
+    'calc-solver-type', 'calc-stat-data', 'calc-theme',
+  ];
+
+  function setDataStatus(msg, isError) {
+    dataStatus.textContent = msg;
+    dataStatus.classList.toggle('error', !!isError);
+  }
+
+  function openData() {
+    setDataStatus('', false);
+    dataOverlay.classList.add('open');
+  }
+
+  function closeData() {
+    dataOverlay.classList.remove('open');
+  }
+
+  function exportAllData() {
+    const data = {};
+    backupKeys.forEach((key) => {
+      const value = localStorage.getItem(key);
+      if (value !== null) data[key] = value;
+    });
+    const payload = { app: 'Advanced Calculator', version: 1, exportedAt: new Date().toISOString(), data };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `calculator-backup-${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setDataStatus(t('dataExportedMsg'), false);
+  }
+
+  function importAllData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let parsed;
+      try {
+        parsed = JSON.parse(reader.result);
+      } catch (e) {
+        setDataStatus(t('dataImportErrorMsg'), true);
+        return;
+      }
+      if (!parsed || typeof parsed.data !== 'object' || parsed.data === null) {
+        setDataStatus(t('dataImportErrorMsg'), true);
+        return;
+      }
+      const importedKeys = Object.keys(parsed.data).filter((k) => backupKeys.includes(k));
+      if (importedKeys.length === 0) {
+        setDataStatus(t('dataImportErrorMsg'), true);
+        return;
+      }
+      importedKeys.forEach((key) => {
+        localStorage.setItem(key, parsed.data[key]);
+      });
+      setDataStatus(t('dataImportedMsg'), false);
+      setTimeout(() => window.location.reload(), 700);
+    };
+    reader.onerror = () => {
+      setDataStatus(t('dataImportErrorMsg'), true);
+    };
+    reader.readAsText(file);
+  }
+
+  function resetAllData() {
+    if (!window.confirm(t('dataResetConfirm'))) return;
+    backupKeys.forEach((key) => localStorage.removeItem(key));
+    setDataStatus(t('dataResetDoneMsg'), false);
+    setTimeout(() => window.location.reload(), 700);
+  }
+
+  dataToggle.addEventListener('click', openData);
+  dataClose.addEventListener('click', closeData);
+  dataOverlay.addEventListener('click', (e) => {
+    if (e.target === dataOverlay) closeData();
+  });
+  exportDataBtn.addEventListener('click', exportAllData);
+  importDataBtn.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', () => {
+    const file = importFileInput.files && importFileInput.files[0];
+    if (file) importAllData(file);
+    importFileInput.value = '';
+  });
+  resetDataBtn.addEventListener('click', resetAllData);
+
   themeToggle.addEventListener('click', () => {
     const root = document.documentElement;
     const current = root.getAttribute('data-theme');
@@ -3176,6 +3300,10 @@
     const key = e.key;
     if (helpOverlay.classList.contains('open')) {
       if (key === 'Escape') closeHelp();
+      return;
+    }
+    if (dataOverlay.classList.contains('open')) {
+      if (key === 'Escape') closeData();
       return;
     }
     if (isProgrammerMode()) {

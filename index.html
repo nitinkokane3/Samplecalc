@@ -25,6 +25,7 @@
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
           <button class="icon-btn" id="historyToggle" title="History" data-i18n-title="historyToggleTitle">🕘</button>
+          <button class="icon-btn" id="dataToggle" title="Backup &amp; Restore" data-i18n-title="dataToggleTitle">💾</button>
           <button class="icon-btn lang-btn" id="langToggle" title="Toggle language" data-i18n-title="langToggleTitle">EN</button>
           <button class="icon-btn" id="themeToggle" title="Toggle theme" data-i18n-title="themeToggleTitle">🌙</button>
         </div>
@@ -503,6 +504,23 @@
         <button id="helpClose" aria-label="Close">&times;</button>
       </div>
       <div class="help-body" id="helpBody"></div>
+    </div>
+  </div>
+
+  <div class="help-overlay" id="dataOverlay">
+    <div class="help-modal">
+      <div class="help-header">
+        <span data-i18n="dataTitle">Backup &amp; Restore</span>
+        <button id="dataClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="help-body">
+        <p class="data-desc" data-i18n="dataDesc">Save every mode's data (history, memory, matrices, complex numbers, regression points, and more) to a file, or restore it on another device or after clearing browser data.</p>
+        <button class="data-action-btn" id="exportDataBtn" data-i18n="dataExport">Export Data</button>
+        <button class="data-action-btn" id="importDataBtn" data-i18n="dataImport">Import Data</button>
+        <input type="file" id="importFileInput" accept="application/json" style="display:none" />
+        <div class="data-status" id="dataStatus"></div>
+        <button class="data-action-btn data-danger" id="resetDataBtn" data-i18n="dataReset">Reset All Data</button>
+      </div>
     </div>
   </div>
 
