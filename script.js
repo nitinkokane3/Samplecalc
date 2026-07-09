@@ -1281,6 +1281,8 @@
     return value;
   }
 
+  const combinOpNames = ['nCr', 'nPr', 'gcd', 'lcm', 'logb'];
+
   function tokenize(str) {
     const tokens = [];
     let i = 0;
@@ -1292,6 +1294,12 @@
         let num = '';
         while (i < str.length && /[0-9.]/.test(str[i])) { num += str[i]; i++; }
         tokens.push({ type: 'num', value: parseFloat(num) });
+        continue;
+      }
+      const matchedCombinOp = combinOpNames.find((op) => str.startsWith(op, i));
+      if (matchedCombinOp) {
+        tokens.push({ type: 'op', value: matchedCombinOp });
+        i += matchedCombinOp.length;
         continue;
       }
       let matchedFunc = funcs.find(f => str.startsWith(f, i));
@@ -1308,11 +1316,6 @@
       if (str.startsWith('E_CONST', i)) {
         tokens.push({ type: 'num', value: Math.E });
         i += 7;
-        continue;
-      }
-      if (str.startsWith('nCr', i) || str.startsWith('nPr', i) || str.startsWith('gcd', i) || str.startsWith('lcm', i)) {
-        tokens.push({ type: 'op', value: str.slice(i, i + 3) });
-        i += 3;
         continue;
       }
       if (ch === 'x') {
@@ -1364,14 +1367,14 @@
     }
     parseCombin() {
       let left = this.parsePow();
-      const combinOps = ['nCr', 'nPr', 'gcd', 'lcm'];
-      while (this.peek() && this.peek().type === 'op' && combinOps.includes(this.peek().value)) {
+      while (this.peek() && this.peek().type === 'op' && combinOpNames.includes(this.peek().value)) {
         const op = this.next().value;
         const right = this.parsePow();
         if (op === 'nCr') left = combinations(left, right);
         else if (op === 'nPr') left = permutations(left, right);
         else if (op === 'gcd') left = gcdOf(left, right);
-        else left = lcmOf(left, right);
+        else if (op === 'lcm') left = lcmOf(left, right);
+        else left = logBase(left, right);
       }
       return left;
     }
@@ -1466,6 +1469,11 @@
     if (!Number.isInteger(a) || !Number.isInteger(b)) return NaN;
     if (a === 0 || b === 0) return 0;
     return Math.abs(a * b) / gcdOf(a, b);
+  }
+
+  function logBase(x, base) {
+    if (x <= 0 || base <= 0 || base === 1) return NaN;
+    return Math.log(x) / Math.log(base);
   }
 
   function applyFunc(name, arg) {
