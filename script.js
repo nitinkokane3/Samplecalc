@@ -3712,6 +3712,9 @@
       updateFinanceTabsUI();
       renderFinance();
     }
+    if (mode === 'standard' || mode === 'scientific') {
+      render();
+    }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
   }
