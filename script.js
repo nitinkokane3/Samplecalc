@@ -73,6 +73,16 @@
   const complexAimEl = document.getElementById('complexAim');
   const complexBreEl = document.getElementById('complexBre');
   const complexBimEl = document.getElementById('complexBim');
+  const regrPanel = document.getElementById('regrPanel');
+  const regrKeys = document.getElementById('regrKeys');
+  const regrChipsEl = document.getElementById('regrChips');
+  const regrEntryXEl = document.getElementById('regrEntryX');
+  const regrEntryYEl = document.getElementById('regrEntryY');
+  const regrNEl = document.getElementById('regrN');
+  const regrSlopeEl = document.getElementById('regrSlope');
+  const regrInterceptEl = document.getElementById('regrIntercept');
+  const regrREl = document.getElementById('regrR');
+  const regrR2El = document.getElementById('regrR2');
 
   const translations = {
     en: {
@@ -111,6 +121,12 @@
       complexModulus: 'Mod',
       complexArgument: 'Arg',
       complexConjugate: 'Conj',
+      regressionMode: 'Regression',
+      regrSlope: 'Slope (m)',
+      regrIntercept: 'Intercept (b)',
+      regrPointsLabel: 'points',
+      regrNeedMore: 'Need at least 2 points',
+      regrVertical: 'x values must vary',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -180,6 +196,12 @@
       complexModulus: 'मापांक',
       complexArgument: 'कोन',
       complexConjugate: 'संयुग्मी',
+      regressionMode: 'समाश्रयण',
+      regrSlope: 'उतार (m)',
+      regrIntercept: 'छेद (b)',
+      regrPointsLabel: 'बिंदू',
+      regrNeedMore: 'किमान २ बिंदू आवश्यक',
+      regrVertical: 'x मूल्ये भिन्न असावीत',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -260,7 +282,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -270,6 +292,7 @@
     else if (isSolverMode()) renderSolver();
     else if (isMatrixMode()) renderMatrix();
     else if (isComplexMode()) renderComplex();
+    else if (isRegressionMode()) renderRegr();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -1468,6 +1491,165 @@
     handleAction(btn.dataset.action, btn.dataset.value);
   });
 
+  // ---------- Linear regression mode ----------
+  const savedRegrPoints = JSON.parse(localStorage.getItem('calc-regr-points') || '[]');
+  const regression = {
+    points: savedRegrPoints,
+    entryX: '0',
+    entryY: '0',
+    activeField: 'x',
+  };
+
+  function isRegressionMode() {
+    return calculator.classList.contains('regression');
+  }
+
+  function saveRegrPoints() {
+    localStorage.setItem('calc-regr-points', JSON.stringify(regression.points));
+  }
+
+  function regrActiveValue() {
+    return regression.activeField === 'y' ? regression.entryY : regression.entryX;
+  }
+
+  function regrSetActiveValue(v) {
+    if (regression.activeField === 'y') regression.entryY = v;
+    else regression.entryX = v;
+  }
+
+  function computeRegression() {
+    const pts = regression.points;
+    const n = pts.length;
+    if (n < 2) return { n, valid: false };
+    const meanX = pts.reduce((a, p) => a + p.x, 0) / n;
+    const meanY = pts.reduce((a, p) => a + p.y, 0) / n;
+    let sxy = 0, sxx = 0, syy = 0;
+    pts.forEach((p) => {
+      const dx = p.x - meanX, dy = p.y - meanY;
+      sxy += dx * dy; sxx += dx * dx; syy += dy * dy;
+    });
+    if (sxx === 0) return { n, valid: false };
+    const m = sxy / sxx;
+    const b = meanY - m * meanX;
+    const r = syy === 0 ? 0 : sxy / Math.sqrt(sxx * syy);
+    return { n, valid: true, m, b, r, r2: r * r };
+  }
+
+  function renderRegrChips() {
+    regrChipsEl.innerHTML = '';
+    if (regression.points.length === 0) {
+      regrChipsEl.innerHTML = `<span class="stat-chips-empty">${t('statNoData')}</span>`;
+      return;
+    }
+    regression.points.forEach((p, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'stat-chip';
+      const valueSpan = document.createElement('span');
+      valueSpan.textContent = `(${localizeDigits(formatNumber(p.x))}, ${localizeDigits(formatNumber(p.y))})`;
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+      removeBtn.setAttribute('aria-label', 'Remove');
+      removeBtn.addEventListener('click', () => {
+        regression.points.splice(idx, 1);
+        saveRegrPoints();
+        renderRegr();
+      });
+      chip.appendChild(valueSpan);
+      chip.appendChild(removeBtn);
+      regrChipsEl.appendChild(chip);
+    });
+  }
+
+  function renderRegr() {
+    const res = computeRegression();
+    expressionEl.textContent = `${localizeDigits(String(res.n))} ${t('regrPointsLabel')}`;
+    if (!res.valid) {
+      resultEl.textContent = res.n < 2 ? t('regrNeedMore') : t('regrVertical');
+    } else {
+      const sign = res.b >= 0 ? '+' : '-';
+      resultEl.textContent = localizeDigits(`y = ${formatNumber(res.m)}x ${sign} ${formatNumber(Math.abs(res.b))}`);
+    }
+    memoryIndicator.textContent = '';
+    regrEntryXEl.textContent = localizeDigits(regression.entryX);
+    regrEntryYEl.textContent = localizeDigits(regression.entryY);
+    document.querySelectorAll('.regr-field').forEach((row) => {
+      row.classList.toggle('active', row.dataset.field === regression.activeField);
+    });
+    regrNEl.textContent = localizeDigits(String(res.n));
+    regrSlopeEl.textContent = res.valid ? localizeDigits(formatNumber(res.m)) : '—';
+    regrInterceptEl.textContent = res.valid ? localizeDigits(formatNumber(res.b)) : '—';
+    regrREl.textContent = res.valid ? localizeDigits(formatNumber(res.r)) : '—';
+    regrR2El.textContent = res.valid ? localizeDigits(formatNumber(res.r2)) : '—';
+    renderRegrChips();
+  }
+
+  function regrAppendDigit(ch) {
+    const cur = regrActiveValue();
+    regrSetActiveValue((cur === '0' ? '' : cur) + ch);
+    renderRegr();
+  }
+
+  function regrAppendDecimal() {
+    const cur = regrActiveValue();
+    if (cur.includes('.')) return;
+    regrSetActiveValue(cur + '.');
+    renderRegr();
+  }
+
+  function regrToggleSign() {
+    const cur = regrActiveValue();
+    regrSetActiveValue(cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur));
+    renderRegr();
+  }
+
+  function regrBackspace() {
+    const cur = regrActiveValue();
+    regrSetActiveValue(cur.slice(0, -1) || '0');
+    renderRegr();
+  }
+
+  function regrClearEntry() {
+    regrSetActiveValue('0');
+    renderRegr();
+  }
+
+  function regrClearAll() {
+    regression.points = [];
+    regression.entryX = '0';
+    regression.entryY = '0';
+    regression.activeField = 'x';
+    saveRegrPoints();
+    renderRegr();
+  }
+
+  function regrNextField() {
+    regression.activeField = regression.activeField === 'x' ? 'y' : 'x';
+    renderRegr();
+  }
+
+  function regrAddPoint() {
+    const x = parseFloat(regression.entryX) || 0;
+    const y = parseFloat(regression.entryY) || 0;
+    regression.points.push({ x, y });
+    regression.entryX = '0';
+    regression.entryY = '0';
+    regression.activeField = 'x';
+    saveRegrPoints();
+    renderRegr();
+  }
+
+  function insertAnsRegr() {
+    regrSetActiveValue(convPlainNumber(lastAnswer));
+    renderRegr();
+  }
+
+  regrPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.regr-field');
+    if (!row) return;
+    regression.activeField = row.dataset.field;
+    renderRegr();
+  });
+
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr, scope) {
     const prepped = expr
@@ -2410,6 +2592,7 @@
         else if (isSolverMode()) solverClearAll();
         else if (isMatrixMode()) matrixClearAll();
         else if (isComplexMode()) complexClearAll();
+        else if (isRegressionMode()) regrClearAll();
         else clearAll();
         break;
       case 'clear-entry':
@@ -2419,6 +2602,7 @@
         else if (isSolverMode()) solverClearEntry();
         else if (isMatrixMode()) matrixClearEntry();
         else if (isComplexMode()) complexClearEntry();
+        else if (isRegressionMode()) regrClearEntry();
         else clearEntry();
         break;
       case 'backspace':
@@ -2428,6 +2612,7 @@
         else if (isSolverMode()) solverBackspace();
         else if (isMatrixMode()) matrixBackspace();
         else if (isComplexMode()) complexBackspace();
+        else if (isRegressionMode()) regrBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -2482,6 +2667,10 @@
       case 'complexmod': complexCompute('mod'); break;
       case 'complexarg': complexCompute('arg'); break;
       case 'complexconj': complexCompute('conj'); break;
+      case 'regrdigit': regrAppendDigit(value); break;
+      case 'regrdecimal': regrAppendDecimal(); break;
+      case 'regrsign': regrToggleSign(); break;
+      case 'regradd': regrAddPoint(); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
@@ -2489,6 +2678,7 @@
         else if (isSolverMode()) insertAnsSolver();
         else if (isMatrixMode()) insertAnsMatrix();
         else if (isComplexMode()) insertAnsComplex();
+        else if (isRegressionMode()) insertAnsRegr();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -2511,7 +2701,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -2529,6 +2719,7 @@
     calculator.classList.toggle('graphing', mode === 'graphing');
     calculator.classList.toggle('matrix', mode === 'matrix');
     calculator.classList.toggle('complex', mode === 'complex');
+    calculator.classList.toggle('regression', mode === 'regression');
     if (mode === 'programmer') {
       updateBaseTabsUI();
       updateDigitAvailability();
@@ -2554,6 +2745,9 @@
     }
     if (mode === 'complex') {
       renderComplex();
+    }
+    if (mode === 'regression') {
+      renderRegr();
     }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -2636,6 +2830,15 @@
         ['Backspace', 'Delete last character'],
         ['Escape', 'Reset both numbers'],
       ],
+      regression: [
+        ['0–9', 'Enter digits into the active field'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Switch between x and y'],
+        ['Enter / =', 'Add point to dataset'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Clear all points'],
+      ],
     },
     mr: {
       standard: [
@@ -2708,6 +2911,15 @@
         ['फील्डवर क्लिक करा', 'ते फील्ड संपादित करण्यासाठी निवडा'],
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'दोन्ही संख्या रीसेट करा'],
+      ],
+      regression: [
+        ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'x आणि y मध्ये बदला'],
+        ['Enter / =', 'डेटासेटमध्ये बिंदू जोडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'सर्व बिंदू साफ करा'],
       ],
     },
   };
@@ -2867,6 +3079,16 @@
       if (key === 'Tab') { e.preventDefault(); complexNextField(); return; }
       return;
     }
+    if (isRegressionMode()) {
+      if (/[0-9]/.test(key)) { regrAppendDigit(key); return; }
+      if (key === '.') { regrAppendDecimal(); return; }
+      if (key === '-') { regrToggleSign(); return; }
+      if (key === 'Backspace') { regrBackspace(); return; }
+      if (key === 'Escape') { regrClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); regrNextField(); return; }
+      if (key === 'Enter' || key === '=') { e.preventDefault(); regrAddPoint(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -2884,7 +3106,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
