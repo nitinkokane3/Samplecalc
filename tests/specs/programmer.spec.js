@@ -75,6 +75,65 @@ module.exports = [
     },
   },
   {
+    name: 'MOD and integer DIV (truncated), including division by zero',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="programmer"]');
+      await page.click('.base-btn[data-base="10"]');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="1"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="7"]');
+      await page.click('#progKeys [data-action="progop"][data-value="mod"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="5"]');
+      await page.click('#progKeys [data-action="progequals"]');
+      assertEqual(await page.textContent('#result'), '2', '17 MOD 5 result');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="1"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="7"]');
+      await page.click('#progKeys [data-action="progop"][data-value="div"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="5"]');
+      await page.click('#progKeys [data-action="progequals"]');
+      assertEqual(await page.textContent('#result'), '3', '17 / 5 truncated result');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="5"]');
+      await page.click('#progKeys [data-action="progop"][data-value="div"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="0"]');
+      await page.click('#progKeys [data-action="progequals"]');
+      assertEqual(await page.textContent('#result'), 'Error', '5 / 0 shows an error');
+    },
+  },
+  {
+    name: 'memory keys (MC/MR/M+/M-) work independently of the current entry',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="programmer"]');
+      await page.click('.base-btn[data-base="10"]');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="1"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="0"]');
+      await page.click('#progKeys [data-action="mplus"]');
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="mr"]');
+      assertEqual(await page.textContent('#result'), '10', 'M+ 10 then MR');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="3"]');
+      await page.click('#progKeys [data-action="mminus"]');
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="mr"]');
+      assertEqual(await page.textContent('#result'), '7', 'M- 3 then MR');
+
+      await page.click('#progKeys [data-action="mc"]');
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="mr"]');
+      assertEqual(await page.textContent('#result'), '0', 'MC clears memory');
+    },
+  },
+  {
     name: 'negative values display correctly as two\'s complement across HEX/OCT/BIN',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
