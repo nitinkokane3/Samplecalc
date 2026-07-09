@@ -20,6 +20,7 @@
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
           <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
           <button class="mode-btn" data-mode="complex" data-i18n="complexMode">Complex</button>
+          <button class="mode-btn" data-mode="regression" data-i18n="regressionMode">Regression</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
@@ -166,6 +167,18 @@
         <div class="conv-row complex-field" data-num="b" data-part="re"><span class="conv-label">Re(B)</span><span class="conv-value" id="complexBre">0</span></div>
         <div class="conv-row complex-field" data-num="b" data-part="im"><span class="conv-label">Im(B)</span><span class="conv-value" id="complexBim">0</span></div>
       </div>
+
+      <div class="conv-panel regr-panel" id="regrPanel">
+        <div class="conv-row regr-field" data-field="x"><span class="conv-label">x</span><span class="conv-value" id="regrEntryX">0</span></div>
+        <div class="conv-row regr-field" data-field="y"><span class="conv-label">y</span><span class="conv-value" id="regrEntryY">0</span></div>
+        <div class="conv-row"><span class="conv-label">N</span><span class="conv-value" id="regrN">0</span></div>
+        <div class="conv-row"><span class="conv-label" data-i18n="regrSlope">Slope (m)</span><span class="conv-value" id="regrSlope">—</span></div>
+        <div class="conv-row"><span class="conv-label" data-i18n="regrIntercept">Intercept (b)</span><span class="conv-value" id="regrIntercept">—</span></div>
+        <div class="conv-row"><span class="conv-label">r</span><span class="conv-value" id="regrR">—</span></div>
+        <div class="conv-row"><span class="conv-label">r²</span><span class="conv-value" id="regrR2">—</span></div>
+      </div>
+
+      <div class="stat-chips regr-chips" id="regrChips"></div>
 
       <div class="panels">
         <div class="history-panel" id="historyPanel">
@@ -452,6 +465,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="complexnext" data-i18n="matrixNext">Next</button>
+          </div>
+
+          <div class="keys regr-keys" id="regrKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="regrdigit" data-value="7">7</button>
+            <button class="key num" data-action="regrdigit" data-value="8">8</button>
+            <button class="key num" data-action="regrdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="regrdigit" data-value="4">4</button>
+            <button class="key num" data-action="regrdigit" data-value="5">5</button>
+            <button class="key num" data-action="regrdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="regrdigit" data-value="1">1</button>
+            <button class="key num" data-action="regrdigit" data-value="2">2</button>
+            <button class="key num" data-action="regrdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="regrsign">±</button>
+            <button class="key num" data-action="regrdigit" data-value="0">0</button>
+            <button class="key num" data-action="regrdecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="regradd" data-i18n="statAdd">Add</button>
           </div>
         </div>
       </div>
