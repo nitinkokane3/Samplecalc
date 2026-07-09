@@ -22,4 +22,43 @@ module.exports = [
       assertEqual(await page.textContent('#result'), '32 f', '0C -> F conversion');
     },
   },
+  {
+    name: 'currency: 100 USD converts to ~92 EUR and round-trips back via swap',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="converter"]');
+      await page.click('.category-btn[data-category="currency"]');
+      await page.click('#convKeys [data-action="clear"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="1"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      const eur = parseFloat(await page.textContent('#result'));
+      assertEqual(Math.abs(eur - 92) < 0.01, true, '100 USD -> EUR is approximately 92');
+
+      await page.click('#swapUnits');
+      const usd = parseFloat(await page.textContent('#result'));
+      assertEqual(Math.abs(usd - 100) < 0.01, true, 'swap and convert back round-trips to ~100 USD');
+    },
+  },
+  {
+    name: 'currency: unit selectors switch to INR and other categories stay unaffected',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="converter"]');
+      await page.click('.category-btn[data-category="currency"]');
+      await page.click('#convKeys [data-action="clear"]');
+      await page.selectOption('#fromUnit', 'USD');
+      await page.selectOption('#toUnit', 'INR');
+      await page.click('#convKeys [data-action="convdigit"][data-value="1"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      const inr = parseFloat((await page.textContent('#result')).replace(/,/g, ''));
+      assertEqual(Math.abs(inr - 8350) < 1, true, '100 USD -> INR is approximately 8350');
+
+      await page.click('.category-btn[data-category="length"]');
+      await page.click('#convKeys [data-action="clear"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="1"]');
+      assertEqual(await page.textContent('#result'), '3.280839895 ft', 'length category unaffected by currency addition');
+    },
+  },
 ];

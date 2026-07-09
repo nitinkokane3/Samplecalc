@@ -227,6 +227,7 @@
       catVolume: 'Volume',
       catSpeed: 'Speed',
       catTime: 'Time',
+      catCurrency: 'Currency',
       swapTitle: 'Swap units',
       statMean: 'Mean',
       statMedian: 'Median',
@@ -349,6 +350,7 @@
       catVolume: 'घनफळ',
       catSpeed: 'वेग',
       catTime: 'वेळ',
+      catCurrency: 'चलन',
       swapTitle: 'एकके बदला',
       statMean: 'सरासरी',
       statMedian: 'मध्यम',
@@ -711,6 +713,21 @@
       units: { sec: 1, min: 60, hour: 3600, day: 86400, week: 604800 },
       labels: { sec: 'Second', min: 'Minute', hour: 'Hour', day: 'Day', week: 'Week' },
     },
+    // Static, illustrative rates (relative to USD) as of this app's last update -- not live.
+    // Kept static deliberately: the app works fully offline (see sw.js), and a live rate
+    // API would silently go stale or fail the moment the network is unavailable.
+    currency: {
+      // Each value is "how many USD is 1 unit of this currency worth" (base unit = USD),
+      // the same convention length/weight/etc. use (base-units per 1 unit).
+      units: {
+        USD: 1, EUR: 1.086957, GBP: 1.265823, INR: 0.011976, JPY: 0.006689,
+        AUD: 0.657895, CAD: 0.735294, CNY: 0.138122, CHF: 1.136364, SGD: 0.746269,
+      },
+      labels: {
+        USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', INR: 'Indian Rupee', JPY: 'Japanese Yen',
+        AUD: 'Australian Dollar', CAD: 'Canadian Dollar', CNY: 'Chinese Yuan', CHF: 'Swiss Franc', SGD: 'Singapore Dollar',
+      },
+    },
   };
 
   const convCategoryDefaults = {
@@ -722,6 +739,7 @@
     volume: ['l', 'gal'],
     speed: ['kmh', 'mph'],
     time: ['min', 'sec'],
+    currency: ['USD', 'EUR'],
   };
 
   const conv = {
@@ -3356,10 +3374,11 @@
         ],
       },
       converter: {
-        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, and Time. Pick a category tab, choose the From/To units, then type a value.',
+        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
         examples: [
           { steps: 'Length: 1 Meter → Foot', result: '= 3.280839895 ft' },
           { steps: 'Temperature: 0 Celsius → Fahrenheit', result: '= 32 °F' },
+          { steps: 'Currency: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
@@ -3438,10 +3457,11 @@
         ],
       },
       converter: {
-        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग आणि वेळ या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका.',
+        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
         examples: [
           { steps: 'लांबी: 1 मीटर → फूट', result: '= 3.280839895 ft' },
           { steps: 'तापमान: 0 सेल्सिअस → फॅरनहाइट', result: '= 32 °F' },
+          { steps: 'चलन: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
