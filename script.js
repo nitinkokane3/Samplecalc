@@ -3881,3 +3881,9 @@
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
 })();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
