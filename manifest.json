@@ -1,7 +1,7 @@
 {
   "name": "Advanced Calculator",
   "short_name": "Calculator",
-  "description": "A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Complex, Regression, and Finance modes.",
+  "description": "A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Vector, Complex, Regression, and Finance modes.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
