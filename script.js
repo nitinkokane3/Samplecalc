@@ -467,6 +467,21 @@
     }
   }
 
+  // Merges only the keys already present in `defaults` from `saved` (e.g. data
+  // restored via Backup & Restore, an untrusted JSON file a user can import).
+  // Unlike a plain Object.assign, this ignores unexpected keys -- including
+  // "__proto__"/"constructor"/"prototype", which a crafted import could use
+  // to attach an unexpected prototype to the merged object.
+  function mergeKnownKeys(defaults, saved) {
+    const result = Object.assign({}, defaults);
+    if (saved && typeof saved === 'object') {
+      Object.keys(defaults).forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(saved, key)) result[key] = saved[key];
+      });
+    }
+    return result;
+  }
+
   function formatNumber(n) {
     if (!isFinite(n)) return t('error');
     const rounded = Math.round((n + Number.EPSILON) * 1e10) / 1e10;
@@ -1059,7 +1074,7 @@
   };
   const solver = {
     type: solverTypes.includes(savedSolverType) ? savedSolverType : 'linear',
-    coeffs: Object.assign({}, solverDefaultCoeffs, savedSolverCoeffs || {}),
+    coeffs: mergeKnownKeys(solverDefaultCoeffs, savedSolverCoeffs),
     activeField: 'a',
   };
 
@@ -2048,7 +2063,7 @@
   const savedFinanceCoeffs = JSON.parse(localStorage.getItem('calc-finance-coeffs') || 'null');
   const finance = {
     type: Object.prototype.hasOwnProperty.call(financeFieldConfig, savedFinanceType) ? savedFinanceType : 'percentof',
-    coeffs: Object.assign(financeDefaultCoeffs(), savedFinanceCoeffs || {}),
+    coeffs: mergeKnownKeys(financeDefaultCoeffs(), savedFinanceCoeffs),
     activeField: 'a',
   };
 
@@ -3154,16 +3169,27 @@
   function renderHistory() {
     historyList.innerHTML = '';
     if (state.history.length === 0) {
-      historyList.innerHTML = `<li class="empty">${t('noHistory')}</li>`;
+      const emptyLi = document.createElement('li');
+      emptyLi.className = 'empty';
+      emptyLi.textContent = t('noHistory');
+      historyList.appendChild(emptyLi);
       return;
     }
     state.history.forEach(({ expr, res }) => {
       const li = document.createElement('li');
-      const exprDisplay = localizeDigits(expr.replace(/\*/g, '×').replace(/\//g, '÷'));
-      const resDisplay = localizeDigits(res);
-      li.innerHTML = `<span class="h-expr">${exprDisplay}</span><span class="h-res">= ${resDisplay}</span>`;
+      // Built via textContent, not innerHTML: expr/res round-trip through
+      // Backup & Restore's JSON import, which is untrusted input a user
+      // could load from a crafted file -- they must never be parsed as markup.
+      const exprSpan = document.createElement('span');
+      exprSpan.className = 'h-expr';
+      exprSpan.textContent = localizeDigits(String(expr).replace(/\*/g, '×').replace(/\//g, '÷'));
+      const resSpan = document.createElement('span');
+      resSpan.className = 'h-res';
+      resSpan.textContent = `= ${localizeDigits(String(res))}`;
+      li.appendChild(exprSpan);
+      li.appendChild(resSpan);
       li.addEventListener('click', () => {
-        state.expression = res.replace(/,/g, '');
+        state.expression = String(res).replace(/,/g, '');
         state.justEvaluated = true;
         render();
       });
