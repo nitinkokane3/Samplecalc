@@ -52,6 +52,7 @@
   const solverCEl = document.getElementById('solverC');
   const solverCRow = document.getElementById('solverCRow');
   const solverKeys = document.getElementById('solverKeys');
+  const graphFnTabs = document.getElementById('graphFnTabs');
   const graphToolbar = document.getElementById('graphToolbar');
   const graphCanvasWrap = document.getElementById('graphCanvasWrap');
   const graphCanvas = document.getElementById('graphCanvas');
@@ -79,6 +80,9 @@
       graphPlot: 'Plot',
       graphFindRoots: 'Roots',
       graphNoRoots: 'No roots found',
+      graphFindIntersect: 'Intersect',
+      graphNoIntersections: 'No intersections found',
+      graphNeedG: 'Enter g(x) first',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -127,6 +131,9 @@
       graphPlot: 'आलेखा करा',
       graphFindRoots: 'मुळे',
       graphNoRoots: 'मुळे आढळली नाहीत',
+      graphFindIntersect: 'छेदनबिंदू',
+      graphNoIntersections: 'छेदनबिंदू आढळले नाहीत',
+      graphNeedG: 'प्रथम g(x) टाका',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -1108,7 +1115,9 @@
 
   // ---------- Graphing mode ----------
   const graphState = {
-    expression: localStorage.getItem('calc-graph-expr') || 'sin(x)',
+    exprF: localStorage.getItem('calc-graph-expr') || 'sin(x)',
+    exprG: localStorage.getItem('calc-graph-expr-g') || '',
+    activeFn: 'f',
     xMin: -10, xMax: 10, yMin: -10, yMax: 10,
     roots: [],
     rootsSearched: false,
@@ -1117,27 +1126,43 @@
     integralComputed: false,
     integralValue: 0,
     integralError: false,
+    intersections: [],
+    intersectionsSearched: false,
+    intersectionsError: false,
+    intersectionsNeedG: false,
   };
 
   function isGraphingMode() {
     return calculator.classList.contains('graphing');
   }
 
-  function renderGraphExpr() {
-    expressionEl.textContent = `y = ${localizeDigits(graphState.expression || '')}`;
+  function activeGraphExpr() {
+    return graphState.activeFn === 'g' ? graphState.exprG : graphState.exprF;
   }
 
-  function evalGraphAt(dataX) {
+  function renderGraphExpr() {
+    const label = graphState.activeFn === 'g' ? 'g(x)' : 'f(x)';
+    expressionEl.textContent = `${label} = ${localizeDigits(activeGraphExpr() || '')}`;
+  }
+
+  function evalAt(expr, dataX) {
     const wasDegrees = state.isDegrees;
     state.isDegrees = false;
     try {
-      return evaluateExpression(graphState.expression, { x: dataX });
+      return evaluateExpression(expr, { x: dataX });
     } catch (e) {
       return NaN;
     } finally {
       state.isDegrees = wasDegrees;
     }
   }
+
+  function evalGraphAt(dataX) {
+    return evalAt(activeGraphExpr(), dataX);
+  }
+
+  function evalFAt(dataX) { return evalAt(graphState.exprF, dataX); }
+  function evalGAt(dataX) { return evalAt(graphState.exprG, dataX); }
 
   function renderGraphResult() {
     if (graphState.trace) {
@@ -1156,6 +1181,16 @@
       resultEl.textContent = graphState.integralError
         ? t('error')
         : `∫dx=${localizeDigits(formatNumber(Math.round(graphState.integralValue * 1e4) / 1e4))}`;
+      return;
+    }
+    if (graphState.intersectionsSearched) {
+      if (graphState.intersectionsNeedG) { resultEl.textContent = t('graphNeedG'); return; }
+      if (graphState.intersectionsError) { resultEl.textContent = t('error'); return; }
+      if (graphState.intersections.length === 0) { resultEl.textContent = t('graphNoIntersections'); return; }
+      const formatted = graphState.intersections
+        .map((p) => `(${formatNumber(Math.round(p.x * 1e6) / 1e6)}, ${formatNumber(Math.round(p.y * 1e6) / 1e6)})`)
+        .join(', ');
+      resultEl.textContent = localizeDigits(formatted);
       return;
     }
     if (!graphState.rootsSearched) { resultEl.textContent = ''; return; }
@@ -1178,6 +1213,10 @@
     graphState.integralComputed = false;
     graphState.integralValue = 0;
     graphState.integralError = false;
+    graphState.intersections = [];
+    graphState.intersectionsSearched = false;
+    graphState.intersectionsError = false;
+    graphState.intersectionsNeedG = false;
   }
 
   function findGraphRoots() {
@@ -1213,6 +1252,55 @@
       if (!deduped.some((d) => Math.abs(d - r) < resolution)) deduped.push(r);
     });
     return { roots: deduped, anyFinite };
+  }
+
+  function findGraphIntersections() {
+    const gExpr = graphState.exprG.trim();
+    if (!gExpr) return { intersections: [], anyFinite: false, needG: true };
+    const { xMin, xMax } = graphState;
+    const samples = 400;
+    const points = [];
+    let anyFinite = false;
+    let prevX = null;
+    let prevDiff = null;
+    for (let i = 0; i <= samples; i++) {
+      const x = xMin + ((xMax - xMin) * i) / samples;
+      const diff = evalFAt(x) - evalGAt(x);
+      if (isFinite(diff)) anyFinite = true;
+      if (prevX !== null && isFinite(prevDiff) && isFinite(diff)) {
+        if (prevDiff === 0) {
+          points.push({ x: prevX, y: evalFAt(prevX) });
+        } else if ((prevDiff < 0 && diff > 0) || (prevDiff > 0 && diff < 0)) {
+          let a = prevX, b = x, fa = prevDiff;
+          for (let iter = 0; iter < 40; iter++) {
+            const mid = (a + b) / 2;
+            const fm = evalFAt(mid) - evalGAt(mid);
+            if (!isFinite(fm)) break;
+            if ((fa < 0 && fm < 0) || (fa > 0 && fm > 0)) { a = mid; fa = fm; } else { b = mid; }
+          }
+          const rx = (a + b) / 2;
+          points.push({ x: rx, y: evalFAt(rx) });
+        }
+      }
+      prevX = x; prevDiff = diff;
+    }
+    const resolution = (xMax - xMin) / samples;
+    const deduped = [];
+    points.forEach((p) => {
+      if (!deduped.some((d) => Math.abs(d.x - p.x) < resolution)) deduped.push(p);
+    });
+    return { intersections: deduped, anyFinite, needG: false };
+  }
+
+  function graphFindIntersections() {
+    const { intersections, anyFinite, needG } = findGraphIntersections();
+    clearGraphAnalysis();
+    graphState.intersectionsSearched = true;
+    graphState.intersectionsNeedG = needG;
+    graphState.intersections = needG ? [] : intersections;
+    graphState.intersectionsError = !needG && !anyFinite;
+    renderGraphDisplay();
+    drawGraph();
   }
 
   function graphFindRoots() {
@@ -1277,6 +1365,8 @@
     const gridColor = styles.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,0.12)';
     const axisColor = styles.getPropertyValue('--text-dim').trim() || '#9aa0b4';
     const curveColor = styles.getPropertyValue('--accent-2').trim() || '#ff6fa5';
+    const curve2Color = styles.getPropertyValue('--accent-3').trim() || '#43d9c8';
+    const activeColor = graphState.activeFn === 'g' ? curve2Color : curveColor;
 
     const { xMin, xMax, yMin, yMax } = graphState;
     const xToPx = (x) => ((x - xMin) / (xMax - xMin)) * w;
@@ -1315,7 +1405,7 @@
 
     if (graphState.integralComputed && !graphState.integralError) {
       const zeroPy = yToPx(Math.max(yMin, Math.min(yMax, 0)));
-      ctx.fillStyle = curveColor;
+      ctx.fillStyle = activeColor;
       ctx.globalAlpha = 0.25;
       const shadeSamples = Math.max(100, Math.floor(w));
       let segment = [];
@@ -1341,33 +1431,53 @@
       ctx.globalAlpha = 1;
     }
 
-    ctx.strokeStyle = curveColor;
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    let drawing = false;
     const samples = Math.max(100, Math.floor(w));
     const yRange = yMax - yMin;
-    for (let i = 0; i <= samples; i++) {
-      const dataX = xMin + ((xMax - xMin) * i) / samples;
-      const y = evalGraphAt(dataX);
-      if (!isFinite(y) || y < yMin - yRange * 2 || y > yMax + yRange * 2) {
-        drawing = false;
-        continue;
+    function drawCurve(expr, color) {
+      if (!expr) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      let drawing = false;
+      for (let i = 0; i <= samples; i++) {
+        const dataX = xMin + ((xMax - xMin) * i) / samples;
+        const y = evalAt(expr, dataX);
+        if (!isFinite(y) || y < yMin - yRange * 2 || y > yMax + yRange * 2) {
+          drawing = false;
+          continue;
+        }
+        const px = xToPx(dataX);
+        const py = yToPx(y);
+        if (!drawing) { ctx.moveTo(px, py); drawing = true; } else { ctx.lineTo(px, py); }
       }
-      const px = xToPx(dataX);
-      const py = yToPx(y);
-      if (!drawing) { ctx.moveTo(px, py); drawing = true; } else { ctx.lineTo(px, py); }
+      ctx.stroke();
     }
-    ctx.stroke();
+    drawCurve(graphState.exprF, curveColor);
+    drawCurve(graphState.exprG.trim(), curve2Color);
 
     if (graphState.roots.length) {
       ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = curveColor;
+      ctx.strokeStyle = activeColor;
       ctx.lineWidth = 1.5;
       graphState.roots.forEach((r) => {
         if (r < xMin || r > xMax) return;
         const px = xToPx(r);
         const py = yToPx(0);
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+
+    if (graphState.intersections.length) {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = curve2Color;
+      ctx.lineWidth = 1.5;
+      graphState.intersections.forEach((p) => {
+        if (p.x < xMin || p.x > xMax || p.y < yMin || p.y > yMax) return;
+        const px = xToPx(p.x);
+        const py = yToPx(p.y);
         ctx.beginPath();
         ctx.arc(px, py, 4, 0, Math.PI * 2);
         ctx.fill();
@@ -1397,7 +1507,7 @@
         ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = curveColor;
+        ctx.fillStyle = activeColor;
         ctx.beginPath();
         ctx.arc(px, py, 5, 0, Math.PI * 2);
         ctx.fill();
@@ -1409,25 +1519,29 @@
   }
 
   function saveGraphExpr() {
-    localStorage.setItem('calc-graph-expr', graphState.expression);
+    localStorage.setItem('calc-graph-expr', graphState.exprF);
+    localStorage.setItem('calc-graph-expr-g', graphState.exprG);
   }
 
   function graphAppend(value) {
-    graphState.expression += value;
+    if (graphState.activeFn === 'g') graphState.exprG += value;
+    else graphState.exprF += value;
     clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphBackspace() {
-    graphState.expression = graphState.expression.slice(0, -1);
+    if (graphState.activeFn === 'g') graphState.exprG = graphState.exprG.slice(0, -1);
+    else graphState.exprF = graphState.exprF.slice(0, -1);
     clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
   }
 
   function graphClearAll() {
-    graphState.expression = '';
+    if (graphState.activeFn === 'g') graphState.exprG = '';
+    else graphState.exprF = '';
     clearGraphAnalysis();
     saveGraphExpr();
     renderGraphDisplay();
@@ -1470,13 +1584,23 @@
   }
 
   graphCanvas.addEventListener('click', (e) => {
-    if (!graphState.expression) return;
+    if (!activeGraphExpr()) return;
     const rect = graphCanvas.getBoundingClientRect();
     const pxX = e.clientX - rect.left;
     const dataX = graphState.xMin + (pxX / rect.width) * (graphState.xMax - graphState.xMin);
     const y = evalGraphAt(dataX);
     clearGraphAnalysis();
     graphState.trace = { x: dataX, y, slope: computeGraphSlope(dataX, y) };
+    renderGraphDisplay();
+    drawGraph();
+  });
+
+  graphFnTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.graph-fn-btn');
+    if (!btn) return;
+    graphState.activeFn = btn.dataset.fn;
+    document.querySelectorAll('.graph-fn-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    clearGraphAnalysis();
     renderGraphDisplay();
     drawGraph();
   });
@@ -1748,6 +1872,7 @@
       case 'graphzoomout': graphZoom(1 / 0.7); break;
       case 'graphfindroots': graphFindRoots(); break;
       case 'graphintegral': graphComputeIntegral(); break;
+      case 'graphfindintersect': graphFindIntersections(); break;
     }
   }
 
@@ -1843,10 +1968,12 @@
         ['x', 'Insert variable x'],
         ['+ − × ÷ ^ ( )', 'Operators and parentheses'],
         ['.', 'Decimal point'],
+        ['f(x) / g(x) tabs', 'Switch which function you are editing'],
         ['Enter / =', 'Plot'],
         ['Backspace', 'Delete last character'],
-        ['Escape', 'Clear function'],
+        ['Escape', 'Clear active function'],
         ['Click graph', 'Trace point (x, y, dy/dx)'],
+        ['Intersect', 'Find where f(x) and g(x) meet'],
       ],
     },
     mr: {
@@ -1896,10 +2023,12 @@
         ['x', 'x चल टाका'],
         ['+ − × ÷ ^ ( )', 'क्रिया चिन्हे आणि कंस'],
         ['.', 'दशांश बिंदू'],
+        ['f(x) / g(x) टॅब', 'कोणते फंक्शन संपादित करायचे ते बदला'],
         ['Enter / =', 'आलेखा करा'],
         ['Backspace', 'शेवटचे अक्षर काढा'],
-        ['Escape', 'फंक्शन साफ करा'],
+        ['Escape', 'सक्रिय फंक्शन साफ करा'],
         ['Click graph', 'बिंदू ट्रेस करा (x, y, dy/dx)'],
+        ['Intersect', 'f(x) आणि g(x) कुठे भेटतात ते शोधा'],
       ],
     },
   };
