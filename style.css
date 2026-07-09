@@ -391,6 +391,7 @@ body {
 
 .graph-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -404,6 +405,7 @@ body {
 
 .matrix-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -417,6 +419,7 @@ body {
 
 .complex-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -430,6 +433,7 @@ body {
 
 .vector-toolbar {
   display: none;
+  flex-wrap: wrap;
   gap: 6px;
   background: var(--fn-bg);
   padding: 4px;
@@ -481,6 +485,18 @@ body {
   width: 100%;
   height: 220px;
   cursor: crosshair;
+}
+
+.graph-range-label {
+  display: none;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  padding: 2px 4px;
+}
+
+.calculator.graphing .graph-range-label {
+  display: block;
 }
 
 .graph-table-wrap {

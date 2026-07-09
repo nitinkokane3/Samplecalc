@@ -58,6 +58,7 @@
         <button class="category-btn" data-category="volume" data-i18n="catVolume">Volume</button>
         <button class="category-btn" data-category="speed" data-i18n="catSpeed">Speed</button>
         <button class="category-btn" data-category="time" data-i18n="catTime">Time</button>
+        <button class="category-btn" data-category="angle" data-i18n="catAngle">Angle</button>
         <button class="category-btn" data-category="currency" data-i18n="catCurrency">Currency</button>
       </div>
 
@@ -89,6 +90,7 @@
         <button class="finance-type-btn" data-type="simpleinterest" data-i18n="financeSimpleInterest">Simple Int.</button>
         <button class="finance-type-btn" data-type="compoundinterest" data-i18n="financeCompoundInterest">Compound Int.</button>
         <button class="finance-type-btn" data-type="tip" data-i18n="financeTip">Tip Split</button>
+        <button class="finance-type-btn" data-type="margin" data-i18n="financeMargin">Margin</button>
       </div>
 
       <div class="graph-fn-tabs" id="graphFnTabs">
@@ -100,6 +102,7 @@
         <button class="graph-tool-btn" data-action="graphreset" data-i18n="graphReset">Reset</button>
         <button class="graph-tool-btn" data-action="graphzoomin" data-i18n="graphZoomIn">Zoom +</button>
         <button class="graph-tool-btn" data-action="graphzoomout" data-i18n="graphZoomOut">Zoom −</button>
+        <button class="graph-tool-btn" data-action="graphzoomfit" data-i18n="graphZoomFit">Fit</button>
         <button class="graph-tool-btn" data-action="graphfindroots" data-i18n="graphFindRoots">Roots</button>
         <button class="graph-tool-btn" data-action="graphintegral">∫dx</button>
         <button class="graph-tool-btn" data-action="graphfindintersect" data-i18n="graphFindIntersect">Intersect</button>
@@ -112,6 +115,7 @@
         <button class="graph-tool-btn" data-action="matrixmul">A×B</button>
         <button class="graph-tool-btn" data-action="matrixdet" data-i18n="matrixDet">Det</button>
         <button class="graph-tool-btn" data-action="matrixinv" data-i18n="matrixInv">Inverse</button>
+        <button class="graph-tool-btn" data-action="matrixtrans" data-i18n="matrixTranspose">Transpose</button>
       </div>
 
       <div class="vector-toolbar" id="vectorToolbar">
@@ -131,6 +135,7 @@
         <button class="graph-tool-btn" data-action="complexmod" data-i18n="complexModulus">Mod</button>
         <button class="graph-tool-btn" data-action="complexarg" data-i18n="complexArgument">Arg</button>
         <button class="graph-tool-btn" data-action="complexconj" data-i18n="complexConjugate">Conj</button>
+        <button class="graph-tool-btn" data-action="complexpolar" data-i18n="complexPolar">Polar</button>
       </div>
 
       <div class="display">
@@ -143,6 +148,7 @@
       <div class="graph-canvas-wrap" id="graphCanvasWrap">
         <canvas id="graphCanvas"></canvas>
       </div>
+      <div class="graph-range-label" id="graphRangeLabel"></div>
 
       <div class="graph-table-wrap" id="graphTableWrap">
         <div class="graph-table" id="graphTable"></div>
@@ -153,6 +159,7 @@
         <div class="conv-row"><span class="conv-label">DEC</span><span class="conv-value" id="convDec">0</span></div>
         <div class="conv-row"><span class="conv-label">OCT</span><span class="conv-value" id="convOct">0</span></div>
         <div class="conv-row"><span class="conv-label">BIN</span><span class="conv-value" id="convBin">0</span></div>
+        <div class="conv-row"><span class="conv-label">ASCII</span><span class="conv-value" id="convAscii">0</span></div>
       </div>
 
       <div class="conv-panel stat-panel" id="statPanel">
@@ -166,6 +173,7 @@
         <div class="conv-row"><span class="conv-label">IQR</span><span class="conv-value" id="statIQR">—</span></div>
         <div class="conv-row"><span class="conv-label">σ</span><span class="conv-value" id="statPStd">0</span></div>
         <div class="conv-row"><span class="conv-label">s</span><span class="conv-value" id="statSStd">—</span></div>
+        <div class="conv-row"><span class="conv-label">CV</span><span class="conv-value" id="statCV">—</span></div>
         <div class="conv-row"><span class="conv-label" data-i18n="statMin">Min</span><span class="conv-value" id="statMin">0</span></div>
         <div class="conv-row"><span class="conv-label" data-i18n="statMax">Max</span><span class="conv-value" id="statMax">0</span></div>
         <div class="conv-row"><span class="conv-label" data-i18n="statRange">Range</span><span class="conv-value" id="statRange">0</span></div>

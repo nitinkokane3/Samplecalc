@@ -57,6 +57,21 @@ bottom of `script.js`. Add your mode's field-row class to that selector so it
 picks up `role="button"`, `tabindex`, and Enter/Space activation automatically
 — don't hand-roll it per mode.
 
+**Toolbars (`.graph-toolbar`, `.matrix-toolbar`, `.complex-toolbar`,
+`.vector-toolbar`) all have `flex-wrap: wrap` — keep it that way when adding
+new ones.** Their buttons use `flex: 1`, which shrinks buttons to fill the
+container but can't shrink a button below its text's min-content width.
+Without wrap, a toolbar with a long label (e.g. "Intersect") can already be
+near the edge at a narrow viewport, and one more button silently overflows
+instead of wrapping to a second row. This caused a real bug: adding an 8th
+button to `.graph-toolbar` overflowed at 350px because it had no `flex-wrap`
+at the time (`.matrix-toolbar`/`.complex-toolbar` didn't either — they just
+hadn't been pushed over the edge yet, confirmed by checking their `scrollWidth`
+was exactly equal to `clientWidth` with zero margin). All four now have
+`flex-wrap: wrap`. When adding a button to any toolbar, check
+`scrollWidth <= clientWidth` at a narrow viewport (350px), not just that it
+looks fine at desktop width.
+
 ## Security-relevant conventions
 
 - **Never build DOM via `innerHTML` string interpolation with data that could

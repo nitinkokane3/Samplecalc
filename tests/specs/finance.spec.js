@@ -127,4 +127,39 @@ module.exports = [
       assertEqual(result.includes('Infinity') || result.includes('NaN'), false, 'no Infinity/NaN leaking through');
     },
   },
+  {
+    name: 'Margin: Cost=80, Sell Price=100 gives Profit=20, Margin=20%, Markup=25% (margin and markup differ)',
+    fn: async (page, baseURL) => {
+      await gotoFinanceType(page, baseURL, 'margin');
+      await setField(page, 'a', 80);
+      await setField(page, 'b', 100);
+      const output = await page.evaluate(() => document.getElementById('financeOutputPanel').textContent);
+      assertEqual(output.includes('20') && output.includes('20%') && output.includes('25%'), true, 'profit/margin/markup present');
+
+      const cRowVisible = await page.evaluate(() => getComputedStyle(document.getElementById('financeCRow')).display !== 'none');
+      assertEqual(cRowVisible, false, 'margin type only uses two fields, c row must stay hidden');
+    },
+  },
+  {
+    name: 'Margin with 0 cost shows an error instead of Infinity',
+    fn: async (page, baseURL) => {
+      await gotoFinanceType(page, baseURL, 'margin');
+      await setField(page, 'b', 5);
+      const result = await page.textContent('#result');
+      assertEqual(result.includes('Infinity') || result.includes('NaN'), false, 'no Infinity/NaN leaking through');
+    },
+  },
+  {
+    name: 'finance-tabs (now 7, including Margin) wraps without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="finance"]');
+      const fits = await page.evaluate(() => {
+        const tabs = document.getElementById('financeTabs');
+        return tabs.scrollWidth <= tabs.clientWidth;
+      });
+      assertEqual(fits, true, 'finance-tabs must not overflow horizontally at 350px width');
+    },
+  },
 ];

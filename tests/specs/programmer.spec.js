@@ -151,4 +151,28 @@ module.exports = [
       assertEqual(bin.length, 32, 'binary two\'s-complement of -1 is 32 bits');
     },
   },
+  {
+    name: 'ASCII viewer shows the character for the low byte, and non-printable bytes report "non-printable"',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="programmer"]');
+      await page.click('.base-btn[data-base="10"]');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="6"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="5"]');
+      assertEqual(await page.textContent('#convAscii'), "'A' (65)", 'DEC 65 shows ASCII A');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="1"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="0"]');
+      assertEqual(await page.textContent('#convAscii'), 'non-printable (10)', 'DEC 10 (line feed) is non-printable');
+
+      await page.click('#progKeys [data-action="clear"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="3"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="2"]');
+      await page.click('#progKeys [data-action="progdigit"][data-value="1"]');
+      assertEqual(await page.textContent('#convAscii'), "'A' (65)", 'DEC 321 wraps to low byte 65 (A)');
+    },
+  },
 ];

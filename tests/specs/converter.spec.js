@@ -23,6 +23,29 @@ module.exports = [
     },
   },
   {
+    name: 'angle: 180 Degree converts to Radian, and 100 Gradian converts to 90 Degree',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="converter"]');
+      await page.click('.category-btn[data-category="angle"]');
+      await page.click('#convKeys [data-action="clear"]');
+      await page.selectOption('#fromUnit', 'deg');
+      await page.selectOption('#toUnit', 'rad');
+      await page.click('#convKeys [data-action="convdigit"][data-value="1"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="8"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      assertEqual(await page.textContent('#result'), '3.1415926536 rad', '180 deg -> rad conversion');
+
+      await page.click('#convKeys [data-action="clear"]');
+      await page.selectOption('#fromUnit', 'grad');
+      await page.selectOption('#toUnit', 'deg');
+      await page.click('#convKeys [data-action="convdigit"][data-value="1"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      await page.click('#convKeys [data-action="convdigit"][data-value="0"]');
+      assertEqual(await page.textContent('#result'), '90 deg', '100 grad -> deg conversion');
+    },
+  },
+  {
     name: 'currency: 100 USD converts to ~92 EUR and round-trips back via swap',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
@@ -91,6 +114,19 @@ module.exports = [
         'none',
         'note hides again after switching away from currency'
       );
+    },
+  },
+  {
+    name: 'category tabs (now 10, including Angle) wrap without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="converter"]');
+      const fits = await page.evaluate(() => {
+        const tabs = document.getElementById('categoryTabs');
+        return tabs.scrollWidth <= tabs.clientWidth;
+      });
+      assertEqual(fits, true, 'category tabs must not overflow horizontally at 350px width');
     },
   },
 ];

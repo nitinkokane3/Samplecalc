@@ -33,6 +33,7 @@
   const convDecEl = document.getElementById('convDec');
   const convOctEl = document.getElementById('convOct');
   const convBinEl = document.getElementById('convBin');
+  const convAsciiEl = document.getElementById('convAscii');
   const categoryTabs = document.getElementById('categoryTabs');
   const unitRow = document.getElementById('unitRow');
   const fromUnitSelect = document.getElementById('fromUnit');
@@ -45,6 +46,7 @@
   const statMeanEl = document.getElementById('statMean');
   const statPStdEl = document.getElementById('statPStd');
   const statSStdEl = document.getElementById('statSStd');
+  const statCVEl = document.getElementById('statCV');
   const statMinEl = document.getElementById('statMin');
   const statMaxEl = document.getElementById('statMax');
   const statMedianEl = document.getElementById('statMedian');
@@ -96,6 +98,7 @@
   const graphToolbar = document.getElementById('graphToolbar');
   const graphCanvasWrap = document.getElementById('graphCanvasWrap');
   const graphCanvas = document.getElementById('graphCanvas');
+  const graphRangeLabelEl = document.getElementById('graphRangeLabel');
   const graphTableWrap = document.getElementById('graphTableWrap');
   const graphTable = document.getElementById('graphTable');
   const graphRow = document.getElementById('graphRow');
@@ -158,6 +161,7 @@
       standard: 'Standard',
       scientific: 'Scientific',
       programmer: 'Programmer',
+      progNonPrintable: 'non-printable',
       converter: 'Converter',
       statistics: 'Statistics',
       solverMode: 'Solver',
@@ -175,6 +179,7 @@
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
       graphZoomOut: 'Zoom −',
+      graphZoomFit: 'Fit',
       graphPlot: 'Plot',
       graphFindRoots: 'Roots',
       graphNoRoots: 'No roots found',
@@ -185,6 +190,7 @@
       matrixMode: 'Matrix',
       matrixDet: 'Det',
       matrixInv: 'Inverse',
+      matrixTranspose: 'Transpose',
       matrixNext: 'Next',
       matrixSingular: 'Singular matrix',
       vectorMode: 'Vector',
@@ -196,6 +202,7 @@
       complexModulus: 'Mod',
       complexArgument: 'Arg',
       complexConjugate: 'Conj',
+      complexPolar: 'Polar',
       regressionMode: 'Regression',
       regrSlope: 'Slope (m)',
       regrIntercept: 'Intercept (b)',
@@ -209,6 +216,7 @@
       financeSimpleInterest: 'Simple Int.',
       financeCompoundInterest: 'Compound Int.',
       financeTip: 'Tip Split',
+      financeMargin: 'Margin',
       financeFieldPercent: 'Percent %',
       financeFieldValue: 'Value',
       financeFieldFrom: 'From',
@@ -222,6 +230,8 @@
       financeFieldBill: 'Bill',
       financeFieldTipPct: 'Tip %',
       financeFieldPeople: 'People',
+      financeFieldCost: 'Cost',
+      financeFieldSellPrice: 'Sell Price',
       financeOutResult: 'Result',
       financeOutChange: 'Change',
       financeOutSaved: 'Amount Saved',
@@ -231,6 +241,9 @@
       financeOutTip: 'Tip Amount',
       financeOutTotalBill: 'Total Bill',
       financeOutPerPerson: 'Per Person',
+      financeOutProfit: 'Profit',
+      financeOutMarginPct: 'Margin %',
+      financeOutMarkupPct: 'Markup %',
       financeIncrease: 'increase',
       financeDecrease: 'decrease',
       financeNeedNonZero: 'Value can\'t be zero',
@@ -242,6 +255,7 @@
       catVolume: 'Volume',
       catSpeed: 'Speed',
       catTime: 'Time',
+      catAngle: 'Angle',
       catCurrency: 'Currency',
       currencyNote: 'Rates are static (not live) so this works fully offline.',
       swapTitle: 'Swap units',
@@ -289,6 +303,7 @@
       standard: 'मानक',
       scientific: 'वैज्ञानिक',
       programmer: 'प्रोग्रामर',
+      progNonPrintable: 'अमुद्रणीय',
       converter: 'रूपांतरक',
       statistics: 'सांख्यिकी',
       solverMode: 'सोडव',
@@ -306,6 +321,7 @@
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
       graphZoomOut: 'झूम −',
+      graphZoomFit: 'फिट',
       graphPlot: 'आलेखा करा',
       graphFindRoots: 'मुळे',
       graphNoRoots: 'मुळे आढळली नाहीत',
@@ -316,6 +332,7 @@
       matrixMode: 'मॅट्रिक्स',
       matrixDet: 'निर्धारक',
       matrixInv: 'व्यस्त',
+      matrixTranspose: 'स्थानांतर',
       matrixNext: 'पुढे',
       matrixSingular: 'व्यस्त अस्तित्वात नाही',
       vectorMode: 'सदिश',
@@ -327,6 +344,7 @@
       complexModulus: 'मापांक',
       complexArgument: 'कोन',
       complexConjugate: 'संयुग्मी',
+      complexPolar: 'ध्रुवीय',
       regressionMode: 'समाश्रयण',
       regrSlope: 'उतार (m)',
       regrIntercept: 'छेद (b)',
@@ -340,6 +358,7 @@
       financeSimpleInterest: 'साधे व्याज',
       financeCompoundInterest: 'चक्रवाढ व्याज',
       financeTip: 'टिप वाटणी',
+      financeMargin: 'मार्जिन',
       financeFieldPercent: 'टक्केवारी %',
       financeFieldValue: 'मूल्य',
       financeFieldFrom: 'सुरुवात',
@@ -353,6 +372,8 @@
       financeFieldBill: 'बिल',
       financeFieldTipPct: 'टिप %',
       financeFieldPeople: 'लोक',
+      financeFieldCost: 'खर्च',
+      financeFieldSellPrice: 'विक्री किंमत',
       financeOutResult: 'निकाल',
       financeOutChange: 'बदल',
       financeOutSaved: 'बचत रक्कम',
@@ -362,6 +383,9 @@
       financeOutTip: 'टिप रक्कम',
       financeOutTotalBill: 'एकूण बिल',
       financeOutPerPerson: 'प्रत्येकी',
+      financeOutProfit: 'नफा',
+      financeOutMarginPct: 'मार्जिन %',
+      financeOutMarkupPct: 'मार्कअप %',
       financeIncrease: 'वाढ',
       financeDecrease: 'घट',
       financeNeedNonZero: 'मूल्य शून्य असू शकत नाही',
@@ -373,6 +397,7 @@
       catVolume: 'घनफळ',
       catSpeed: 'वेग',
       catTime: 'वेळ',
+      catAngle: 'कोन',
       catCurrency: 'चलन',
       currencyNote: 'दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे हे पूर्णपणे ऑफलाइन काम करते.',
       swapTitle: 'एकके बदला',
@@ -546,6 +571,12 @@
     return base === 10 ? String(n) : unsignedBaseStr(n, base);
   }
 
+  function progAsciiStr(n) {
+    const byte = n & 0xff;
+    if (byte >= 32 && byte <= 126) return `'${String.fromCharCode(byte)}' (${byte})`;
+    return `${t('progNonPrintable')} (${byte})`;
+  }
+
   function isDigitValidForBase(ch, base) {
     const val = parseInt(ch, 16);
     return !isNaN(val) && val < base;
@@ -579,6 +610,7 @@
     convDecEl.textContent = localizeDigits(String(prog.value));
     convOctEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 8));
     convBinEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 2));
+    convAsciiEl.textContent = localizeDigits(progAsciiStr(prog.value));
   }
 
   function progShowError() {
@@ -755,6 +787,10 @@
       units: { sec: 1, min: 60, hour: 3600, day: 86400, week: 604800 },
       labels: { sec: 'Second', min: 'Minute', hour: 'Hour', day: 'Day', week: 'Week' },
     },
+    angle: {
+      units: { deg: 1, rad: 180 / Math.PI, grad: 0.9 },
+      labels: { deg: 'Degree', rad: 'Radian', grad: 'Gradian' },
+    },
     // Static, illustrative rates (relative to USD) as of this app's last update -- not live.
     // Kept static deliberately: the app works fully offline (see sw.js), and a live rate
     // API would silently go stale or fail the moment the network is unavailable.
@@ -781,6 +817,7 @@
     volume: ['l', 'gal'],
     speed: ['kmh', 'mph'],
     time: ['min', 'sec'],
+    angle: ['deg', 'rad'],
     currency: ['USD', 'EUR'],
   };
 
@@ -949,7 +986,7 @@
     if (n === 0) {
       return {
         n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0,
-        median: 0, mode: [], range: 0, q1: null, q3: null, iqr: null,
+        median: 0, mode: [], range: 0, q1: null, q3: null, iqr: null, cv: null,
       };
     }
     const sum = data.reduce((a, b) => a + b, 0);
@@ -974,7 +1011,8 @@
     const q1 = medianOf(lowerHalf);
     const q3 = medianOf(upperHalf);
     const iqr = q1 !== null && q3 !== null ? q3 - q1 : null;
-    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min, q1, q3, iqr };
+    const cv = sampleStd !== null && mean !== 0 ? (sampleStd / mean) * 100 : null;
+    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min, q1, q3, iqr, cv };
   }
 
   function renderStatChips() {
@@ -1012,6 +1050,7 @@
     statMeanEl.textContent = localizeDigits(formatNumber(s.mean));
     statPStdEl.textContent = localizeDigits(formatNumber(s.popStd));
     statSStdEl.textContent = s.sampleStd === null ? '—' : localizeDigits(formatNumber(s.sampleStd));
+    statCVEl.textContent = s.cv === null ? '—' : localizeDigits(`${formatNumber(s.cv)}%`);
     statMinEl.textContent = localizeDigits(formatNumber(s.min));
     statMaxEl.textContent = localizeDigits(formatNumber(s.max));
     statMedianEl.textContent = localizeDigits(formatNumber(s.median));
@@ -1515,6 +1554,9 @@
     }
     return result;
   }
+  function matrixTranspose(A) {
+    return A.map((row, i) => row.map((_, j) => A[j][i]));
+  }
   function matrixDet(A) {
     const n = A.length;
     if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
@@ -1574,6 +1616,10 @@
         matrix.resultText = inv ? formatMatrixResult(inv) : t('matrixSingular');
         break;
       }
+      case 'trans':
+        matrix.opLabel = `${activeLabel}ᵀ`;
+        matrix.resultText = formatMatrixResult(matrixTranspose(activeM));
+        break;
     }
     renderMatrix();
   }
@@ -1998,6 +2044,14 @@
         complexNum.opLabel = `conj(${activeLabel})`;
         complexNum.resultText = formatComplex(cConjugate(activeZ));
         break;
+      case 'polar': {
+        const r = cModulus(activeZ);
+        const theta = cArgument(activeZ);
+        const unit = state.isDegrees ? '°' : ' rad';
+        complexNum.opLabel = `polar(${activeLabel})`;
+        complexNum.resultText = `${formatNumber(r)} ∠ ${formatNumber(theta)}${unit}`;
+        break;
+      }
     }
     renderComplex();
   }
@@ -2268,6 +2322,7 @@
     simpleinterest: { fields: ['a', 'b', 'c'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears'] },
     compoundinterest: { fields: ['a', 'b', 'c', 'd'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears', 'financeFieldCompounds'] },
     tip: { fields: ['a', 'b', 'c'], labels: ['financeFieldBill', 'financeFieldTipPct', 'financeFieldPeople'] },
+    margin: { fields: ['a', 'b'], labels: ['financeFieldCost', 'financeFieldSellPrice'] },
   };
   const financeDefaultCoeffs = () => ({ a: '0', b: '0', c: '0', d: '1' });
   const savedFinanceType = localStorage.getItem('calc-finance-type');
@@ -2322,6 +2377,15 @@
           { label: t('financeOutTip'), value: tipAmt },
           { label: t('financeOutTotalBill'), value: total },
           { label: t('financeOutPerPerson'), value: total / c },
+        ] };
+      }
+      case 'margin': {
+        if (a === 0 || b === 0) return { error: t('financeNeedNonZero') };
+        const profit = b - a;
+        return { outputs: [
+          { label: t('financeOutProfit'), value: profit },
+          { label: t('financeOutMarginPct'), text: `${formatNumber((profit / b) * 100)}%` },
+          { label: t('financeOutMarkupPct'), text: `${formatNumber((profit / a) * 100)}%` },
         ] };
       }
       default:
@@ -2934,9 +2998,18 @@
     graphCanvas.height = Math.max(1, Math.round(rect.height * dpr));
   }
 
+  function renderGraphRangeLabel() {
+    const { xMin, xMax, yMin, yMax } = graphState;
+    const fmt = (n) => formatNumber(Math.round(n * 1e4) / 1e4);
+    graphRangeLabelEl.textContent = localizeDigits(
+      `X: ${fmt(xMin)} – ${fmt(xMax)}   Y: ${fmt(yMin)} – ${fmt(yMax)}`
+    );
+  }
+
   function drawGraph() {
     if (!isGraphingMode()) return;
     resizeGraphCanvas();
+    renderGraphRangeLabel();
     const ctx = graphCanvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const w = graphCanvas.width / dpr;
@@ -3165,6 +3238,32 @@
     const halfY = ((graphState.yMax - graphState.yMin) / 2) * factor;
     graphState.xMin = cx - halfX; graphState.xMax = cx + halfX;
     graphState.yMin = cy - halfY; graphState.yMax = cy + halfY;
+    drawGraph();
+  }
+
+  function graphZoomToFit() {
+    const fns = [];
+    if (graphState.exprF && graphState.exprF.trim()) fns.push(evalFAt);
+    if (graphState.exprG && graphState.exprG.trim()) fns.push(evalGAt);
+    if (fns.length === 0) return;
+
+    const samples = 400;
+    let yMin = Infinity, yMax = -Infinity;
+    for (let i = 0; i <= samples; i++) {
+      const x = graphState.xMin + (graphState.xMax - graphState.xMin) * (i / samples);
+      for (const fn of fns) {
+        const y = fn(x);
+        if (isFinite(y)) {
+          if (y < yMin) yMin = y;
+          if (y > yMax) yMax = y;
+        }
+      }
+    }
+    if (!isFinite(yMin) || !isFinite(yMax)) return;
+    if (yMin === yMax) { yMin -= 1; yMax += 1; }
+    const pad = (yMax - yMin) * 0.1;
+    graphState.yMin = yMin - pad;
+    graphState.yMax = yMax + pad;
     drawGraph();
   }
 
@@ -3491,6 +3590,7 @@
       case 'matrixmul': matrixCompute('mul'); break;
       case 'matrixdet': matrixCompute('det'); break;
       case 'matrixinv': matrixCompute('inv'); break;
+      case 'matrixtrans': matrixCompute('trans'); break;
       case 'vectordigit': vectorAppendDigit(value); break;
       case 'vectordecimal': vectorAppendDecimal(); break;
       case 'vectorsign': vectorToggleSign(); break;
@@ -3512,6 +3612,7 @@
       case 'complexmod': complexCompute('mod'); break;
       case 'complexarg': complexCompute('arg'); break;
       case 'complexconj': complexCompute('conj'); break;
+      case 'complexpolar': complexCompute('polar'); break;
       case 'regrdigit': regrAppendDigit(value); break;
       case 'regrdecimal': regrAppendDecimal(); break;
       case 'regrsign': regrToggleSign(); break;
@@ -3545,6 +3646,7 @@
       case 'graphreset': graphResetView(); break;
       case 'graphzoomin': graphZoom(0.7); break;
       case 'graphzoomout': graphZoom(1 / 0.7); break;
+      case 'graphzoomfit': graphZoomToFit(); break;
       case 'graphfindroots': graphFindRoots(); break;
       case 'graphintegral': graphComputeIntegral(); break;
       case 'graphfindintersect': graphFindIntersections(); break;
@@ -3636,24 +3738,26 @@
         ],
       },
       programmer: {
-        description: 'Work in HEX, DEC, OCT, or BIN using the base tabs above the display, with bitwise AND/OR/XOR/NOT and bit-shift operators.',
+        description: 'Work in HEX, DEC, OCT, or BIN using the base tabs above the display, with bitwise AND/OR/XOR/NOT and bit-shift operators. The panel below also shows the ASCII character for the current value\'s low byte.',
         examples: [
           { steps: 'In HEX: 1A, AND, 0F, =', result: '= A (0x0A)' },
           { steps: 'In HEX: A, OR, 5, =', result: '= F' },
+          { steps: 'In DEC: 65', result: "ASCII = 'A' (65)" },
         ],
       },
       converter: {
-        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
+        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, Angle, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
         examples: [
           { steps: 'Length: 1 Meter → Foot', result: '= 3.280839895 ft' },
           { steps: 'Temperature: 0 Celsius → Fahrenheit', result: '= 32 °F' },
+          { steps: 'Angle: 180 Degree → Radian', result: '= 3.1415926536 rad' },
           { steps: 'Currency: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
-        description: 'Add a list of numbers to get the count, sum, mean, median, mode, quartiles, IQR, and both population and sample standard deviation.',
+        description: 'Add a list of numbers to get the count, sum, mean, median, mode, quartiles, IQR, population/sample standard deviation, and the coefficient of variation (CV = sample std dev ÷ mean, as a %).',
         examples: [
-          { steps: 'Add: 2, 4, 4, 4, 5, 5, 7, 9', result: 'Mean = 5, Median = 4.5, Mode = 4' },
+          { steps: 'Add: 2, 4, 4, 4, 5, 5, 7, 9', result: 'Mean = 5, Median = 4.5, Mode = 4, CV = 42.761798706%' },
         ],
       },
       solver: {
@@ -3666,18 +3770,20 @@
         ],
       },
       graphing: {
-        description: 'Type f(x) (and optionally g(x)) with the on-screen keypad, then use the toolbar for Roots, ∫dx, Intersect, or Table. Tap the graph itself to trace a point and see its slope.',
+        description: 'Type f(x) (and optionally g(x)) with the on-screen keypad, then use the toolbar for Roots, ∫dx, Intersect, or Table. Fit auto-scales the Y range to the curve within the current X window. Tap the graph itself to trace a point and see its slope.',
         examples: [
           { steps: 'f(x) = x^2 - 4, then Roots', result: 'Roots at x = -2 and x = 2' },
           { steps: 'f(x) = x, g(x) = x^2, then Intersect', result: 'Meets at (0, 0) and (1, 1)' },
+          { steps: 'f(x) = x^2, then Fit (X stays -10 to 10)', result: 'Y range becomes -10 to 110' },
         ],
       },
       matrix: {
-        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse (via cofactor expansion for 3×3) of whichever matrix is active.',
+        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, Inverse (via cofactor expansion for 3×3), or Transpose of whichever matrix is active.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
           { steps: '3×3: Det of A=[1,0,2;-1,3,1;0,2,4]', result: '= 6' },
+          { steps: 'Transpose of A=[1,2;3,4]', result: '= [1, 3; 2, 4]' },
         ],
       },
       vector: {
@@ -3689,10 +3795,11 @@
         ],
       },
       complex: {
-        description: 'Enter two complex numbers A and B by tapping their Re/Im fields, then compute A+B, A-B, A×B, A÷B, or Mod/Arg/Conj of whichever number is active.',
+        description: 'Enter two complex numbers A and B by tapping their Re/Im fields, then compute A+B, A-B, A×B, A÷B, or Mod/Arg/Conj/Polar of whichever number is active. Polar shows r ∠ θ using the current DEG/RAD setting.',
         examples: [
           { steps: 'A=3+4i, B=1-2i, then A+B', result: '= 4 + 2i' },
           { steps: 'Mod of A=3+4i', result: '= 5 (that is, |3+4i|)' },
+          { steps: 'Polar of A=3+4i (in DEG)', result: '= 5 ∠ 53.1301023542°' },
         ],
       },
       regression: {
@@ -3702,11 +3809,12 @@
         ],
       },
       finance: {
-        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, and splitting a tip. Pick a tab, tap a field to edit it.',
+        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, splitting a tip, and margin/markup on a cost and sell price. Pick a tab, tap a field to edit it.',
         examples: [
           { steps: '% Of: Percent=20, Value=150', result: '= 30' },
           { steps: 'Discount: Price=200, Discount %=15', result: 'Saved = 30, Final Price = 170' },
           { steps: 'Tip Split: Bill=100, Tip %=18, People=4', result: 'Tip = 18, Total = 118, Per Person = 29.5' },
+          { steps: 'Margin: Cost=80, Sell Price=100', result: 'Profit = 20, Margin = 20%, Markup = 25%' },
         ],
       },
     },
@@ -3727,24 +3835,26 @@
         ],
       },
       programmer: {
-        description: 'डिस्प्लेवरील बेस टॅब वापरून HEX, DEC, OCT किंवा BIN मध्ये काम करा, तसेच बिटवाइज AND/OR/XOR/NOT आणि बिट-शिफ्ट क्रिया वापरा.',
+        description: 'डिस्प्लेवरील बेस टॅब वापरून HEX, DEC, OCT किंवा BIN मध्ये काम करा, तसेच बिटवाइज AND/OR/XOR/NOT आणि बिट-शिफ्ट क्रिया वापरा. खालील पॅनेल सध्याच्या मूल्याच्या low byte साठी ASCII अक्षरही दाखवते.',
         examples: [
           { steps: 'HEX मध्ये: 1A, AND, 0F, =', result: '= A (0x0A)' },
           { steps: 'HEX मध्ये: A, OR, 5, =', result: '= F' },
+          { steps: 'DEC मध्ये: 65', result: "ASCII = 'A' (65)" },
         ],
       },
       converter: {
-        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
+        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ, कोन आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
         examples: [
           { steps: 'लांबी: 1 मीटर → फूट', result: '= 3.280839895 ft' },
           { steps: 'तापमान: 0 सेल्सिअस → फॅरनहाइट', result: '= 32 °F' },
+          { steps: 'कोन: 180 अंश → रेडियन', result: '= 3.1415926536 rad' },
           { steps: 'चलन: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
-        description: 'संख्यांची यादी जोडून N, बेरीज, सरासरी, मध्यम, बहुलक, चतुर्थांश, IQR, तसेच लोकसंख्या आणि नमुना मानक विचलन मिळवा.',
+        description: 'संख्यांची यादी जोडून N, बेरीज, सरासरी, मध्यम, बहुलक, चतुर्थांश, IQR, लोकसंख्या व नमुना मानक विचलन, तसेच भिन्नता गुणांक (CV = नमुना मानक विचलन ÷ सरासरी, % मध्ये) मिळवा.',
         examples: [
-          { steps: 'जोडा: 2, 4, 4, 4, 5, 5, 7, 9', result: 'सरासरी = 5, मध्यम = 4.5, बहुलक = 4' },
+          { steps: 'जोडा: 2, 4, 4, 4, 5, 5, 7, 9', result: 'सरासरी = 5, मध्यम = 4.5, बहुलक = 4, CV = 42.761798706%' },
         ],
       },
       solver: {
@@ -3757,18 +3867,20 @@
         ],
       },
       graphing: {
-        description: 'ऑन-स्क्रीन कीपॅड वापरून f(x) (आणि इच्छित असल्यास g(x)) टाका, नंतर Roots, ∫dx, Intersect किंवा Table साठी टूलबार वापरा. बिंदू ट्रेस करण्यासाठी आलेखावर टॅप करा.',
+        description: 'ऑन-स्क्रीन कीपॅड वापरून f(x) (आणि इच्छित असल्यास g(x)) टाका, नंतर Roots, ∫dx, Intersect किंवा Table साठी टूलबार वापरा. Fit सध्याच्या X श्रेणीतील वक्रानुसार Y श्रेणी आपोआप समायोजित करतो. बिंदू ट्रेस करण्यासाठी आलेखावर टॅप करा.',
         examples: [
           { steps: 'f(x) = x^2 - 4, नंतर Roots', result: 'x = -2 आणि x = 2 वर मुळे' },
           { steps: 'f(x) = x, g(x) = x^2, नंतर Intersect', result: '(0, 0) आणि (1, 1) येथे भेटतात' },
+          { steps: 'f(x) = x^2, नंतर Fit (X -10 ते 10 राहते)', result: 'Y श्रेणी -10 ते 110 होते' },
         ],
       },
       matrix: {
-        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे) काढा.',
+        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे), किंवा Transpose काढा.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
           { steps: '3×3: A=[1,0,2;-1,3,1;0,2,4] चा Det', result: '= 6' },
+          { steps: 'A=[1,2;3,4] चा Transpose', result: '= [1, 3; 2, 4]' },
         ],
       },
       vector: {
@@ -3780,10 +3892,11 @@
         ],
       },
       complex: {
-        description: 'Re/Im फील्डवर टॅप करून दोन सम्मिश्र संख्या A आणि B टाका, नंतर A+B, A-B, A×B, A÷B, किंवा सक्रिय संख्येचा Mod/Arg/Conj काढा.',
+        description: 'Re/Im फील्डवर टॅप करून दोन सम्मिश्र संख्या A आणि B टाका, नंतर A+B, A-B, A×B, A÷B, किंवा सक्रिय संख्येचा Mod/Arg/Conj/Polar काढा. Polar सध्याच्या DEG/RAD सेटिंगनुसार r ∠ θ दाखवतो.',
         examples: [
           { steps: 'A=3+4i, B=1-2i, नंतर A+B', result: '= 4 + 2i' },
           { steps: 'A=3+4i चा Mod', result: '= 5 (म्हणजे |3+4i|)' },
+          { steps: 'A=3+4i चा Polar (DEG मध्ये)', result: '= 5 ∠ 53.1301023542°' },
         ],
       },
       regression: {
@@ -3793,11 +3906,12 @@
         ],
       },
       finance: {
-        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, आणि टिप वाटणी. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
+        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, टिप वाटणी, आणि खर्च व विक्री किंमतीवरील मार्जिन/मार्कअप. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
         examples: [
           { steps: '% चे: टक्केवारी=20, मूल्य=150', result: '= 30' },
           { steps: 'सवलत: किंमत=200, सवलत %=15', result: 'बचत = 30, अंतिम किंमत = 170' },
           { steps: 'टिप वाटणी: बिल=100, टिप %=18, लोक=4', result: 'टिप = 18, एकूण = 118, प्रत्येकी = 29.5' },
+          { steps: 'मार्जिन: खर्च=80, विक्री किंमत=100', result: 'नफा = 20, मार्जिन = 20%, मार्कअप = 25%' },
         ],
       },
     },

@@ -82,4 +82,51 @@ module.exports = [
       assertEqual(hidden, true, 'table hides after a second toggle');
     },
   },
+  {
+    name: 'zoom-to-fit scales Y to the curve within the current X window, and Reset restores the default view',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="graphing"]');
+      await page.click('#graphKeys [data-action="graphclear"]');
+      assertEqual(await page.textContent('#graphRangeLabel'), 'X: -10 – 10   Y: -10 – 10', 'default view range label');
+
+      await page.click('#graphRow [data-action="graphvar"]');
+      await page.click('#graphRow [data-action="graphop"][data-value="^"]');
+      await page.click('#graphKeys [data-action="graphdigit"][data-value="2"]');
+      await page.click('[data-action="graphzoomfit"]');
+      assertEqual(await page.textContent('#graphRangeLabel'), 'X: -10 – 10   Y: -10 – 110', 'x^2 fit range: X unchanged, Y padded to [0,100]');
+
+      await page.click('[data-action="graphreset"]');
+      assertEqual(await page.textContent('#graphRangeLabel'), 'X: -10 – 10   Y: -10 – 10', 'reset restores the default view');
+    },
+  },
+  {
+    name: 'zoom-to-fit is a no-op with no function entered, and widens a flat function\'s Y range',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="graphing"]');
+      await page.click('#graphKeys [data-action="graphclear"]');
+
+      const before = await page.textContent('#graphRangeLabel');
+      await page.click('[data-action="graphzoomfit"]');
+      assertEqual(await page.textContent('#graphRangeLabel'), before, 'fit with empty f(x) does not change the view');
+
+      await page.click('#graphKeys [data-action="graphdigit"][data-value="5"]');
+      await page.click('[data-action="graphzoomfit"]');
+      assertEqual(await page.textContent('#graphRangeLabel'), 'X: -10 – 10   Y: 3.8 – 6.2', 'flat function f(x)=5 still gets a non-zero Y range');
+    },
+  },
+  {
+    name: 'graph toolbar (now 8 buttons, including Fit) wraps without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="graphing"]');
+      const fits = await page.evaluate(() => {
+        const tb = document.getElementById('graphToolbar');
+        return tb.scrollWidth <= tb.clientWidth;
+      });
+      assertEqual(fits, true, 'graph toolbar must not overflow horizontally at 350px width');
+    },
+  },
 ];

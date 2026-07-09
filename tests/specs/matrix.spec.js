@@ -97,6 +97,50 @@ module.exports = [
     },
   },
   {
+    name: '2x2: transpose of A=[1,2;3,4] = [1,3;2,4], and transpose of active B (identity) is unchanged',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="matrix"]');
+      await setCell(page, 'a', 0, 0, 1); await setCell(page, 'a', 0, 1, 2);
+      await setCell(page, 'a', 1, 0, 3); await setCell(page, 'a', 1, 1, 4);
+      await page.click('[data-action="matrixtrans"]');
+      assertEqual(await page.textContent('#result'), '[1, 3; 2, 4]', '2x2 transpose of A result');
+      assertEqual(await page.textContent('#expression'), 'Aᵀ', '2x2 transpose of A op label');
+
+      await page.click('.matrix-cell[data-mat="b"][data-r="0"][data-c="0"]');
+      await page.click('[data-action="matrixtrans"]');
+      assertEqual(await page.textContent('#result'), '[1, 0; 0, 1]', '2x2 transpose of identity B result');
+      assertEqual(await page.textContent('#expression'), 'Bᵀ', '2x2 transpose of B op label');
+    },
+  },
+  {
+    name: '3x3: transpose of A=[1,2,3;4,5,6;7,8,9] = [1,4,7;2,5,8;3,6,9]',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="matrix"]');
+      await page.click('.matrix-size-btn[data-size="3"]');
+      await setCell(page, 'a', 0, 0, 1); await setCell(page, 'a', 0, 1, 2); await setCell(page, 'a', 0, 2, 3);
+      await setCell(page, 'a', 1, 0, 4); await setCell(page, 'a', 1, 1, 5); await setCell(page, 'a', 1, 2, 6);
+      await setCell(page, 'a', 2, 0, 7); await setCell(page, 'a', 2, 1, 8); await setCell(page, 'a', 2, 2, 9);
+      await page.click('.matrix-cell[data-mat="a"][data-r="0"][data-c="0"]');
+      await page.click('[data-action="matrixtrans"]');
+      assertEqual(await page.textContent('#result'), '[1, 4, 7; 2, 5, 8; 3, 6, 9]', '3x3 transpose result');
+    },
+  },
+  {
+    name: 'matrix toolbar fits without horizontal overflow on a narrow (350px) viewport',
+    fn: async (page, baseURL) => {
+      await page.setViewportSize({ width: 350, height: 950 });
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="matrix"]');
+      const fits = await page.evaluate(() => {
+        const tb = document.getElementById('matrixToolbar');
+        return tb.scrollWidth <= tb.clientWidth;
+      });
+      assertTrue(fits, 'matrix toolbar with 6 buttons must not overflow at 350px width');
+    },
+  },
+  {
     name: 'switching to 3x3 and back to 2x2 leaves 2x2 math unaffected',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
