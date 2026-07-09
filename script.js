@@ -58,6 +58,9 @@
   const graphCanvas = document.getElementById('graphCanvas');
   const graphRow = document.getElementById('graphRow');
   const graphKeys = document.getElementById('graphKeys');
+  const matrixToolbar = document.getElementById('matrixToolbar');
+  const matrixPanel = document.getElementById('matrixPanel');
+  const matrixKeys = document.getElementById('matrixKeys');
 
   const translations = {
     en: {
@@ -83,6 +86,11 @@
       graphFindIntersect: 'Intersect',
       graphNoIntersections: 'No intersections found',
       graphNeedG: 'Enter g(x) first',
+      matrixMode: 'Matrix',
+      matrixDet: 'Det',
+      matrixInv: 'Inverse',
+      matrixNext: 'Next',
+      matrixSingular: 'Singular matrix',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -134,6 +142,11 @@
       graphFindIntersect: 'छेदनबिंदू',
       graphNoIntersections: 'छेदनबिंदू आढळले नाहीत',
       graphNeedG: 'प्रथम g(x) टाका',
+      matrixMode: 'मॅट्रिक्स',
+      matrixDet: 'निर्धारक',
+      matrixInv: 'व्यस्त',
+      matrixNext: 'पुढे',
+      matrixSingular: 'व्यस्त अस्तित्वात नाही',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -209,7 +222,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -217,6 +230,7 @@
     else if (isConverterMode()) renderConv();
     else if (isStatisticsMode()) renderStat();
     else if (isSolverMode()) renderSolver();
+    else if (isMatrixMode()) renderMatrix();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -940,6 +954,206 @@
     if (!row) return;
     solver.activeField = row.dataset.field;
     renderSolver();
+  });
+
+  // ---------- Matrix calculator mode (2x2) ----------
+  const identity2 = () => [['1', '0'], ['0', '1']];
+  const savedMatrixA = JSON.parse(localStorage.getItem('calc-matrix-a') || 'null');
+  const savedMatrixB = JSON.parse(localStorage.getItem('calc-matrix-b') || 'null');
+  const matrix = {
+    entries: { a: savedMatrixA || identity2(), b: savedMatrixB || identity2() },
+    activeMat: 'a',
+    activeR: 0,
+    activeC: 0,
+    opLabel: '',
+    resultText: '',
+  };
+
+  function isMatrixMode() {
+    return calculator.classList.contains('matrix');
+  }
+
+  function saveMatrix() {
+    localStorage.setItem('calc-matrix-a', JSON.stringify(matrix.entries.a));
+    localStorage.setItem('calc-matrix-b', JSON.stringify(matrix.entries.b));
+  }
+
+  function matrixNumeric(mat) {
+    return matrix.entries[mat].map((row) => row.map((v) => parseFloat(v) || 0));
+  }
+
+  function matrixAdd(A, B) {
+    return A.map((row, i) => row.map((v, j) => v + B[i][j]));
+  }
+  function matrixSub(A, B) {
+    return A.map((row, i) => row.map((v, j) => v - B[i][j]));
+  }
+  function matrixMul(A, B) {
+    const result = [[0, 0], [0, 0]];
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        for (let k = 0; k < 2; k++) result[i][j] += A[i][k] * B[k][j];
+      }
+    }
+    return result;
+  }
+  function matrixDet(A) {
+    return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  }
+  function matrixInverse(A) {
+    const d = matrixDet(A);
+    if (d === 0) return null;
+    return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]];
+  }
+
+  function formatMatrixResult(M) {
+    return `[${formatNumber(M[0][0])}, ${formatNumber(M[0][1])}; ${formatNumber(M[1][0])}, ${formatNumber(M[1][1])}]`;
+  }
+
+  function matrixCompute(op) {
+    const A = matrixNumeric('a');
+    const B = matrixNumeric('b');
+    const activeLabel = matrix.activeMat === 'b' ? 'B' : 'A';
+    const activeM = matrix.activeMat === 'b' ? B : A;
+    switch (op) {
+      case 'add':
+        matrix.opLabel = 'A + B';
+        matrix.resultText = formatMatrixResult(matrixAdd(A, B));
+        break;
+      case 'sub':
+        matrix.opLabel = 'A − B';
+        matrix.resultText = formatMatrixResult(matrixSub(A, B));
+        break;
+      case 'mul':
+        matrix.opLabel = 'A × B';
+        matrix.resultText = formatMatrixResult(matrixMul(A, B));
+        break;
+      case 'det':
+        matrix.opLabel = `det(${activeLabel})`;
+        matrix.resultText = formatNumber(matrixDet(activeM));
+        break;
+      case 'inv': {
+        const inv = matrixInverse(activeM);
+        matrix.opLabel = `${activeLabel}⁻¹`;
+        matrix.resultText = inv ? formatMatrixResult(inv) : t('matrixSingular');
+        break;
+      }
+    }
+    renderMatrix();
+  }
+
+  function renderMatrixGrids() {
+    document.querySelectorAll('.matrix-cell').forEach((el) => {
+      const m = el.dataset.mat;
+      const r = parseInt(el.dataset.r, 10);
+      const c = parseInt(el.dataset.c, 10);
+      el.textContent = localizeDigits(matrix.entries[m][r][c]);
+      el.classList.toggle('active', matrix.activeMat === m && matrix.activeR === r && matrix.activeC === c);
+    });
+  }
+
+  function renderMatrix() {
+    renderMatrixGrids();
+    expressionEl.textContent = localizeDigits(matrix.opLabel);
+    resultEl.textContent = localizeDigits(matrix.resultText);
+    memoryIndicator.textContent = '';
+  }
+
+  function matrixSetActiveCell(m, r, c) {
+    matrix.activeMat = m;
+    matrix.activeR = r;
+    matrix.activeC = c;
+    renderMatrix();
+  }
+
+  function matrixNextCell() {
+    let { activeMat: m, activeR: r, activeC: c } = matrix;
+    c += 1;
+    if (c > 1) {
+      c = 0;
+      r += 1;
+      if (r > 1) {
+        r = 0;
+        m = m === 'a' ? 'b' : 'a';
+      }
+    }
+    matrix.activeMat = m;
+    matrix.activeR = r;
+    matrix.activeC = c;
+    renderMatrix();
+  }
+
+  function matrixActiveCellValue() {
+    return matrix.entries[matrix.activeMat][matrix.activeR][matrix.activeC];
+  }
+
+  function matrixSetActiveCellValue(value) {
+    matrix.entries[matrix.activeMat][matrix.activeR][matrix.activeC] = value;
+  }
+
+  function matrixAppendDigit(ch) {
+    const cur = matrixActiveCellValue();
+    matrixSetActiveCellValue((cur === '0' ? '' : cur) + ch);
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function matrixAppendDecimal() {
+    const cur = matrixActiveCellValue();
+    if (cur.includes('.')) return;
+    matrixSetActiveCellValue(cur + '.');
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function matrixToggleSign() {
+    const cur = matrixActiveCellValue();
+    matrixSetActiveCellValue(cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur));
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function matrixBackspace() {
+    const cur = matrixActiveCellValue();
+    matrixSetActiveCellValue(cur.slice(0, -1) || '0');
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function matrixClearEntry() {
+    matrixSetActiveCellValue('0');
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function matrixClearAll() {
+    matrix.entries.a = identity2();
+    matrix.entries.b = identity2();
+    matrix.activeMat = 'a';
+    matrix.activeR = 0;
+    matrix.activeC = 0;
+    matrix.opLabel = '';
+    matrix.resultText = '';
+    saveMatrix();
+    renderMatrix();
+  }
+
+  function insertAnsMatrix() {
+    matrixSetActiveCellValue(convPlainNumber(lastAnswer));
+    saveMatrix();
+    renderMatrix();
+  }
+
+  matrixPanel.addEventListener('click', (e) => {
+    const cell = e.target.closest('.matrix-cell');
+    if (!cell) return;
+    matrixSetActiveCell(cell.dataset.mat, parseInt(cell.dataset.r, 10), parseInt(cell.dataset.c, 10));
+  });
+
+  matrixToolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.graph-tool-btn');
+    if (!btn) return;
+    handleAction(btn.dataset.action, btn.dataset.value);
   });
 
   // ---------- Safe expression parser (recursive descent) ----------
@@ -1803,6 +2017,7 @@
         else if (isConverterMode()) convClearAll();
         else if (isStatisticsMode()) statClearAll();
         else if (isSolverMode()) solverClearAll();
+        else if (isMatrixMode()) matrixClearAll();
         else clearAll();
         break;
       case 'clear-entry':
@@ -1810,6 +2025,7 @@
         else if (isConverterMode()) convClearEntry();
         else if (isStatisticsMode()) statClearEntry();
         else if (isSolverMode()) solverClearEntry();
+        else if (isMatrixMode()) matrixClearEntry();
         else clearEntry();
         break;
       case 'backspace':
@@ -1817,6 +2033,7 @@
         else if (isConverterMode()) convBackspace();
         else if (isStatisticsMode()) statBackspace();
         else if (isSolverMode()) solverBackspace();
+        else if (isMatrixMode()) matrixBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -1850,11 +2067,21 @@
       case 'solverdecimal': solverAppendDecimal(); break;
       case 'solversign': solverToggleSign(); break;
       case 'solvernext': solverNextField(); break;
+      case 'matrixdigit': matrixAppendDigit(value); break;
+      case 'matrixdecimal': matrixAppendDecimal(); break;
+      case 'matrixsign': matrixToggleSign(); break;
+      case 'matrixnextcell': matrixNextCell(); break;
+      case 'matrixadd': matrixCompute('add'); break;
+      case 'matrixsub': matrixCompute('sub'); break;
+      case 'matrixmul': matrixCompute('mul'); break;
+      case 'matrixdet': matrixCompute('det'); break;
+      case 'matrixinv': matrixCompute('inv'); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
         else if (isStatisticsMode()) insertAnsStat();
         else if (isSolverMode()) insertAnsSolver();
+        else if (isMatrixMode()) insertAnsMatrix();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -1876,7 +2103,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -1892,6 +2119,7 @@
     calculator.classList.toggle('statistics', mode === 'statistics');
     calculator.classList.toggle('solver', mode === 'solver');
     calculator.classList.toggle('graphing', mode === 'graphing');
+    calculator.classList.toggle('matrix', mode === 'matrix');
     if (mode === 'programmer') {
       updateBaseTabsUI();
       updateDigitAvailability();
@@ -1911,6 +2139,9 @@
     if (mode === 'graphing') {
       renderGraphDisplay();
       drawGraph();
+    }
+    if (mode === 'matrix') {
+      renderMatrix();
     }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -1975,6 +2206,15 @@
         ['Click graph', 'Trace point (x, y, dy/dx)'],
         ['Intersect', 'Find where f(x) and g(x) meet'],
       ],
+      matrix: [
+        ['0–9', 'Enter digits into the active cell'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next cell'],
+        ['Click cell', 'Select that cell to edit'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset both matrices to identity'],
+      ],
     },
     mr: {
       standard: [
@@ -2029,6 +2269,15 @@
         ['Escape', 'सक्रिय फंक्शन साफ करा'],
         ['Click graph', 'बिंदू ट्रेस करा (x, y, dy/dx)'],
         ['Intersect', 'f(x) आणि g(x) कुठे भेटतात ते शोधा'],
+      ],
+      matrix: [
+        ['0–9', 'सक्रिय सेलमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील सेलवर जा'],
+        ['सेलवर क्लिक करा', 'तो सेल संपादित करण्यासाठी निवडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'दोन्ही मॅट्रिक्स रीसेट करा'],
       ],
     },
   };
@@ -2140,6 +2389,15 @@
       if (key === 'Enter' || key === '=') { e.preventDefault(); drawGraph(); return; }
       return;
     }
+    if (isMatrixMode()) {
+      if (/[0-9]/.test(key)) { matrixAppendDigit(key); return; }
+      if (key === '.') { matrixAppendDecimal(); return; }
+      if (key === '-') { matrixToggleSign(); return; }
+      if (key === 'Backspace') { matrixBackspace(); return; }
+      if (key === 'Escape') { matrixClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); matrixNextCell(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -2157,7 +2415,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
