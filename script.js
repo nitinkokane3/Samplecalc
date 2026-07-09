@@ -46,6 +46,7 @@
   const statMeanEl = document.getElementById('statMean');
   const statPStdEl = document.getElementById('statPStd');
   const statSStdEl = document.getElementById('statSStd');
+  const statCVEl = document.getElementById('statCV');
   const statMinEl = document.getElementById('statMin');
   const statMaxEl = document.getElementById('statMax');
   const statMedianEl = document.getElementById('statMedian');
@@ -982,7 +983,7 @@
     if (n === 0) {
       return {
         n: 0, sum: 0, mean: 0, popStd: 0, sampleStd: null, min: 0, max: 0,
-        median: 0, mode: [], range: 0, q1: null, q3: null, iqr: null,
+        median: 0, mode: [], range: 0, q1: null, q3: null, iqr: null, cv: null,
       };
     }
     const sum = data.reduce((a, b) => a + b, 0);
@@ -1007,7 +1008,8 @@
     const q1 = medianOf(lowerHalf);
     const q3 = medianOf(upperHalf);
     const iqr = q1 !== null && q3 !== null ? q3 - q1 : null;
-    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min, q1, q3, iqr };
+    const cv = sampleStd !== null && mean !== 0 ? (sampleStd / mean) * 100 : null;
+    return { n, sum, mean, popStd, sampleStd, min, max, median, mode, range: max - min, q1, q3, iqr, cv };
   }
 
   function renderStatChips() {
@@ -1045,6 +1047,7 @@
     statMeanEl.textContent = localizeDigits(formatNumber(s.mean));
     statPStdEl.textContent = localizeDigits(formatNumber(s.popStd));
     statSStdEl.textContent = s.sampleStd === null ? '—' : localizeDigits(formatNumber(s.sampleStd));
+    statCVEl.textContent = s.cv === null ? '—' : localizeDigits(`${formatNumber(s.cv)}%`);
     statMinEl.textContent = localizeDigits(formatNumber(s.min));
     statMaxEl.textContent = localizeDigits(formatNumber(s.max));
     statMedianEl.textContent = localizeDigits(formatNumber(s.median));
@@ -3713,9 +3716,9 @@
         ],
       },
       statistics: {
-        description: 'Add a list of numbers to get the count, sum, mean, median, mode, quartiles, IQR, and both population and sample standard deviation.',
+        description: 'Add a list of numbers to get the count, sum, mean, median, mode, quartiles, IQR, population/sample standard deviation, and the coefficient of variation (CV = sample std dev ÷ mean, as a %).',
         examples: [
-          { steps: 'Add: 2, 4, 4, 4, 5, 5, 7, 9', result: 'Mean = 5, Median = 4.5, Mode = 4' },
+          { steps: 'Add: 2, 4, 4, 4, 5, 5, 7, 9', result: 'Mean = 5, Median = 4.5, Mode = 4, CV = 42.761798706%' },
         ],
       },
       solver: {
@@ -3809,9 +3812,9 @@
         ],
       },
       statistics: {
-        description: 'संख्यांची यादी जोडून N, बेरीज, सरासरी, मध्यम, बहुलक, चतुर्थांश, IQR, तसेच लोकसंख्या आणि नमुना मानक विचलन मिळवा.',
+        description: 'संख्यांची यादी जोडून N, बेरीज, सरासरी, मध्यम, बहुलक, चतुर्थांश, IQR, लोकसंख्या व नमुना मानक विचलन, तसेच भिन्नता गुणांक (CV = नमुना मानक विचलन ÷ सरासरी, % मध्ये) मिळवा.',
         examples: [
-          { steps: 'जोडा: 2, 4, 4, 4, 5, 5, 7, 9', result: 'सरासरी = 5, मध्यम = 4.5, बहुलक = 4' },
+          { steps: 'जोडा: 2, 4, 4, 4, 5, 5, 7, 9', result: 'सरासरी = 5, मध्यम = 4.5, बहुलक = 4, CV = 42.761798706%' },
         ],
       },
       solver: {
