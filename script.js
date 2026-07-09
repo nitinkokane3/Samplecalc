@@ -33,6 +33,7 @@
   const convDecEl = document.getElementById('convDec');
   const convOctEl = document.getElementById('convOct');
   const convBinEl = document.getElementById('convBin');
+  const convAsciiEl = document.getElementById('convAscii');
   const categoryTabs = document.getElementById('categoryTabs');
   const unitRow = document.getElementById('unitRow');
   const fromUnitSelect = document.getElementById('fromUnit');
@@ -158,6 +159,7 @@
       standard: 'Standard',
       scientific: 'Scientific',
       programmer: 'Programmer',
+      progNonPrintable: 'non-printable',
       converter: 'Converter',
       statistics: 'Statistics',
       solverMode: 'Solver',
@@ -297,6 +299,7 @@
       standard: 'मानक',
       scientific: 'वैज्ञानिक',
       programmer: 'प्रोग्रामर',
+      progNonPrintable: 'अमुद्रणीय',
       converter: 'रूपांतरक',
       statistics: 'सांख्यिकी',
       solverMode: 'सोडव',
@@ -562,6 +565,12 @@
     return base === 10 ? String(n) : unsignedBaseStr(n, base);
   }
 
+  function progAsciiStr(n) {
+    const byte = n & 0xff;
+    if (byte >= 32 && byte <= 126) return `'${String.fromCharCode(byte)}' (${byte})`;
+    return `${t('progNonPrintable')} (${byte})`;
+  }
+
   function isDigitValidForBase(ch, base) {
     const val = parseInt(ch, 16);
     return !isNaN(val) && val < base;
@@ -595,6 +604,7 @@
     convDecEl.textContent = localizeDigits(String(prog.value));
     convOctEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 8));
     convBinEl.textContent = localizeDigits(unsignedBaseStr(prog.value, 2));
+    convAsciiEl.textContent = localizeDigits(progAsciiStr(prog.value));
   }
 
   function progShowError() {
@@ -3675,10 +3685,11 @@
         ],
       },
       programmer: {
-        description: 'Work in HEX, DEC, OCT, or BIN using the base tabs above the display, with bitwise AND/OR/XOR/NOT and bit-shift operators.',
+        description: 'Work in HEX, DEC, OCT, or BIN using the base tabs above the display, with bitwise AND/OR/XOR/NOT and bit-shift operators. The panel below also shows the ASCII character for the current value\'s low byte.',
         examples: [
           { steps: 'In HEX: 1A, AND, 0F, =', result: '= A (0x0A)' },
           { steps: 'In HEX: A, OR, 5, =', result: '= F' },
+          { steps: 'In DEC: 65', result: "ASCII = 'A' (65)" },
         ],
       },
       converter: {
@@ -3769,10 +3780,11 @@
         ],
       },
       programmer: {
-        description: 'डिस्प्लेवरील बेस टॅब वापरून HEX, DEC, OCT किंवा BIN मध्ये काम करा, तसेच बिटवाइज AND/OR/XOR/NOT आणि बिट-शिफ्ट क्रिया वापरा.',
+        description: 'डिस्प्लेवरील बेस टॅब वापरून HEX, DEC, OCT किंवा BIN मध्ये काम करा, तसेच बिटवाइज AND/OR/XOR/NOT आणि बिट-शिफ्ट क्रिया वापरा. खालील पॅनेल सध्याच्या मूल्याच्या low byte साठी ASCII अक्षरही दाखवते.',
         examples: [
           { steps: 'HEX मध्ये: 1A, AND, 0F, =', result: '= A (0x0A)' },
           { steps: 'HEX मध्ये: A, OR, 5, =', result: '= F' },
+          { steps: 'DEC मध्ये: 65', result: "ASCII = 'A' (65)" },
         ],
       },
       converter: {
