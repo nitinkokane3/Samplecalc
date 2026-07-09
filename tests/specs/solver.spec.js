@@ -109,4 +109,75 @@ module.exports = [
       assertEqual(await page.textContent('#result'), 'Infinite solutions', 'system2x2 infinite-solutions result');
     },
   },
+  {
+    name: 'system2x2: degenerate 0x+0y=5, 0x+0y=3 correctly reports no solution (not infinite)',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system2x2"]');
+      await page.click('#solverKeys [data-action="clear"]');
+      await setField(page, 'a', 0); await setField(page, 'b', 0); await setField(page, 'c', 5);
+      await setField(page, 'd', 0); await setField(page, 'e', 0); await setField(page, 'f', 3);
+      assertEqual(await page.textContent('#result'), 'No solution', 'degenerate system2x2 no-solution result');
+    },
+  },
+  {
+    name: 'system3x3: x+y+z=6, 2x+y-z=1, x-y+2z=5 solves to x=1, y=2, z=3',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system3x3"]');
+      await page.click('#solverKeys [data-action="clear"]');
+      await setField(page, 'a', 1); await setField(page, 'b', 1); await setField(page, 'c', 1); await setField(page, 'd', 6);
+      await setField(page, 'e', 2); await setField(page, 'f', 1); await setField(page, 'g', -1); await setField(page, 'h', 1);
+      await setField(page, 'i', 1); await setField(page, 'j', -1); await setField(page, 'k', 2); await setField(page, 'l', 5);
+      assertEqual(await page.textContent('#result'), 'x = 1, y = 2, z = 3', 'system3x3 solver result');
+    },
+  },
+  {
+    name: 'system3x3: three parallel planes report no solution',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system3x3"]');
+      await page.click('#solverKeys [data-action="clear"]');
+      await setField(page, 'a', 1); await setField(page, 'b', 1); await setField(page, 'c', 1); await setField(page, 'd', 1);
+      await setField(page, 'e', 1); await setField(page, 'f', 1); await setField(page, 'g', 1); await setField(page, 'h', 2);
+      await setField(page, 'i', 1); await setField(page, 'j', 1); await setField(page, 'k', 1); await setField(page, 'l', 3);
+      assertEqual(await page.textContent('#result'), 'No solution', 'system3x3 no-solution result');
+    },
+  },
+  {
+    name: 'system3x3: three coincident planes report infinite solutions',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system3x3"]');
+      await page.click('#solverKeys [data-action="clear"]');
+      await setField(page, 'a', 1); await setField(page, 'b', 1); await setField(page, 'c', 1); await setField(page, 'd', 1);
+      await setField(page, 'e', 2); await setField(page, 'f', 2); await setField(page, 'g', 2); await setField(page, 'h', 2);
+      await setField(page, 'i', 3); await setField(page, 'j', 3); await setField(page, 'k', 3); await setField(page, 'l', 3);
+      assertEqual(await page.textContent('#result'), 'Infinite solutions', 'system3x3 infinite-solutions result');
+    },
+  },
+  {
+    name: 'system3x3: all 12 fields visible; other solver types unaffected',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="solver"]');
+      await page.click('.solver-type-btn[data-type="system3x3"]');
+      const allVisible = await page.evaluate(() => {
+        const fields = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+        return fields.every((f) => getComputedStyle(document.querySelector(`.solver-field[data-field="${f}"]`)).display !== 'none');
+      });
+      assertEqual(allVisible, true, 'all 12 system3x3 fields visible');
+
+      await page.click('.solver-type-btn[data-type="linear"]');
+      const linearHidesRest = await page.evaluate(() => {
+        const hidden = ['c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+        return hidden.every((f) => getComputedStyle(document.querySelector(`.solver-field[data-field="${f}"]`)).display === 'none');
+      });
+      assertEqual(linearHidesRest, true, 'linear type hides fields c through l');
+    },
+  },
 ];
