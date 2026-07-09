@@ -1420,6 +1420,23 @@ body {
   margin-top: 2px;
 }
 
+.help-manual-link {
+  display: block;
+  text-align: center;
+  margin: 0 16px 16px;
+  padding: 10px;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.help-manual-link:hover {
+  text-decoration: underline;
+}
+
 .data-desc {
   margin: 0;
   font-size: 0.82rem;

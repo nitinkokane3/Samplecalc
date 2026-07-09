@@ -4,6 +4,9 @@ A multi-mode calculator (Standard, Scientific, Programmer, Converter, Statistics
 
 Open `index.html` directly, or serve the folder with any static file server.
 
+See [`docs/user-manual.html`](docs/user-manual.html) for a full walkthrough of every mode, with
+worked examples and screenshots — open it in a browser directly from a local checkout.
+
 ## Running the test suite
 
 The suite drives the app end-to-end in a real browser via Playwright.

@@ -65,6 +65,32 @@ module.exports = [
     },
   },
   {
+    name: 'the Help Guide dialog links to the full user manual, opening it in a new tab without navigating the app away',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('#helpToggle');
+      const link = page.locator('.help-manual-link');
+      assertEqual(await link.getAttribute('href'), 'docs/user-manual.html', 'manual link href');
+      assertEqual(await link.getAttribute('target'), '_blank', 'manual link opens in a new tab');
+      assertEqual(await link.getAttribute('rel'), 'noopener', 'manual link has rel=noopener');
+
+      const [manualPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        link.click(),
+      ]);
+      await manualPage.waitForLoadState('domcontentloaded');
+      assertTrue(manualPage.url().endsWith('docs/user-manual.html'), 'clicking the link opens docs/user-manual.html');
+      assertTrue((await manualPage.title()).includes('User Manual'), 'the new tab is the user manual page');
+      assertEqual(page.url().endsWith('/index.html'), true, 'the original app tab is unaffected');
+      await manualPage.close();
+
+      // the manual link joins the dialog's Tab-trapped focus order as the last element
+      await page.evaluate(() => document.getElementById('helpClose').focus());
+      await page.keyboard.press('Shift+Tab');
+      assertEqual(await page.evaluate(() => document.activeElement.className), 'help-manual-link', 'Shift+Tab from the close button wraps to the manual link');
+    },
+  },
+  {
     name: 'data dialog traps focus with Tab, wrapping from last element back to first',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
