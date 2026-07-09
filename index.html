@@ -56,12 +56,13 @@
         <button class="category-btn" data-category="volume" data-i18n="catVolume">Volume</button>
         <button class="category-btn" data-category="speed" data-i18n="catSpeed">Speed</button>
         <button class="category-btn" data-category="time" data-i18n="catTime">Time</button>
+        <button class="category-btn" data-category="currency" data-i18n="catCurrency">Currency</button>
       </div>
 
       <div class="unit-row" id="unitRow">
-        <select class="unit-select" id="fromUnit"></select>
+        <select class="unit-select" id="fromUnit" title="Convert from" data-i18n-title="convFromLabel"></select>
         <button class="swap-btn" id="swapUnits" title="Swap units" data-i18n-title="swapTitle">⇅</button>
-        <select class="unit-select" id="toUnit"></select>
+        <select class="unit-select" id="toUnit" title="Convert to" data-i18n-title="convToLabel"></select>
       </div>
 
       <div class="solver-tabs" id="solverTabs">
@@ -69,6 +70,7 @@
         <button class="solver-type-btn" data-type="quadratic" data-i18n="solverQuadratic">Quadratic</button>
         <button class="solver-type-btn" data-type="cubic" data-i18n="solverCubic">Cubic</button>
         <button class="solver-type-btn" data-type="system2x2" data-i18n="solverSystem2x2">System 2×2</button>
+        <button class="solver-type-btn solver-type-btn-wide" data-type="system3x3" data-i18n="solverSystem3x3">System 3×3</button>
       </div>
 
       <div class="matrix-size-tabs" id="matrixSizeTabs">
@@ -165,6 +167,12 @@
         <div class="conv-row solver-field" data-field="d" id="solverDRow"><span class="conv-label" id="solverDLabel">d</span><span class="conv-value" id="solverD">0</span></div>
         <div class="conv-row solver-field" data-field="e" id="solverERow"><span class="conv-label" id="solverELabel">e</span><span class="conv-value" id="solverE">0</span></div>
         <div class="conv-row solver-field" data-field="f" id="solverFRow"><span class="conv-label" id="solverFLabel">f</span><span class="conv-value" id="solverF">0</span></div>
+        <div class="conv-row solver-field" data-field="g" id="solverGRow"><span class="conv-label" id="solverGLabel">g</span><span class="conv-value" id="solverG">0</span></div>
+        <div class="conv-row solver-field" data-field="h" id="solverHRow"><span class="conv-label" id="solverHLabel">h</span><span class="conv-value" id="solverH">0</span></div>
+        <div class="conv-row solver-field" data-field="i" id="solverIRow"><span class="conv-label" id="solverILabel">i</span><span class="conv-value" id="solverI">0</span></div>
+        <div class="conv-row solver-field" data-field="j" id="solverJRow"><span class="conv-label" id="solverJLabel">j</span><span class="conv-value" id="solverJ">0</span></div>
+        <div class="conv-row solver-field" data-field="k" id="solverKRow"><span class="conv-label" id="solverKLabel">k</span><span class="conv-value" id="solverK">0</span></div>
+        <div class="conv-row solver-field" data-field="l" id="solverLRow"><span class="conv-label" id="solverLLabel">l</span><span class="conv-value" id="solverL">0</span></div>
       </div>
 
       <div class="matrix-panel" id="matrixPanel">
@@ -571,20 +579,20 @@
     </div>
   </div>
 
-  <div class="help-overlay" id="helpOverlay">
+  <div class="help-overlay" id="helpOverlay" role="dialog" aria-modal="true" aria-labelledby="helpTitleText">
     <div class="help-modal">
       <div class="help-header">
-        <span data-i18n="helpTitle">Keyboard Shortcuts</span>
+        <span id="helpTitleText" data-i18n="helpTitle">Keyboard Shortcuts</span>
         <button id="helpClose" aria-label="Close">&times;</button>
       </div>
       <div class="help-body" id="helpBody"></div>
     </div>
   </div>
 
-  <div class="help-overlay" id="dataOverlay">
+  <div class="help-overlay" id="dataOverlay" role="dialog" aria-modal="true" aria-labelledby="dataTitleText">
     <div class="help-modal">
       <div class="help-header">
-        <span data-i18n="dataTitle">Backup &amp; Restore</span>
+        <span id="dataTitleText" data-i18n="dataTitle">Backup &amp; Restore</span>
         <button id="dataClose" aria-label="Close">&times;</button>
       </div>
       <div class="help-body">

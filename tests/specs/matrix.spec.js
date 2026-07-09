@@ -53,6 +53,31 @@ module.exports = [
     },
   },
   {
+    name: '3x3: keyboard-only entry (Tab across all 9 cells of A, then into B) fills correctly',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="matrix"]');
+      await page.click('.matrix-size-btn[data-size="3"]');
+      await page.keyboard.press('Escape');
+      await page.click('.matrix-cell[data-mat="a"][data-r="0"][data-c="0"]');
+      const values = ['1', '2', '3', '0', '1', '4', '5', '6', '0'];
+      for (let i = 0; i < values.length; i++) {
+        await page.keyboard.press('Backspace');
+        await page.keyboard.type(values[i]);
+        if (i < values.length - 1) await page.keyboard.press('Tab');
+      }
+      await page.click('[data-action="matrixdet"]');
+      assertEqual(await page.textContent('#result'), '1', 'keyboard-only 3x3 determinant result');
+
+      await page.keyboard.press('Tab');
+      const activeAfterCrossing = await page.evaluate(() => {
+        const active = document.querySelector('.matrix-cell.active');
+        return active ? { mat: active.dataset.mat, r: active.dataset.r, c: active.dataset.c } : null;
+      });
+      assertEqual(activeAfterCrossing, { mat: 'b', r: '0', c: '0' }, 'Tab crosses from matrix A into matrix B after the 9th cell');
+    },
+  },
+  {
     name: '3x3: A x identity = A, and a singular matrix reports no inverse',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);

@@ -321,6 +321,10 @@ body {
   color: #fff;
 }
 
+.solver-type-btn-wide {
+  grid-column: span 2;
+}
+
 .finance-type-btn {
   border: none;
   background: transparent;

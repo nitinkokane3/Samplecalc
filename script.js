@@ -66,12 +66,30 @@
   const solverERow = document.getElementById('solverERow');
   const solverFEl = document.getElementById('solverF');
   const solverFRow = document.getElementById('solverFRow');
+  const solverGEl = document.getElementById('solverG');
+  const solverGRow = document.getElementById('solverGRow');
+  const solverHEl = document.getElementById('solverH');
+  const solverHRow = document.getElementById('solverHRow');
+  const solverIEl = document.getElementById('solverI');
+  const solverIRow = document.getElementById('solverIRow');
+  const solverJEl = document.getElementById('solverJ');
+  const solverJRow = document.getElementById('solverJRow');
+  const solverKEl = document.getElementById('solverK');
+  const solverKRow = document.getElementById('solverKRow');
+  const solverLEl = document.getElementById('solverL');
+  const solverLRow = document.getElementById('solverLRow');
   const solverALabelEl = document.getElementById('solverALabel');
   const solverBLabelEl = document.getElementById('solverBLabel');
   const solverCLabelEl = document.getElementById('solverCLabel');
   const solverDLabelEl = document.getElementById('solverDLabel');
   const solverELabelEl = document.getElementById('solverELabel');
   const solverFLabelEl = document.getElementById('solverFLabel');
+  const solverGLabelEl = document.getElementById('solverGLabel');
+  const solverHLabelEl = document.getElementById('solverHLabel');
+  const solverILabelEl = document.getElementById('solverILabel');
+  const solverJLabelEl = document.getElementById('solverJLabel');
+  const solverKLabelEl = document.getElementById('solverKLabel');
+  const solverLLabelEl = document.getElementById('solverLLabel');
   const solverKeys = document.getElementById('solverKeys');
   const graphFnTabs = document.getElementById('graphFnTabs');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -142,6 +160,7 @@
       solverComplexNote: '2 complex roots',
       solverRepeatedNote: 'repeated root',
       solverSystem2x2: 'System 2×2',
+      solverSystem3x3: 'System 3×3',
       graphing: 'Graph',
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
@@ -208,7 +227,10 @@
       catVolume: 'Volume',
       catSpeed: 'Speed',
       catTime: 'Time',
+      catCurrency: 'Currency',
       swapTitle: 'Swap units',
+      convFromLabel: 'Convert from',
+      convToLabel: 'Convert to',
       statMean: 'Mean',
       statMedian: 'Median',
       statMode: 'Mode',
@@ -263,6 +285,7 @@
       solverComplexNote: '२ सम्मिश्र मुळे',
       solverRepeatedNote: 'पुनरावृत्त मूळ',
       solverSystem2x2: 'प्रणाली 2×2',
+      solverSystem3x3: 'प्रणाली 3×3',
       graphing: 'आलेख',
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
@@ -329,7 +352,10 @@
       catVolume: 'घनफळ',
       catSpeed: 'वेग',
       catTime: 'वेळ',
+      catCurrency: 'चलन',
       swapTitle: 'एकके बदला',
+      convFromLabel: 'यावरून रूपांतरित करा',
+      convToLabel: 'यावर रूपांतरित करा',
       statMean: 'सरासरी',
       statMedian: 'मध्यम',
       statMode: 'बहुलक',
@@ -691,6 +717,21 @@
       units: { sec: 1, min: 60, hour: 3600, day: 86400, week: 604800 },
       labels: { sec: 'Second', min: 'Minute', hour: 'Hour', day: 'Day', week: 'Week' },
     },
+    // Static, illustrative rates (relative to USD) as of this app's last update -- not live.
+    // Kept static deliberately: the app works fully offline (see sw.js), and a live rate
+    // API would silently go stale or fail the moment the network is unavailable.
+    currency: {
+      // Each value is "how many USD is 1 unit of this currency worth" (base unit = USD),
+      // the same convention length/weight/etc. use (base-units per 1 unit).
+      units: {
+        USD: 1, EUR: 1.086957, GBP: 1.265823, INR: 0.011976, JPY: 0.006689,
+        AUD: 0.657895, CAD: 0.735294, CNY: 0.138122, CHF: 1.136364, SGD: 0.746269,
+      },
+      labels: {
+        USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', INR: 'Indian Rupee', JPY: 'Japanese Yen',
+        AUD: 'Australian Dollar', CAD: 'Canadian Dollar', CNY: 'Chinese Yuan', CHF: 'Swiss Franc', SGD: 'Singapore Dollar',
+      },
+    },
   };
 
   const convCategoryDefaults = {
@@ -702,6 +743,7 @@
     volume: ['l', 'gal'],
     speed: ['kmh', 'mph'],
     time: ['min', 'sec'],
+    currency: ['USD', 'EUR'],
   };
 
   const conv = {
@@ -1008,12 +1050,16 @@
   }
 
   // ---------- Equation solver mode ----------
-  const solverTypes = ['linear', 'quadratic', 'cubic', 'system2x2'];
+  const solverTypes = ['linear', 'quadratic', 'cubic', 'system2x2', 'system3x3'];
   const savedSolverCoeffs = JSON.parse(localStorage.getItem('calc-solver-coeffs') || 'null');
   const savedSolverType = localStorage.getItem('calc-solver-type');
+  const solverDefaultCoeffs = {
+    a: '1', b: '0', c: '0', d: '0', e: '0', f: '0',
+    g: '0', h: '0', i: '0', j: '0', k: '0', l: '0',
+  };
   const solver = {
     type: solverTypes.includes(savedSolverType) ? savedSolverType : 'linear',
-    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' }, savedSolverCoeffs || {}),
+    coeffs: Object.assign({}, solverDefaultCoeffs, savedSolverCoeffs || {}),
     activeField: 'a',
   };
 
@@ -1022,6 +1068,7 @@
   }
 
   function solverFieldOrder() {
+    if (solver.type === 'system3x3') return ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
     if (solver.type === 'system2x2') return ['a', 'b', 'c', 'd', 'e', 'f'];
     if (solver.type === 'cubic') return ['a', 'b', 'c', 'd'];
     if (solver.type === 'quadratic') return ['a', 'b', 'c'];
@@ -1040,7 +1087,13 @@
   }
 
   function formatSolverEquation() {
-    const { a, b, c, d, e, f } = solver.coeffs;
+    const { a, b, c, d, e, f, g, h, i, j, k, l } = solver.coeffs;
+    if (solver.type === 'system3x3') {
+      const eq1 = `${formatNumber(parseFloat(a) || 0)}x${eqTerm(b, 'y')}${eqTerm(c, 'z')} = ${formatNumber(parseFloat(d) || 0)}`;
+      const eq2 = `${formatNumber(parseFloat(e) || 0)}x${eqTerm(f, 'y')}${eqTerm(g, 'z')} = ${formatNumber(parseFloat(h) || 0)}`;
+      const eq3 = `${formatNumber(parseFloat(i) || 0)}x${eqTerm(j, 'y')}${eqTerm(k, 'z')} = ${formatNumber(parseFloat(l) || 0)}`;
+      return `${eq1}; ${eq2}; ${eq3}`;
+    }
     if (solver.type === 'system2x2') {
       const eq1 = `${formatNumber(parseFloat(a) || 0)}x${eqTerm(b, 'y')} = ${formatNumber(parseFloat(c) || 0)}`;
       const eq2 = `${formatNumber(parseFloat(d) || 0)}x${eqTerm(e, 'y')} = ${formatNumber(parseFloat(f) || 0)}`;
@@ -1119,15 +1172,57 @@
     return { kind: 'cubic', roots, repeatedReal };
   }
 
-  function computeSystem2x2Result(a, b, c, d, e, f) {
-    const D = a * e - d * b;
-    if (D !== 0) {
-      return { kind: 'system', x: (c * e - f * b) / D, y: (a * f - d * c) / D };
+  // Row-echelon rank via Gaussian elimination with partial pivoting.
+  function rowEchelonRank(inputMatrix) {
+    const M = inputMatrix.map((row) => row.slice());
+    const rows = M.length;
+    const cols = M[0].length;
+    const eps = 1e-9;
+    let rank = 0;
+    for (let col = 0; col < cols && rank < rows; col++) {
+      let pivot = -1;
+      let maxVal = eps;
+      for (let r = rank; r < rows; r++) {
+        if (Math.abs(M[r][col]) > maxVal) { maxVal = Math.abs(M[r][col]); pivot = r; }
+      }
+      if (pivot === -1) continue;
+      [M[rank], M[pivot]] = [M[pivot], M[rank]];
+      for (let r = rank + 1; r < rows; r++) {
+        const factor = M[r][col] / M[rank][col];
+        for (let c = col; c < cols; c++) M[r][c] -= factor * M[rank][c];
+      }
+      rank++;
     }
-    const Dx = c * e - f * b;
-    const Dy = a * f - d * c;
-    if (Dx === 0 && Dy === 0) return { kind: 'system-infinite' };
+    return rank;
+  }
+
+  // Solves an NxN linear system Ax=b. Uses Cramer's rule when A is nonsingular;
+  // otherwise distinguishes "no solution" from "infinite solutions" by comparing
+  // rank(A) to rank([A|b]) (Rouché-Capelli), since a same-or-zero Cramer numerator
+  // alone is not a reliable test once there are more than two equations.
+  function computeLinearSystemResult(A, b) {
+    const n = A.length;
+    const D = matrixDet(A);
+    if (D !== 0) {
+      const vars = A.map((_, col) => {
+        const Ai = A.map((row, r) => row.map((v, c) => (c === col ? b[r] : v)));
+        return matrixDet(Ai) / D;
+      });
+      return { kind: n === 2 ? 'system' : 'system3', x: vars[0], y: vars[1], z: vars[2] };
+    }
+    const augmented = A.map((row, r) => [...row, b[r]]);
+    const rankA = rowEchelonRank(A);
+    const rankAug = rowEchelonRank(augmented);
+    if (rankA === rankAug) return { kind: 'system-infinite' };
     return { kind: 'system-none' };
+  }
+
+  function computeSystem2x2Result(a, b, c, d, e, f) {
+    return computeLinearSystemResult([[a, b], [d, e]], [c, f]);
+  }
+
+  function computeSystem3x3Result(a, b, c, d, e, f, g, h, i, j, k, l) {
+    return computeLinearSystemResult([[a, b, c], [e, f, g], [i, j, k]], [d, h, l]);
   }
 
   function computeSolverResult() {
@@ -1141,6 +1236,18 @@
       const e = parseFloat(solver.coeffs.e) || 0;
       const f = parseFloat(solver.coeffs.f) || 0;
       return computeSystem2x2Result(a, b, c, d, e, f);
+    }
+    if (solver.type === 'system3x3') {
+      const d = parseFloat(solver.coeffs.d) || 0;
+      const e = parseFloat(solver.coeffs.e) || 0;
+      const f = parseFloat(solver.coeffs.f) || 0;
+      const g = parseFloat(solver.coeffs.g) || 0;
+      const h = parseFloat(solver.coeffs.h) || 0;
+      const i = parseFloat(solver.coeffs.i) || 0;
+      const j = parseFloat(solver.coeffs.j) || 0;
+      const k = parseFloat(solver.coeffs.k) || 0;
+      const l = parseFloat(solver.coeffs.l) || 0;
+      return computeSystem3x3Result(a, b, c, d, e, f, g, h, i, j, k, l);
     }
     const d = parseFloat(solver.coeffs.d) || 0;
     return computeCubicResult(a, b, c, d);
@@ -1164,6 +1271,7 @@
       case 'none': return t('solverNoSolution');
       case 'infinite': return t('solverInfiniteSolutions');
       case 'system': return `x = ${formatNumber(res.x)}, y = ${formatNumber(res.y)}`;
+      case 'system3': return `x = ${formatNumber(res.x)}, y = ${formatNumber(res.y)}, z = ${formatNumber(res.z)}`;
       case 'system-none': return t('solverNoSolution');
       case 'system-infinite': return t('solverInfiniteSolutions');
       default: return '';
@@ -1180,29 +1288,57 @@
     solverDEl.textContent = localizeDigits(solver.coeffs.d);
     solverEEl.textContent = localizeDigits(solver.coeffs.e);
     solverFEl.textContent = localizeDigits(solver.coeffs.f);
+    solverGEl.textContent = localizeDigits(solver.coeffs.g);
+    solverHEl.textContent = localizeDigits(solver.coeffs.h);
+    solverIEl.textContent = localizeDigits(solver.coeffs.i);
+    solverJEl.textContent = localizeDigits(solver.coeffs.j);
+    solverKEl.textContent = localizeDigits(solver.coeffs.k);
+    solverLEl.textContent = localizeDigits(solver.coeffs.l);
     document.querySelectorAll('.solver-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === solver.activeField);
+      const isActive = row.dataset.field === solver.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
   function updateSolverLabels() {
-    const isSystem = solver.type === 'system2x2';
-    solverALabelEl.textContent = isSystem ? 'a₁' : 'a';
-    solverBLabelEl.textContent = isSystem ? 'b₁' : 'b';
-    solverCLabelEl.textContent = isSystem ? 'c₁' : 'c';
-    solverDLabelEl.textContent = isSystem ? 'a₂' : 'd';
-    solverELabelEl.textContent = isSystem ? 'b₂' : 'e';
-    solverFLabelEl.textContent = isSystem ? 'c₂' : 'f';
+    if (solver.type === 'system3x3') {
+      solverALabelEl.textContent = 'a₁'; solverBLabelEl.textContent = 'b₁';
+      solverCLabelEl.textContent = 'c₁'; solverDLabelEl.textContent = 'd₁';
+      solverELabelEl.textContent = 'a₂'; solverFLabelEl.textContent = 'b₂';
+      solverGLabelEl.textContent = 'c₂'; solverHLabelEl.textContent = 'd₂';
+      solverILabelEl.textContent = 'a₃'; solverJLabelEl.textContent = 'b₃';
+      solverKLabelEl.textContent = 'c₃'; solverLLabelEl.textContent = 'd₃';
+      return;
+    }
+    const isSystem2 = solver.type === 'system2x2';
+    solverALabelEl.textContent = isSystem2 ? 'a₁' : 'a';
+    solverBLabelEl.textContent = isSystem2 ? 'b₁' : 'b';
+    solverCLabelEl.textContent = isSystem2 ? 'c₁' : 'c';
+    solverDLabelEl.textContent = isSystem2 ? 'a₂' : 'd';
+    solverELabelEl.textContent = isSystem2 ? 'b₂' : 'e';
+    solverFLabelEl.textContent = isSystem2 ? 'c₂' : 'f';
+    solverGLabelEl.textContent = 'g'; solverHLabelEl.textContent = 'h';
+    solverILabelEl.textContent = 'i'; solverJLabelEl.textContent = 'j';
+    solverKLabelEl.textContent = 'k'; solverLLabelEl.textContent = 'l';
   }
 
   function updateSolverTabsUI() {
     document.querySelectorAll('.solver-type-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.type === solver.type);
     });
-    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
-    solverDRow.style.display = solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
-    solverERow.style.display = solver.type === 'system2x2' ? '' : 'none';
-    solverFRow.style.display = solver.type === 'system2x2' ? '' : 'none';
+    const type = solver.type;
+    solverCRow.style.display = type === 'quadratic' || type === 'cubic' || type === 'system2x2' || type === 'system3x3' ? '' : 'none';
+    solverDRow.style.display = type === 'cubic' || type === 'system2x2' || type === 'system3x3' ? '' : 'none';
+    solverERow.style.display = type === 'system2x2' || type === 'system3x3' ? '' : 'none';
+    solverFRow.style.display = type === 'system2x2' || type === 'system3x3' ? '' : 'none';
+    const isSystem3 = type === 'system3x3';
+    solverGRow.style.display = isSystem3 ? '' : 'none';
+    solverHRow.style.display = isSystem3 ? '' : 'none';
+    solverIRow.style.display = isSystem3 ? '' : 'none';
+    solverJRow.style.display = isSystem3 ? '' : 'none';
+    solverKRow.style.display = isSystem3 ? '' : 'none';
+    solverLRow.style.display = isSystem3 ? '' : 'none';
     updateSolverLabels();
   }
 
@@ -1257,7 +1393,7 @@
   }
 
   function solverClearAll() {
-    solver.coeffs = { a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' };
+    solver.coeffs = Object.assign({}, solverDefaultCoeffs);
     solver.activeField = 'a';
     saveSolver();
     renderSolver();
@@ -1435,7 +1571,9 @@
       const r = parseInt(el.dataset.r, 10);
       const c = parseInt(el.dataset.c, 10);
       el.textContent = localizeDigits(matrix.entries[m][r][c]);
-      el.classList.toggle('active', matrix.activeMat === m && matrix.activeR === r && matrix.activeC === c);
+      const isActive = matrix.activeMat === m && matrix.activeR === r && matrix.activeC === c;
+      el.classList.toggle('active', isActive);
+      el.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -1647,7 +1785,9 @@
     complexBreEl.textContent = localizeDigits(complexNum.entries.b.re);
     complexBimEl.textContent = localizeDigits(complexNum.entries.b.im);
     document.querySelectorAll('.complex-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.num === complexNum.activeNum && row.dataset.part === complexNum.activePart);
+      const isActive = row.dataset.num === complexNum.activeNum && row.dataset.part === complexNum.activePart;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -1815,7 +1955,9 @@
     regrEntryXEl.textContent = localizeDigits(regression.entryX);
     regrEntryYEl.textContent = localizeDigits(regression.entryY);
     document.querySelectorAll('.regr-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === regression.activeField);
+      const isActive = row.dataset.field === regression.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
     regrNEl.textContent = localizeDigits(String(res.n));
     regrSlopeEl.textContent = res.valid ? localizeDigits(formatNumber(res.m)) : '—';
@@ -2022,7 +2164,9 @@
     financeCEl.textContent = localizeDigits(finance.coeffs.c);
     financeDEl.textContent = localizeDigits(finance.coeffs.d);
     document.querySelectorAll('.finance-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === finance.activeField);
+      const isActive = row.dataset.field === finance.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -3244,10 +3388,11 @@
         ],
       },
       converter: {
-        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, and Time. Pick a category tab, choose the From/To units, then type a value.',
+        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, Time, and Currency. Pick a category tab, choose the From/To units, then type a value. Currency rates are static (not live) so conversions still work fully offline.',
         examples: [
           { steps: 'Length: 1 Meter → Foot', result: '= 3.280839895 ft' },
           { steps: 'Temperature: 0 Celsius → Fahrenheit', result: '= 32 °F' },
+          { steps: 'Currency: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
@@ -3257,11 +3402,12 @@
         ],
       },
       solver: {
-        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), Cubic (ax³+bx²+cx+d=0), or a System 2×2 of linear equations (a₁x+b₁y=c₁, a₂x+b₂y=c₂), including complex roots for quadratics and cubics.',
+        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), Cubic (ax³+bx²+cx+d=0), a System 2×2 (a₁x+b₁y=c₁, a₂x+b₂y=c₂), or a System 3×3 of linear equations, including complex roots for quadratics and cubics.',
         examples: [
           { steps: 'Quadratic: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'Quadratic: a=1, b=0, c=1', result: 'x = 0 ± 1i (no real roots)' },
           { steps: 'System 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
+          { steps: 'System 3×3: x+y+z=6, 2x+y-z=1, x-y+2z=5', result: 'x = 1, y = 2, z = 3' },
         ],
       },
       graphing: {
@@ -3325,10 +3471,11 @@
         ],
       },
       converter: {
-        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग आणि वेळ या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका.',
+        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग, वेळ आणि चलन या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका. चलन दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे रूपांतरण ऑफलाइनही काम करते.',
         examples: [
           { steps: 'लांबी: 1 मीटर → फूट', result: '= 3.280839895 ft' },
           { steps: 'तापमान: 0 सेल्सिअस → फॅरनहाइट', result: '= 32 °F' },
+          { steps: 'चलन: 100 USD → EUR', result: '≈ 92 EUR' },
         ],
       },
       statistics: {
@@ -3338,11 +3485,12 @@
         ],
       },
       solver: {
-        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), घन (ax³+bx²+cx+d=0), किंवा रेषीय समीकरणांची प्रणाली 2×2 (a₁x+b₁y=c₁, a₂x+b₂y=c₂) सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
+        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), घन (ax³+bx²+cx+d=0), प्रणाली 2×2 (a₁x+b₁y=c₁, a₂x+b₂y=c₂), किंवा रेषीय समीकरणांची प्रणाली 3×3 सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
         examples: [
           { steps: 'द्विघात: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'द्विघात: a=1, b=0, c=1', result: 'x = 0 ± 1i (वास्तव मुळे नाहीत)' },
           { steps: 'प्रणाली 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
+          { steps: 'प्रणाली 3×3: x+y+z=6, 2x+y-z=1, x-y+2z=5', result: 'x = 1, y = 2, z = 3' },
         ],
       },
       graphing: {
@@ -3599,10 +3747,12 @@
   function openHelp() {
     renderHelpContent();
     helpOverlay.classList.add('open');
+    helpClose.focus();
   }
 
   function closeHelp() {
     helpOverlay.classList.remove('open');
+    helpToggle.focus();
   }
 
   helpToggle.addEventListener('click', openHelp);
@@ -3628,10 +3778,12 @@
   function openData() {
     setDataStatus('', false);
     dataOverlay.classList.add('open');
+    dataClose.focus();
   }
 
   function closeData() {
     dataOverlay.classList.remove('open');
+    dataToggle.focus();
   }
 
   function exportAllData() {
@@ -3763,14 +3915,36 @@
   });
 
   // ---------- Keyboard support ----------
+  function getFocusableElements(container) {
+    return Array.from(container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => !el.disabled && el.offsetParent !== null);
+  }
+
+  function trapFocus(container, e) {
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   window.addEventListener('keydown', (e) => {
     const key = e.key;
     if (helpOverlay.classList.contains('open')) {
-      if (key === 'Escape') closeHelp();
+      if (key === 'Escape') { closeHelp(); return; }
+      trapFocus(helpOverlay, e);
       return;
     }
     if (dataOverlay.classList.contains('open')) {
-      if (key === 'Escape') closeData();
+      if (key === 'Escape') { closeData(); return; }
+      trapFocus(dataOverlay, e);
       return;
     }
     if (isProgrammerMode()) {
@@ -3867,6 +4041,25 @@
     if (key === 'Backspace') { backspace(); return; }
     if (key === 'Escape') { clearAll(); return; }
     if (key === '!') { factValue(); return; }
+  });
+
+  // ---------- Accessibility: make the custom "active field" rows/cells
+  // (solver coefficients, matrix cells, finance/complex/regression fields)
+  // discoverable and operable via keyboard and screen readers, not just
+  // mouse clicks. The app's own Tab-key handling (see keydown support
+  // above) already cycles the logical active field regardless of DOM
+  // focus, so this doesn't change that -- it just lets assistive tech
+  // reach, hear, and activate these controls too.
+  const activeFieldSelector = '.solver-field, .matrix-cell, .finance-field, .complex-field, .regr-field';
+  document.querySelectorAll(activeFieldSelector).forEach((el) => {
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+  });
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches(activeFieldSelector)) {
+      e.preventDefault();
+      e.target.click();
+    }
   });
 
   // ---------- Init ----------
