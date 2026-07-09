@@ -95,6 +95,10 @@
       catWeight: 'Weight',
       catTemp: 'Temp',
       catData: 'Data',
+      catArea: 'Area',
+      catVolume: 'Volume',
+      catSpeed: 'Speed',
+      catTime: 'Time',
       swapTitle: 'Swap units',
       statMean: 'Mean',
       statMedian: 'Median',
@@ -151,6 +155,10 @@
       catWeight: 'वजन',
       catTemp: 'तापमान',
       catData: 'डेटा',
+      catArea: 'क्षेत्रफळ',
+      catVolume: 'घनफळ',
+      catSpeed: 'वेग',
+      catTime: 'वेळ',
       swapTitle: 'एकके बदला',
       statMean: 'सरासरी',
       statMedian: 'मध्यम',
@@ -480,6 +488,22 @@
       units: { b: 0.125, B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3, TB: 1024 ** 4 },
       labels: { b: 'Bit', B: 'Byte', KB: 'Kilobyte', MB: 'Megabyte', GB: 'Gigabyte', TB: 'Terabyte' },
     },
+    area: {
+      units: { m2: 1, km2: 1000000, ft2: 0.09290304, acre: 4046.8564224, hectare: 10000, mi2: 2589988.110336 },
+      labels: { m2: 'Square Meter', km2: 'Square Kilometer', ft2: 'Square Foot', acre: 'Acre', hectare: 'Hectare', mi2: 'Square Mile' },
+    },
+    volume: {
+      units: { ml: 0.001, l: 1, m3: 1000, gal: 3.785411784, qt: 0.946352946, cup: 0.2365882365 },
+      labels: { ml: 'Milliliter', l: 'Liter', m3: 'Cubic Meter', gal: 'Gallon', qt: 'Quart', cup: 'Cup' },
+    },
+    speed: {
+      units: { mps: 1, kmh: 1000 / 3600, mph: 0.44704, knot: 0.5144444444, fts: 0.3048 },
+      labels: { mps: 'Meter/sec', kmh: 'Km/hour', mph: 'Mile/hour', knot: 'Knot', fts: 'Foot/sec' },
+    },
+    time: {
+      units: { sec: 1, min: 60, hour: 3600, day: 86400, week: 604800 },
+      labels: { sec: 'Second', min: 'Minute', hour: 'Hour', day: 'Day', week: 'Week' },
+    },
   };
 
   const convCategoryDefaults = {
@@ -487,6 +511,10 @@
     weight: ['kg', 'lb'],
     temperature: ['c', 'f'],
     data: ['MB', 'GB'],
+    area: ['m2', 'ft2'],
+    volume: ['l', 'gal'],
+    speed: ['kmh', 'mph'],
+    time: ['min', 'sec'],
   };
 
   const conv = {
