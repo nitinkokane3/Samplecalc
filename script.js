@@ -57,6 +57,8 @@
   const graphToolbar = document.getElementById('graphToolbar');
   const graphCanvasWrap = document.getElementById('graphCanvasWrap');
   const graphCanvas = document.getElementById('graphCanvas');
+  const graphTableWrap = document.getElementById('graphTableWrap');
+  const graphTable = document.getElementById('graphTable');
   const graphRow = document.getElementById('graphRow');
   const graphKeys = document.getElementById('graphKeys');
   const matrixToolbar = document.getElementById('matrixToolbar');
@@ -87,6 +89,7 @@
       graphFindIntersect: 'Intersect',
       graphNoIntersections: 'No intersections found',
       graphNeedG: 'Enter g(x) first',
+      graphTable: 'Table',
       matrixMode: 'Matrix',
       matrixDet: 'Det',
       matrixInv: 'Inverse',
@@ -148,6 +151,7 @@
       graphFindIntersect: 'छेदनबिंदू',
       graphNoIntersections: 'छेदनबिंदू आढळले नाहीत',
       graphNeedG: 'प्रथम g(x) टाका',
+      graphTable: 'तक्ता',
       matrixMode: 'मॅट्रिक्स',
       matrixDet: 'निर्धारक',
       matrixInv: 'व्यस्त',
@@ -1202,7 +1206,7 @@
   function tokenize(str) {
     const tokens = [];
     let i = 0;
-    const funcs = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'];
+    const funcs = ['asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sin', 'cos', 'tan', 'log', 'ln', 'sqrt'];
     while (i < str.length) {
       const ch = str[i];
       if (/\s/.test(ch)) { i++; continue; }
@@ -1388,10 +1392,17 @@
 
   function applyFunc(name, arg) {
     const toRad = (v) => state.isDegrees ? (v * Math.PI / 180) : v;
+    const fromRad = (v) => state.isDegrees ? (v * 180 / Math.PI) : v;
     switch (name) {
       case 'sin': return Math.sin(toRad(arg));
       case 'cos': return Math.cos(toRad(arg));
       case 'tan': return Math.tan(toRad(arg));
+      case 'asin': return fromRad(Math.asin(arg));
+      case 'acos': return fromRad(Math.acos(arg));
+      case 'atan': return fromRad(Math.atan(arg));
+      case 'sinh': return Math.sinh(arg);
+      case 'cosh': return Math.cosh(arg);
+      case 'tanh': return Math.tanh(arg);
       case 'log': return Math.log10(arg);
       case 'ln': return Math.log(arg);
       case 'sqrt': return Math.sqrt(arg);
@@ -1416,6 +1427,7 @@
     intersectionsSearched: false,
     intersectionsError: false,
     intersectionsNeedG: false,
+    tableOpen: false,
   };
 
   function isGraphingMode() {
@@ -1802,6 +1814,28 @@
         ctx.stroke();
       }
     }
+
+    if (graphState.tableOpen) renderGraphTable();
+  }
+
+  function renderGraphTable() {
+    const { xMin, xMax } = graphState;
+    const n = 10;
+    const rows = [];
+    for (let i = 0; i <= n; i++) {
+      const x = xMin + ((xMax - xMin) * i) / n;
+      const y = evalGraphAt(x);
+      const xStr = localizeDigits(formatNumber(Math.round(x * 1e4) / 1e4));
+      const yStr = isFinite(y) ? localizeDigits(formatNumber(Math.round(y * 1e4) / 1e4)) : t('error');
+      rows.push(`<div class="graph-table-row"><span class="gx">x=${xStr}</span><span>${yStr}</span></div>`);
+    }
+    graphTable.innerHTML = rows.join('');
+  }
+
+  function graphToggleTable() {
+    graphState.tableOpen = !graphState.tableOpen;
+    graphTableWrap.classList.toggle('open', graphState.tableOpen);
+    if (graphState.tableOpen) renderGraphTable();
   }
 
   function saveGraphExpr() {
@@ -2173,6 +2207,7 @@
       case 'graphfindroots': graphFindRoots(); break;
       case 'graphintegral': graphComputeIntegral(); break;
       case 'graphfindintersect': graphFindIntersections(); break;
+      case 'graphtoggletable': graphToggleTable(); break;
     }
   }
 

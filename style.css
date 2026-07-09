@@ -362,6 +362,39 @@ body {
   cursor: crosshair;
 }
 
+.graph-table-wrap {
+  display: none;
+  max-height: 130px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+
+:root[data-theme="light"] .graph-table-wrap {
+  background: rgba(20, 20, 40, 0.04);
+}
+
+.calculator.graphing .graph-table-wrap.open {
+  display: block;
+}
+
+.graph-table-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.78rem;
+  padding: 3px 0;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.graph-table-row .gx {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .calculator.graphing .memory-indicator {
   display: none;
 }

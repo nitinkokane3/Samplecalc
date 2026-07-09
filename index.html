@@ -69,6 +69,7 @@
         <button class="graph-tool-btn" data-action="graphfindroots" data-i18n="graphFindRoots">Roots</button>
         <button class="graph-tool-btn" data-action="graphintegral">∫dx</button>
         <button class="graph-tool-btn" data-action="graphfindintersect" data-i18n="graphFindIntersect">Intersect</button>
+        <button class="graph-tool-btn" data-action="graphtoggletable" data-i18n="graphTable">Table</button>
       </div>
 
       <div class="matrix-toolbar" id="matrixToolbar">
@@ -88,6 +89,10 @@
 
       <div class="graph-canvas-wrap" id="graphCanvasWrap">
         <canvas id="graphCanvas"></canvas>
+      </div>
+
+      <div class="graph-table-wrap" id="graphTableWrap">
+        <div class="graph-table" id="graphTable"></div>
       </div>
 
       <div class="conv-panel" id="convPanel">
@@ -172,6 +177,12 @@
             <button class="key fn" data-action="combin" data-value="nPr">nPr</button>
             <button class="key fn" data-action="combin" data-value="gcd">GCD</button>
             <button class="key fn" data-action="combin" data-value="lcm">LCM</button>
+            <button class="key fn" data-action="fn" data-value="asin(">sin⁻¹</button>
+            <button class="key fn" data-action="fn" data-value="acos(">cos⁻¹</button>
+            <button class="key fn" data-action="fn" data-value="atan(">tan⁻¹</button>
+            <button class="key fn" data-action="fn" data-value="sinh(">sinh</button>
+            <button class="key fn" data-action="fn" data-value="cosh(">cosh</button>
+            <button class="key fn" data-action="fn" data-value="tanh(">tanh</button>
           </div>
 
           <div class="keys" id="keys">
