@@ -60,6 +60,7 @@
         <button class="solver-type-btn active" data-type="linear" data-i18n="solverLinear">Linear</button>
         <button class="solver-type-btn" data-type="quadratic" data-i18n="solverQuadratic">Quadratic</button>
         <button class="solver-type-btn" data-type="cubic" data-i18n="solverCubic">Cubic</button>
+        <button class="solver-type-btn" data-type="system2x2" data-i18n="solverSystem2x2">System 2×2</button>
       </div>
 
       <div class="finance-tabs" id="financeTabs">
@@ -145,10 +146,12 @@
       <div class="stat-chips" id="statChips"></div>
 
       <div class="conv-panel solver-panel" id="solverPanel">
-        <div class="conv-row solver-field" data-field="a"><span class="conv-label">a</span><span class="conv-value" id="solverA">1</span></div>
-        <div class="conv-row solver-field" data-field="b"><span class="conv-label">b</span><span class="conv-value" id="solverB">0</span></div>
-        <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label">c</span><span class="conv-value" id="solverC">0</span></div>
-        <div class="conv-row solver-field" data-field="d" id="solverDRow"><span class="conv-label">d</span><span class="conv-value" id="solverD">0</span></div>
+        <div class="conv-row solver-field" data-field="a"><span class="conv-label" id="solverALabel">a</span><span class="conv-value" id="solverA">1</span></div>
+        <div class="conv-row solver-field" data-field="b"><span class="conv-label" id="solverBLabel">b</span><span class="conv-value" id="solverB">0</span></div>
+        <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label" id="solverCLabel">c</span><span class="conv-value" id="solverC">0</span></div>
+        <div class="conv-row solver-field" data-field="d" id="solverDRow"><span class="conv-label" id="solverDLabel">d</span><span class="conv-value" id="solverD">0</span></div>
+        <div class="conv-row solver-field" data-field="e" id="solverERow"><span class="conv-label" id="solverELabel">e</span><span class="conv-value" id="solverE">0</span></div>
+        <div class="conv-row solver-field" data-field="f" id="solverFRow"><span class="conv-label" id="solverFLabel">f</span><span class="conv-value" id="solverF">0</span></div>
       </div>
 
       <div class="matrix-panel" id="matrixPanel">

@@ -62,6 +62,16 @@
   const solverCRow = document.getElementById('solverCRow');
   const solverDEl = document.getElementById('solverD');
   const solverDRow = document.getElementById('solverDRow');
+  const solverEEl = document.getElementById('solverE');
+  const solverERow = document.getElementById('solverERow');
+  const solverFEl = document.getElementById('solverF');
+  const solverFRow = document.getElementById('solverFRow');
+  const solverALabelEl = document.getElementById('solverALabel');
+  const solverBLabelEl = document.getElementById('solverBLabel');
+  const solverCLabelEl = document.getElementById('solverCLabel');
+  const solverDLabelEl = document.getElementById('solverDLabel');
+  const solverELabelEl = document.getElementById('solverELabel');
+  const solverFLabelEl = document.getElementById('solverFLabel');
   const solverKeys = document.getElementById('solverKeys');
   const graphFnTabs = document.getElementById('graphFnTabs');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -130,6 +140,7 @@
       solverInfiniteSolutions: 'Infinite solutions',
       solverComplexNote: '2 complex roots',
       solverRepeatedNote: 'repeated root',
+      solverSystem2x2: 'System 2×2',
       graphing: 'Graph',
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
@@ -250,6 +261,7 @@
       solverInfiniteSolutions: 'अनंत उपाय',
       solverComplexNote: '२ सम्मिश्र मुळे',
       solverRepeatedNote: 'पुनरावृत्त मूळ',
+      solverSystem2x2: 'प्रणाली 2×2',
       graphing: 'आलेख',
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
@@ -995,12 +1007,12 @@
   }
 
   // ---------- Equation solver mode ----------
-  const solverTypes = ['linear', 'quadratic', 'cubic'];
+  const solverTypes = ['linear', 'quadratic', 'cubic', 'system2x2'];
   const savedSolverCoeffs = JSON.parse(localStorage.getItem('calc-solver-coeffs') || 'null');
   const savedSolverType = localStorage.getItem('calc-solver-type');
   const solver = {
     type: solverTypes.includes(savedSolverType) ? savedSolverType : 'linear',
-    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0' }, savedSolverCoeffs || {}),
+    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' }, savedSolverCoeffs || {}),
     activeField: 'a',
   };
 
@@ -1009,6 +1021,7 @@
   }
 
   function solverFieldOrder() {
+    if (solver.type === 'system2x2') return ['a', 'b', 'c', 'd', 'e', 'f'];
     if (solver.type === 'cubic') return ['a', 'b', 'c', 'd'];
     if (solver.type === 'quadratic') return ['a', 'b', 'c'];
     return ['a', 'b'];
@@ -1026,7 +1039,12 @@
   }
 
   function formatSolverEquation() {
-    const { a, b, c, d } = solver.coeffs;
+    const { a, b, c, d, e, f } = solver.coeffs;
+    if (solver.type === 'system2x2') {
+      const eq1 = `${formatNumber(parseFloat(a) || 0)}x${eqTerm(b, 'y')} = ${formatNumber(parseFloat(c) || 0)}`;
+      const eq2 = `${formatNumber(parseFloat(d) || 0)}x${eqTerm(e, 'y')} = ${formatNumber(parseFloat(f) || 0)}`;
+      return `${eq1}; ${eq2}`;
+    }
     const leadTerm = `${formatNumber(parseFloat(a) || 0)}x`;
     if (solver.type === 'cubic') {
       return `${leadTerm}³${eqTerm(b, 'x²')}${eqTerm(c, 'x')}${eqTerm(d, '')} = 0`;
@@ -1100,12 +1118,29 @@
     return { kind: 'cubic', roots, repeatedReal };
   }
 
+  function computeSystem2x2Result(a, b, c, d, e, f) {
+    const D = a * e - d * b;
+    if (D !== 0) {
+      return { kind: 'system', x: (c * e - f * b) / D, y: (a * f - d * c) / D };
+    }
+    const Dx = c * e - f * b;
+    const Dy = a * f - d * c;
+    if (Dx === 0 && Dy === 0) return { kind: 'system-infinite' };
+    return { kind: 'system-none' };
+  }
+
   function computeSolverResult() {
     const a = parseFloat(solver.coeffs.a) || 0;
     const b = parseFloat(solver.coeffs.b) || 0;
     if (solver.type === 'linear') return computeLinearResult(a, b);
     const c = parseFloat(solver.coeffs.c) || 0;
     if (solver.type === 'quadratic') return computeQuadraticResult(a, b, c);
+    if (solver.type === 'system2x2') {
+      const d = parseFloat(solver.coeffs.d) || 0;
+      const e = parseFloat(solver.coeffs.e) || 0;
+      const f = parseFloat(solver.coeffs.f) || 0;
+      return computeSystem2x2Result(a, b, c, d, e, f);
+    }
     const d = parseFloat(solver.coeffs.d) || 0;
     return computeCubicResult(a, b, c, d);
   }
@@ -1127,6 +1162,9 @@
       }
       case 'none': return t('solverNoSolution');
       case 'infinite': return t('solverInfiniteSolutions');
+      case 'system': return `x = ${formatNumber(res.x)}, y = ${formatNumber(res.y)}`;
+      case 'system-none': return t('solverNoSolution');
+      case 'system-infinite': return t('solverInfiniteSolutions');
       default: return '';
     }
   }
@@ -1139,17 +1177,32 @@
     solverBEl.textContent = localizeDigits(solver.coeffs.b);
     solverCEl.textContent = localizeDigits(solver.coeffs.c);
     solverDEl.textContent = localizeDigits(solver.coeffs.d);
+    solverEEl.textContent = localizeDigits(solver.coeffs.e);
+    solverFEl.textContent = localizeDigits(solver.coeffs.f);
     document.querySelectorAll('.solver-field').forEach((row) => {
       row.classList.toggle('active', row.dataset.field === solver.activeField);
     });
+  }
+
+  function updateSolverLabels() {
+    const isSystem = solver.type === 'system2x2';
+    solverALabelEl.textContent = isSystem ? 'a₁' : 'a';
+    solverBLabelEl.textContent = isSystem ? 'b₁' : 'b';
+    solverCLabelEl.textContent = isSystem ? 'c₁' : 'c';
+    solverDLabelEl.textContent = isSystem ? 'a₂' : 'd';
+    solverELabelEl.textContent = isSystem ? 'b₂' : 'e';
+    solverFLabelEl.textContent = isSystem ? 'c₂' : 'f';
   }
 
   function updateSolverTabsUI() {
     document.querySelectorAll('.solver-type-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.type === solver.type);
     });
-    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' ? '' : 'none';
-    solverDRow.style.display = solver.type === 'cubic' ? '' : 'none';
+    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
+    solverDRow.style.display = solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
+    solverERow.style.display = solver.type === 'system2x2' ? '' : 'none';
+    solverFRow.style.display = solver.type === 'system2x2' ? '' : 'none';
+    updateSolverLabels();
   }
 
   function setSolverType(type) {
@@ -1203,7 +1256,7 @@
   }
 
   function solverClearAll() {
-    solver.coeffs = { a: '1', b: '0', c: '0', d: '0' };
+    solver.coeffs = { a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' };
     solver.activeField = 'a';
     saveSolver();
     renderSolver();
@@ -3134,10 +3187,11 @@
         ],
       },
       solver: {
-        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), or Cubic (ax³+bx²+cx+d=0) equations, including complex roots for quadratics and cubics.',
+        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), Cubic (ax³+bx²+cx+d=0), or a System 2×2 of linear equations (a₁x+b₁y=c₁, a₂x+b₂y=c₂), including complex roots for quadratics and cubics.',
         examples: [
           { steps: 'Quadratic: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'Quadratic: a=1, b=0, c=1', result: 'x = 0 ± 1i (no real roots)' },
+          { steps: 'System 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
         ],
       },
       graphing: {
@@ -3213,10 +3267,11 @@
         ],
       },
       solver: {
-        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), किंवा घन (ax³+bx²+cx+d=0) समीकरणे सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
+        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), घन (ax³+bx²+cx+d=0), किंवा रेषीय समीकरणांची प्रणाली 2×2 (a₁x+b₁y=c₁, a₂x+b₂y=c₂) सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
         examples: [
           { steps: 'द्विघात: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'द्विघात: a=1, b=0, c=1', result: 'x = 0 ± 1i (वास्तव मुळे नाहीत)' },
+          { steps: 'प्रणाली 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
         ],
       },
       graphing: {
