@@ -45,6 +45,13 @@
   const statIQREl = document.getElementById('statIQR');
   const statChipsEl = document.getElementById('statChips');
   const statKeys = document.getElementById('statKeys');
+  const solverTabs = document.getElementById('solverTabs');
+  const solverPanel = document.getElementById('solverPanel');
+  const solverAEl = document.getElementById('solverA');
+  const solverBEl = document.getElementById('solverB');
+  const solverCEl = document.getElementById('solverC');
+  const solverCRow = document.getElementById('solverCRow');
+  const solverKeys = document.getElementById('solverKeys');
   const graphToolbar = document.getElementById('graphToolbar');
   const graphCanvasWrap = document.getElementById('graphCanvasWrap');
   const graphCanvas = document.getElementById('graphCanvas');
@@ -59,6 +66,12 @@
       programmer: 'Programmer',
       converter: 'Converter',
       statistics: 'Statistics',
+      solverMode: 'Solver',
+      solverLinear: 'Linear',
+      solverQuadratic: 'Quadratic',
+      solverNext: 'Next',
+      solverNoSolution: 'No solution',
+      solverInfiniteSolutions: 'Infinite solutions',
       graphing: 'Graph',
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
@@ -101,6 +114,12 @@
       programmer: 'प्रोग्रामर',
       converter: 'रूपांतरक',
       statistics: 'सांख्यिकी',
+      solverMode: 'सोडव',
+      solverLinear: 'रेषीय',
+      solverQuadratic: 'द्विघात',
+      solverNext: 'पुढे',
+      solverNoSolution: 'उपाय नाही',
+      solverInfiniteSolutions: 'अनंत उपाय',
       graphing: 'आलेख',
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
@@ -183,13 +202,14 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="graphdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
     if (isProgrammerMode()) renderProg();
     else if (isConverterMode()) renderConv();
     else if (isStatisticsMode()) renderStat();
+    else if (isSolverMode()) renderSolver();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -750,6 +770,170 @@
     stat.justEntered = true;
     renderStat();
   }
+
+  // ---------- Equation solver mode ----------
+  const savedSolverCoeffs = JSON.parse(localStorage.getItem('calc-solver-coeffs') || 'null');
+  const solver = {
+    type: localStorage.getItem('calc-solver-type') === 'quadratic' ? 'quadratic' : 'linear',
+    coeffs: savedSolverCoeffs || { a: '1', b: '0', c: '0' },
+    activeField: 'a',
+  };
+
+  function isSolverMode() {
+    return calculator.classList.contains('solver');
+  }
+
+  function solverFieldOrder() {
+    return solver.type === 'quadratic' ? ['a', 'b', 'c'] : ['a', 'b'];
+  }
+
+  function saveSolver() {
+    localStorage.setItem('calc-solver-type', solver.type);
+    localStorage.setItem('calc-solver-coeffs', JSON.stringify(solver.coeffs));
+  }
+
+  function eqTerm(rawValue, suffix) {
+    const v = parseFloat(rawValue) || 0;
+    const sign = v < 0 ? '-' : '+';
+    return ` ${sign} ${formatNumber(Math.abs(v))}${suffix}`;
+  }
+
+  function formatSolverEquation() {
+    const { a, b, c } = solver.coeffs;
+    const leadTerm = `${formatNumber(parseFloat(a) || 0)}x`;
+    if (solver.type === 'quadratic') {
+      return `${leadTerm}²${eqTerm(b, 'x')}${eqTerm(c, '')} = 0`;
+    }
+    return `${leadTerm}${eqTerm(b, '')} = 0`;
+  }
+
+  function computeSolverResult() {
+    const a = parseFloat(solver.coeffs.a) || 0;
+    const b = parseFloat(solver.coeffs.b) || 0;
+    if (solver.type === 'linear') {
+      if (a === 0) return b === 0 ? { kind: 'infinite' } : { kind: 'none' };
+      return { kind: 'single', x: -b / a };
+    }
+    const c = parseFloat(solver.coeffs.c) || 0;
+    if (a === 0) {
+      if (b === 0) return c === 0 ? { kind: 'infinite' } : { kind: 'none' };
+      return { kind: 'single', x: -c / b };
+    }
+    const d = b * b - 4 * a * c;
+    if (d === 0) return { kind: 'repeated', x: -b / (2 * a) };
+    if (d > 0) {
+      const sqrtD = Math.sqrt(d);
+      return { kind: 'two', x1: (-b + sqrtD) / (2 * a), x2: (-b - sqrtD) / (2 * a) };
+    }
+    return { kind: 'complex', re: -b / (2 * a), im: Math.sqrt(-d) / (2 * a) };
+  }
+
+  function formatSolverResult(res) {
+    switch (res.kind) {
+      case 'single': return `x = ${formatNumber(res.x)}`;
+      case 'repeated': return `x₁ = x₂ = ${formatNumber(res.x)}`;
+      case 'two': return `x₁ = ${formatNumber(res.x1)}, x₂ = ${formatNumber(res.x2)}`;
+      case 'complex': return `x = ${formatNumber(res.re)} ± ${formatNumber(res.im)}i`;
+      case 'none': return t('solverNoSolution');
+      case 'infinite': return t('solverInfiniteSolutions');
+      default: return '';
+    }
+  }
+
+  function renderSolver() {
+    expressionEl.textContent = localizeDigits(formatSolverEquation());
+    resultEl.textContent = localizeDigits(formatSolverResult(computeSolverResult()));
+    memoryIndicator.textContent = '';
+    solverAEl.textContent = localizeDigits(solver.coeffs.a);
+    solverBEl.textContent = localizeDigits(solver.coeffs.b);
+    solverCEl.textContent = localizeDigits(solver.coeffs.c);
+    document.querySelectorAll('.solver-field').forEach((row) => {
+      row.classList.toggle('active', row.dataset.field === solver.activeField);
+    });
+  }
+
+  function updateSolverTabsUI() {
+    document.querySelectorAll('.solver-type-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.type === solver.type);
+    });
+    solverCRow.style.display = solver.type === 'quadratic' ? '' : 'none';
+  }
+
+  function setSolverType(type) {
+    solver.type = type;
+    solver.activeField = 'a';
+    updateSolverTabsUI();
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverNextField() {
+    const order = solverFieldOrder();
+    const idx = order.indexOf(solver.activeField);
+    solver.activeField = order[(idx + 1) % order.length];
+    renderSolver();
+  }
+
+  function solverAppendDigit(ch) {
+    const cur = solver.coeffs[solver.activeField];
+    solver.coeffs[solver.activeField] = (cur === '0' ? '' : cur) + ch;
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverAppendDecimal() {
+    const cur = solver.coeffs[solver.activeField];
+    if (cur.includes('.')) return;
+    solver.coeffs[solver.activeField] = cur + '.';
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverToggleSign() {
+    const cur = solver.coeffs[solver.activeField];
+    solver.coeffs[solver.activeField] = cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur);
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverBackspace() {
+    const cur = solver.coeffs[solver.activeField];
+    solver.coeffs[solver.activeField] = cur.slice(0, -1) || '0';
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverClearEntry() {
+    solver.coeffs[solver.activeField] = '0';
+    saveSolver();
+    renderSolver();
+  }
+
+  function solverClearAll() {
+    solver.coeffs = { a: '1', b: '0', c: '0' };
+    solver.activeField = 'a';
+    saveSolver();
+    renderSolver();
+  }
+
+  function insertAnsSolver() {
+    solver.coeffs[solver.activeField] = convPlainNumber(lastAnswer);
+    saveSolver();
+    renderSolver();
+  }
+
+  solverTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.solver-type-btn');
+    if (!btn) return;
+    setSolverType(btn.dataset.type);
+  });
+
+  solverPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.solver-field');
+    if (!row) return;
+    solver.activeField = row.dataset.field;
+    renderSolver();
+  });
 
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr, scope) {
@@ -1494,18 +1678,21 @@
         if (isProgrammerMode()) progClearAll();
         else if (isConverterMode()) convClearAll();
         else if (isStatisticsMode()) statClearAll();
+        else if (isSolverMode()) solverClearAll();
         else clearAll();
         break;
       case 'clear-entry':
         if (isProgrammerMode()) progClearEntry();
         else if (isConverterMode()) convClearEntry();
         else if (isStatisticsMode()) statClearEntry();
+        else if (isSolverMode()) solverClearEntry();
         else clearEntry();
         break;
       case 'backspace':
         if (isProgrammerMode()) progBackspace();
         else if (isConverterMode()) convBackspace();
         else if (isStatisticsMode()) statBackspace();
+        else if (isSolverMode()) solverBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -1535,10 +1722,15 @@
       case 'statdecimal': statAppendDecimal(); break;
       case 'statsign': statToggleSign(); break;
       case 'statadd': statAddEntry(); break;
+      case 'solverdigit': solverAppendDigit(value); break;
+      case 'solverdecimal': solverAppendDecimal(); break;
+      case 'solversign': solverToggleSign(); break;
+      case 'solvernext': solverNextField(); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
         else if (isStatisticsMode()) insertAnsStat();
+        else if (isSolverMode()) insertAnsSolver();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -1559,7 +1751,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, graphRow, graphKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -1573,6 +1765,7 @@
     calculator.classList.toggle('programmer', mode === 'programmer');
     calculator.classList.toggle('converter', mode === 'converter');
     calculator.classList.toggle('statistics', mode === 'statistics');
+    calculator.classList.toggle('solver', mode === 'solver');
     calculator.classList.toggle('graphing', mode === 'graphing');
     if (mode === 'programmer') {
       updateBaseTabsUI();
@@ -1585,6 +1778,10 @@
     }
     if (mode === 'statistics') {
       renderStat();
+    }
+    if (mode === 'solver') {
+      updateSolverTabsUI();
+      renderSolver();
     }
     if (mode === 'graphing') {
       renderGraphDisplay();
@@ -1633,6 +1830,14 @@
         ['Backspace', 'Delete last character'],
         ['Escape', 'Clear all data'],
       ],
+      solver: [
+        ['0–9', 'Enter digits into the active coefficient'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next coefficient'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset coefficients'],
+      ],
       graphing: [
         ['0–9', 'Enter digits'],
         ['x', 'Insert variable x'],
@@ -1677,6 +1882,14 @@
         ['Enter / =', 'डेटामध्ये मूल्य जोडा'],
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'सर्व डेटा साफ करा'],
+      ],
+      solver: [
+        ['0–9', 'सक्रिय गुणांकात अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील गुणांकावर जा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'गुणांक रीसेट करा'],
       ],
       graphing: [
         ['0–9', 'अंक टाका'],
@@ -1782,6 +1995,15 @@
       if (key === 'Enter' || key === '=') { e.preventDefault(); statAddEntry(); return; }
       return;
     }
+    if (isSolverMode()) {
+      if (/[0-9]/.test(key)) { solverAppendDigit(key); return; }
+      if (key === '.') { solverAppendDecimal(); return; }
+      if (key === '-') { solverToggleSign(); return; }
+      if (key === 'Backspace') { solverBackspace(); return; }
+      if (key === 'Escape') { solverClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); solverNextField(); return; }
+      return;
+    }
     if (isGraphingMode()) {
       if (/[0-9]/.test(key) || key === 'x' || key === '.' || '+-*/^()'.includes(key)) { graphAppend(key); return; }
       if (key === 'Backspace') { graphBackspace(); return; }
@@ -1806,7 +2028,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'graphing'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();

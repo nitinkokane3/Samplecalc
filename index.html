@@ -16,6 +16,7 @@
           <button class="mode-btn" data-mode="programmer" data-i18n="programmer">Programmer</button>
           <button class="mode-btn" data-mode="converter" data-i18n="converter">Converter</button>
           <button class="mode-btn" data-mode="statistics" data-i18n="statistics">Statistics</button>
+          <button class="mode-btn" data-mode="solver" data-i18n="solverMode">Solver</button>
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
         </div>
         <div class="top-actions">
@@ -44,6 +45,11 @@
         <select class="unit-select" id="fromUnit"></select>
         <button class="swap-btn" id="swapUnits" title="Swap units" data-i18n-title="swapTitle">⇅</button>
         <select class="unit-select" id="toUnit"></select>
+      </div>
+
+      <div class="solver-tabs" id="solverTabs">
+        <button class="solver-type-btn active" data-type="linear" data-i18n="solverLinear">Linear</button>
+        <button class="solver-type-btn" data-type="quadratic" data-i18n="solverQuadratic">Quadratic</button>
       </div>
 
       <div class="graph-toolbar" id="graphToolbar">
@@ -88,6 +94,12 @@
       </div>
 
       <div class="stat-chips" id="statChips"></div>
+
+      <div class="conv-panel solver-panel" id="solverPanel">
+        <div class="conv-row solver-field" data-field="a"><span class="conv-label">a</span><span class="conv-value" id="solverA">1</span></div>
+        <div class="conv-row solver-field" data-field="b"><span class="conv-label">b</span><span class="conv-value" id="solverB">0</span></div>
+        <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label">c</span><span class="conv-value" id="solverC">0</span></div>
+      </div>
 
       <div class="panels">
         <div class="history-panel" id="historyPanel">
@@ -246,6 +258,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="statadd" data-i18n="statAdd">Add</button>
+          </div>
+
+          <div class="keys solver-keys" id="solverKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="solverdigit" data-value="7">7</button>
+            <button class="key num" data-action="solverdigit" data-value="8">8</button>
+            <button class="key num" data-action="solverdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="solverdigit" data-value="4">4</button>
+            <button class="key num" data-action="solverdigit" data-value="5">5</button>
+            <button class="key num" data-action="solverdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="solverdigit" data-value="1">1</button>
+            <button class="key num" data-action="solverdigit" data-value="2">2</button>
+            <button class="key num" data-action="solverdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="solversign">±</button>
+            <button class="key num" data-action="solverdigit" data-value="0">0</button>
+            <button class="key num" data-action="solverdecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="solvernext" data-i18n="solverNext">Next</button>
           </div>
 
           <div class="prog-row graph-row" id="graphRow">
