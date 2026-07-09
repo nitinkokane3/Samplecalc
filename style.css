@@ -106,6 +106,10 @@ body {
   max-width: 400px;
 }
 
+.calculator.vector {
+  max-width: 400px;
+}
+
 .calculator.regression {
   max-width: 400px;
 }
@@ -413,6 +417,19 @@ body {
   display: flex;
 }
 
+.vector-toolbar {
+  display: none;
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.vector .vector-toolbar {
+  display: flex;
+}
+
 .graph-tool-btn {
   flex: 1;
   border: none;
@@ -698,6 +715,27 @@ body {
 
 .complex-field.active .conv-label,
 .complex-field.active .conv-value {
+  color: var(--accent);
+}
+
+.calculator.vector .vector-panel {
+  display: flex;
+}
+
+.vector-field {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.vector-field.active {
+  background: var(--op-bg);
+}
+
+.vector-field.active .conv-label,
+.vector-field.active .conv-value {
   color: var(--accent);
 }
 
@@ -995,6 +1033,15 @@ body {
 }
 
 .calculator.complex .keys:not(.complex-keys) {
+  display: none;
+}
+
+.calculator.vector .keys.vector-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calculator.vector .keys:not(.vector-keys) {
   display: none;
 }
 

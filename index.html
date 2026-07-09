@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Advanced Calculator</title>
-<meta name="description" content="A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Complex, Regression, and Finance modes." />
+<meta name="description" content="A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Vector, Complex, Regression, and Finance modes." />
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#7c5cff" />
 <link rel="icon" href="icon-192.png" />
@@ -27,6 +27,7 @@
           <button class="mode-btn" data-mode="solver" data-i18n="solverMode">Solver</button>
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
           <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
+          <button class="mode-btn" data-mode="vector" data-i18n="vectorMode">Vector</button>
           <button class="mode-btn" data-mode="complex" data-i18n="complexMode">Complex</button>
           <button class="mode-btn" data-mode="regression" data-i18n="regressionMode">Regression</button>
           <button class="mode-btn" data-mode="finance" data-i18n="financeMode">Finance</button>
@@ -108,6 +109,15 @@
         <button class="graph-tool-btn" data-action="matrixmul">A×B</button>
         <button class="graph-tool-btn" data-action="matrixdet" data-i18n="matrixDet">Det</button>
         <button class="graph-tool-btn" data-action="matrixinv" data-i18n="matrixInv">Inverse</button>
+      </div>
+
+      <div class="vector-toolbar" id="vectorToolbar">
+        <button class="graph-tool-btn" data-action="vectoradd">A+B</button>
+        <button class="graph-tool-btn" data-action="vectorsub">A−B</button>
+        <button class="graph-tool-btn" data-action="vectordot" data-i18n="vectorDot">Dot</button>
+        <button class="graph-tool-btn" data-action="vectorcross" data-i18n="vectorCross">Cross</button>
+        <button class="graph-tool-btn" data-action="vectormag" data-i18n="vectorMagnitude">Mag</button>
+        <button class="graph-tool-btn" data-action="vectorangle" data-i18n="vectorAngle">Angle</button>
       </div>
 
       <div class="complex-toolbar" id="complexToolbar">
@@ -204,6 +214,15 @@
             <span class="matrix-cell" data-mat="b" data-r="2" data-c="2">1</span>
           </div>
         </div>
+      </div>
+
+      <div class="conv-panel vector-panel" id="vectorPanel">
+        <div class="conv-row vector-field" data-vec="a" data-part="x"><span class="conv-label">Ax</span><span class="conv-value" id="vectorAx">0</span></div>
+        <div class="conv-row vector-field" data-vec="a" data-part="y"><span class="conv-label">Ay</span><span class="conv-value" id="vectorAy">0</span></div>
+        <div class="conv-row vector-field" data-vec="a" data-part="z"><span class="conv-label">Az</span><span class="conv-value" id="vectorAz">0</span></div>
+        <div class="conv-row vector-field" data-vec="b" data-part="x"><span class="conv-label">Bx</span><span class="conv-value" id="vectorBx">0</span></div>
+        <div class="conv-row vector-field" data-vec="b" data-part="y"><span class="conv-label">By</span><span class="conv-value" id="vectorBy">0</span></div>
+        <div class="conv-row vector-field" data-vec="b" data-part="z"><span class="conv-label">Bz</span><span class="conv-value" id="vectorBz">0</span></div>
       </div>
 
       <div class="conv-panel complex-panel" id="complexPanel">
@@ -498,6 +517,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="matrixnextcell" data-i18n="matrixNext">Next</button>
+          </div>
+
+          <div class="keys vector-keys" id="vectorKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="vectordigit" data-value="7">7</button>
+            <button class="key num" data-action="vectordigit" data-value="8">8</button>
+            <button class="key num" data-action="vectordigit" data-value="9">9</button>
+
+            <button class="key num" data-action="vectordigit" data-value="4">4</button>
+            <button class="key num" data-action="vectordigit" data-value="5">5</button>
+            <button class="key num" data-action="vectordigit" data-value="6">6</button>
+
+            <button class="key num" data-action="vectordigit" data-value="1">1</button>
+            <button class="key num" data-action="vectordigit" data-value="2">2</button>
+            <button class="key num" data-action="vectordigit" data-value="3">3</button>
+
+            <button class="key num" data-action="vectorsign">±</button>
+            <button class="key num" data-action="vectordigit" data-value="0">0</button>
+            <button class="key num" data-action="vectordecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="vectornext" data-i18n="matrixNext">Next</button>
           </div>
 
           <div class="keys complex-keys" id="complexKeys">

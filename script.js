@@ -103,6 +103,15 @@
   const matrixPanel = document.getElementById('matrixPanel');
   const matrixSizeTabs = document.getElementById('matrixSizeTabs');
   const matrixKeys = document.getElementById('matrixKeys');
+  const vectorToolbar = document.getElementById('vectorToolbar');
+  const vectorPanel = document.getElementById('vectorPanel');
+  const vectorKeys = document.getElementById('vectorKeys');
+  const vectorAxEl = document.getElementById('vectorAx');
+  const vectorAyEl = document.getElementById('vectorAy');
+  const vectorAzEl = document.getElementById('vectorAz');
+  const vectorBxEl = document.getElementById('vectorBx');
+  const vectorByEl = document.getElementById('vectorBy');
+  const vectorBzEl = document.getElementById('vectorBz');
   const complexToolbar = document.getElementById('complexToolbar');
   const complexPanel = document.getElementById('complexPanel');
   const complexKeys = document.getElementById('complexKeys');
@@ -177,6 +186,11 @@
       matrixInv: 'Inverse',
       matrixNext: 'Next',
       matrixSingular: 'Singular matrix',
+      vectorMode: 'Vector',
+      vectorDot: 'Dot',
+      vectorCross: 'Cross',
+      vectorMagnitude: 'Mag',
+      vectorAngle: 'Angle',
       complexMode: 'Complex',
       complexModulus: 'Mod',
       complexArgument: 'Arg',
@@ -302,6 +316,11 @@
       matrixInv: 'व्यस्त',
       matrixNext: 'पुढे',
       matrixSingular: 'व्यस्त अस्तित्वात नाही',
+      vectorMode: 'सदिश',
+      vectorDot: 'डॉट',
+      vectorCross: 'क्रॉस',
+      vectorMagnitude: 'परिमाण',
+      vectorAngle: 'कोन',
       complexMode: 'सम्मिश्र',
       complexModulus: 'मापांक',
       complexArgument: 'कोन',
@@ -440,7 +459,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"], .key[data-action="financedigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="vectordigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"], .key[data-action="financedigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -449,6 +468,7 @@
     else if (isStatisticsMode()) renderStat();
     else if (isSolverMode()) renderSolver();
     else if (isMatrixMode()) renderMatrix();
+    else if (isVectorMode()) renderVector();
     else if (isComplexMode()) renderComplex();
     else if (isRegressionMode()) renderRegr();
     else if (isFinanceMode()) renderFinance();
@@ -1701,6 +1721,193 @@
     const btn = e.target.closest('.matrix-size-btn');
     if (!btn) return;
     setMatrixSize(parseInt(btn.dataset.size, 10));
+  });
+
+  // ---------- Vector mode (3D) ----------
+  const savedVectorA = JSON.parse(localStorage.getItem('calc-vector-a') || 'null');
+  const savedVectorB = JSON.parse(localStorage.getItem('calc-vector-b') || 'null');
+  const vector = {
+    entries: {
+      a: savedVectorA || { x: '1', y: '0', z: '0' },
+      b: savedVectorB || { x: '0', y: '1', z: '0' },
+    },
+    activeVec: 'a',
+    activePart: 'x',
+    opLabel: '',
+    resultText: '',
+  };
+
+  function isVectorMode() {
+    return calculator.classList.contains('vector');
+  }
+
+  function saveVector() {
+    localStorage.setItem('calc-vector-a', JSON.stringify(vector.entries.a));
+    localStorage.setItem('calc-vector-b', JSON.stringify(vector.entries.b));
+  }
+
+  function vectorNumeric(key) {
+    const v = vector.entries[key];
+    return { x: parseFloat(v.x) || 0, y: parseFloat(v.y) || 0, z: parseFloat(v.z) || 0 };
+  }
+
+  function vAdd(a, b) { return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z }; }
+  function vSub(a, b) { return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }; }
+  function vDot(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+  function vCross(a, b) {
+    return {
+      x: a.y * b.z - a.z * b.y,
+      y: a.z * b.x - a.x * b.z,
+      z: a.x * b.y - a.y * b.x,
+    };
+  }
+  function vMagnitude(v) { return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
+  function vAngle(a, b) {
+    const denom = vMagnitude(a) * vMagnitude(b);
+    if (denom === 0) return NaN;
+    const cos = Math.max(-1, Math.min(1, vDot(a, b) / denom));
+    const radians = Math.acos(cos);
+    return state.isDegrees ? (radians * 180) / Math.PI : radians;
+  }
+
+  function formatVector(v) {
+    return `(${formatNumber(v.x)}, ${formatNumber(v.y)}, ${formatNumber(v.z)})`;
+  }
+
+  function vectorCompute(op) {
+    const A = vectorNumeric('a');
+    const B = vectorNumeric('b');
+    switch (op) {
+      case 'add':
+        vector.opLabel = 'A + B';
+        vector.resultText = formatVector(vAdd(A, B));
+        break;
+      case 'sub':
+        vector.opLabel = 'A − B';
+        vector.resultText = formatVector(vSub(A, B));
+        break;
+      case 'dot':
+        vector.opLabel = 'A · B';
+        vector.resultText = formatNumber(vDot(A, B));
+        break;
+      case 'cross':
+        vector.opLabel = 'A × B';
+        vector.resultText = formatVector(vCross(A, B));
+        break;
+      case 'mag': {
+        const activeLabel = vector.activeVec === 'b' ? 'B' : 'A';
+        const activeV = vector.activeVec === 'b' ? B : A;
+        vector.opLabel = `|${activeLabel}|`;
+        vector.resultText = formatNumber(vMagnitude(activeV));
+        break;
+      }
+      case 'angle': {
+        const angle = vAngle(A, B);
+        vector.opLabel = 'angle(A, B)';
+        vector.resultText = isFinite(angle) ? formatNumber(angle) : t('error');
+        break;
+      }
+    }
+    renderVector();
+  }
+
+  function renderVector() {
+    expressionEl.textContent = localizeDigits(vector.opLabel);
+    resultEl.textContent = localizeDigits(vector.resultText);
+    memoryIndicator.textContent = '';
+    vectorAxEl.textContent = localizeDigits(vector.entries.a.x);
+    vectorAyEl.textContent = localizeDigits(vector.entries.a.y);
+    vectorAzEl.textContent = localizeDigits(vector.entries.a.z);
+    vectorBxEl.textContent = localizeDigits(vector.entries.b.x);
+    vectorByEl.textContent = localizeDigits(vector.entries.b.y);
+    vectorBzEl.textContent = localizeDigits(vector.entries.b.z);
+    document.querySelectorAll('.vector-field').forEach((row) => {
+      const isActive = row.dataset.vec === vector.activeVec && row.dataset.part === vector.activePart;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
+    });
+  }
+
+  function vectorActiveValue() {
+    return vector.entries[vector.activeVec][vector.activePart];
+  }
+
+  function vectorSetActiveValue(v) {
+    vector.entries[vector.activeVec][vector.activePart] = v;
+  }
+
+  function vectorAppendDigit(ch) {
+    const cur = vectorActiveValue();
+    vectorSetActiveValue((cur === '0' ? '' : cur) + ch);
+    saveVector();
+    renderVector();
+  }
+
+  function vectorAppendDecimal() {
+    const cur = vectorActiveValue();
+    if (cur.includes('.')) return;
+    vectorSetActiveValue(cur + '.');
+    saveVector();
+    renderVector();
+  }
+
+  function vectorToggleSign() {
+    const cur = vectorActiveValue();
+    vectorSetActiveValue(cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur));
+    saveVector();
+    renderVector();
+  }
+
+  function vectorBackspace() {
+    const cur = vectorActiveValue();
+    vectorSetActiveValue(cur.slice(0, -1) || '0');
+    saveVector();
+    renderVector();
+  }
+
+  function vectorClearEntry() {
+    vectorSetActiveValue('0');
+    saveVector();
+    renderVector();
+  }
+
+  function vectorClearAll() {
+    vector.entries = { a: { x: '1', y: '0', z: '0' }, b: { x: '0', y: '1', z: '0' } };
+    vector.activeVec = 'a';
+    vector.activePart = 'x';
+    vector.opLabel = '';
+    vector.resultText = '';
+    saveVector();
+    renderVector();
+  }
+
+  function vectorNextField() {
+    const order = [['a', 'x'], ['a', 'y'], ['a', 'z'], ['b', 'x'], ['b', 'y'], ['b', 'z']];
+    const idx = order.findIndex(([v, p]) => v === vector.activeVec && p === vector.activePart);
+    const [v, p] = order[(idx + 1) % order.length];
+    vector.activeVec = v;
+    vector.activePart = p;
+    renderVector();
+  }
+
+  function insertAnsVector() {
+    vectorSetActiveValue(convPlainNumber(lastAnswer));
+    saveVector();
+    renderVector();
+  }
+
+  vectorPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.vector-field');
+    if (!row) return;
+    vector.activeVec = row.dataset.vec;
+    vector.activePart = row.dataset.part;
+    renderVector();
+  });
+
+  vectorToolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.graph-tool-btn');
+    if (!btn) return;
+    handleAction(btn.dataset.action, btn.dataset.value);
   });
 
   // ---------- Complex number mode ----------
@@ -3209,6 +3416,7 @@
         else if (isStatisticsMode()) statClearAll();
         else if (isSolverMode()) solverClearAll();
         else if (isMatrixMode()) matrixClearAll();
+        else if (isVectorMode()) vectorClearAll();
         else if (isComplexMode()) complexClearAll();
         else if (isRegressionMode()) regrClearAll();
         else if (isFinanceMode()) financeClearAll();
@@ -3220,6 +3428,7 @@
         else if (isStatisticsMode()) statClearEntry();
         else if (isSolverMode()) solverClearEntry();
         else if (isMatrixMode()) matrixClearEntry();
+        else if (isVectorMode()) vectorClearEntry();
         else if (isComplexMode()) complexClearEntry();
         else if (isRegressionMode()) regrClearEntry();
         else if (isFinanceMode()) financeClearEntry();
@@ -3231,6 +3440,7 @@
         else if (isStatisticsMode()) statBackspace();
         else if (isSolverMode()) solverBackspace();
         else if (isMatrixMode()) matrixBackspace();
+        else if (isVectorMode()) vectorBackspace();
         else if (isComplexMode()) complexBackspace();
         else if (isRegressionMode()) regrBackspace();
         else if (isFinanceMode()) financeBackspace();
@@ -3277,6 +3487,16 @@
       case 'matrixmul': matrixCompute('mul'); break;
       case 'matrixdet': matrixCompute('det'); break;
       case 'matrixinv': matrixCompute('inv'); break;
+      case 'vectordigit': vectorAppendDigit(value); break;
+      case 'vectordecimal': vectorAppendDecimal(); break;
+      case 'vectorsign': vectorToggleSign(); break;
+      case 'vectornext': vectorNextField(); break;
+      case 'vectoradd': vectorCompute('add'); break;
+      case 'vectorsub': vectorCompute('sub'); break;
+      case 'vectordot': vectorCompute('dot'); break;
+      case 'vectorcross': vectorCompute('cross'); break;
+      case 'vectormag': vectorCompute('mag'); break;
+      case 'vectorangle': vectorCompute('angle'); break;
       case 'complexdigit': complexAppendDigit(value); break;
       case 'complexdecimal': complexAppendDecimal(); break;
       case 'complexsign': complexToggleSign(); break;
@@ -3302,6 +3522,7 @@
         else if (isStatisticsMode()) insertAnsStat();
         else if (isSolverMode()) insertAnsSolver();
         else if (isMatrixMode()) insertAnsMatrix();
+        else if (isVectorMode()) insertAnsVector();
         else if (isComplexMode()) insertAnsComplex();
         else if (isRegressionMode()) insertAnsRegr();
         else if (isFinanceMode()) insertAnsFinance();
@@ -3327,7 +3548,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys, financeKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, vectorKeys, complexKeys, regrKeys, financeKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -3344,6 +3565,7 @@
     calculator.classList.toggle('solver', mode === 'solver');
     calculator.classList.toggle('graphing', mode === 'graphing');
     calculator.classList.toggle('matrix', mode === 'matrix');
+    calculator.classList.toggle('vector', mode === 'vector');
     calculator.classList.toggle('complex', mode === 'complex');
     calculator.classList.toggle('regression', mode === 'regression');
     calculator.classList.toggle('finance', mode === 'finance');
@@ -3370,6 +3592,9 @@
     if (mode === 'matrix') {
       updateMatrixSizeUI();
       renderMatrix();
+    }
+    if (mode === 'vector') {
+      renderVector();
     }
     if (mode === 'complex') {
       renderComplex();
@@ -3449,6 +3674,14 @@
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
           { steps: '3×3: Det of A=[1,0,2;-1,3,1;0,2,4]', result: '= 6' },
+        ],
+      },
+      vector: {
+        description: 'Enter two 3D vectors A and B by tapping their x/y/z fields, then compute A+B, A-B, the dot product A·B, the cross product A×B, the magnitude of whichever vector is active, or the angle between A and B.',
+        examples: [
+          { steps: 'A=(1,2,3), B=(4,5,6), then A+B', result: '= (5, 7, 9)' },
+          { steps: 'Dot of A=(1,2,3), B=(4,5,6)', result: '= 32' },
+          { steps: 'Cross of A=(1,2,3), B=(4,5,6)', result: '= (-3, 6, -3)' },
         ],
       },
       complex: {
@@ -3532,6 +3765,14 @@
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
           { steps: '3×3: A=[1,0,2;-1,3,1;0,2,4] चा Det', result: '= 6' },
+        ],
+      },
+      vector: {
+        description: 'x/y/z फील्डवर टॅप करून दोन त्रिमितीय सदिश A आणि B टाका, नंतर A+B, A-B, डॉट गुणाकार A·B, क्रॉस गुणाकार A×B, सक्रिय सदिशाचे परिमाण, किंवा A आणि B मधील कोन काढा.',
+        examples: [
+          { steps: 'A=(1,2,3), B=(4,5,6), नंतर A+B', result: '= (5, 7, 9)' },
+          { steps: 'A=(1,2,3), B=(4,5,6) चा डॉट', result: '= 32' },
+          { steps: 'A=(1,2,3), B=(4,5,6) चा क्रॉस', result: '= (-3, 6, -3)' },
         ],
       },
       complex: {
@@ -3621,6 +3862,15 @@
         ['Click cell', 'Select that cell to edit'],
         ['Backspace', 'Delete last character'],
         ['Escape', 'Reset both matrices to identity'],
+      ],
+      vector: [
+        ['0–9', 'Enter digits into the active field'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next field'],
+        ['Click field', 'Select that field to edit'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset both vectors'],
       ],
       complex: [
         ['0–9', 'Enter digits into the active field'],
@@ -3713,6 +3963,15 @@
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'दोन्ही मॅट्रिक्स रीसेट करा'],
       ],
+      vector: [
+        ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील फील्डवर जा'],
+        ['फील्डवर क्लिक करा', 'ते फील्ड संपादित करण्यासाठी निवडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'दोन्ही सदिश रीसेट करा'],
+      ],
       complex: [
         ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
         ['.', 'दशांश बिंदू'],
@@ -3793,7 +4052,7 @@
     'calc-finance-type', 'calc-graph-expr', 'calc-graph-expr-g', 'calc-history',
     'calc-lang', 'calc-matrix-a', 'calc-matrix-b', 'calc-matrix-size', 'calc-memory',
     'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs', 'calc-solver-type',
-    'calc-stat-data', 'calc-theme',
+    'calc-stat-data', 'calc-theme', 'calc-vector-a', 'calc-vector-b',
   ];
 
   function setDataStatus(msg, isError) {
@@ -4031,6 +4290,15 @@
       if (key === 'Tab') { e.preventDefault(); matrixNextCell(); return; }
       return;
     }
+    if (isVectorMode()) {
+      if (/[0-9]/.test(key)) { vectorAppendDigit(key); return; }
+      if (key === '.') { vectorAppendDecimal(); return; }
+      if (key === '-') { vectorToggleSign(); return; }
+      if (key === 'Backspace') { vectorBackspace(); return; }
+      if (key === 'Escape') { vectorClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); vectorNextField(); return; }
+      return;
+    }
     if (isComplexMode()) {
       if (/[0-9]/.test(key)) { complexAppendDigit(key); return; }
       if (key === '.') { complexAppendDecimal(); return; }
@@ -4076,7 +4344,7 @@
   // above) already cycles the logical active field regardless of DOM
   // focus, so this doesn't change that -- it just lets assistive tech
   // reach, hear, and activate these controls too.
-  const activeFieldSelector = '.solver-field, .matrix-cell, .finance-field, .complex-field, .regr-field';
+  const activeFieldSelector = '.solver-field, .matrix-cell, .finance-field, .complex-field, .regr-field, .vector-field';
   document.querySelectorAll(activeFieldSelector).forEach((el) => {
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
@@ -4095,7 +4363,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression', 'finance'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'vector', 'complex', 'regression', 'finance'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
