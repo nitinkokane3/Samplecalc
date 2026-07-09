@@ -85,6 +85,38 @@ module.exports = [
     },
   },
   {
+    name: 'Compound interest: 1000 at 5% for 2 years, annual vs monthly compounding',
+    fn: async (page, baseURL) => {
+      await gotoFinanceType(page, baseURL, 'compoundinterest');
+      await setField(page, 'a', 1000);
+      await setField(page, 'b', 5);
+      await setField(page, 'c', 2);
+      // 'd' (compounds/year) defaults to 1, i.e. annual compounding
+      const annualOutput = await page.evaluate(() => document.getElementById('financeOutputPanel').textContent);
+      assertEqual(annualOutput.includes('102.5') && annualOutput.includes('1,102.5'), true, 'annual compound interest/total');
+
+      await setField(page, 'd', 12);
+      const monthlyOutput = await page.evaluate(() => document.getElementById('financeOutputPanel').textContent);
+      assertEqual(
+        monthlyOutput.includes('104.9413355583') && monthlyOutput.includes('1,104.9413355583'),
+        true,
+        'monthly compound interest/total'
+      );
+    },
+  },
+  {
+    name: 'Compound interest with 0 compounds per year shows an error instead of Infinity',
+    fn: async (page, baseURL) => {
+      await gotoFinanceType(page, baseURL, 'compoundinterest');
+      await setField(page, 'a', 1000);
+      await setField(page, 'b', 5);
+      await setField(page, 'c', 2);
+      await setField(page, 'd', 0);
+      const result = await page.textContent('#result');
+      assertEqual(result.includes('Infinity') || result.includes('NaN'), false, 'no Infinity/NaN leaking through');
+    },
+  },
+  {
     name: 'Tip split with 0 people shows an error instead of Infinity',
     fn: async (page, baseURL) => {
       await gotoFinanceType(page, baseURL, 'tip');
