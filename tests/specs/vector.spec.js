@@ -137,6 +137,29 @@ module.exports = [
     },
   },
   {
+    name: 'vector keypad (#vectorKeys) does not leak into Standard or Scientific mode after visiting Vector mode',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      // real regression: #vector-keys was missing from the base "hide all
+      // mode-specific keypads" rule, so it stayed visible in any mode that
+      // has no catch-all .keys:not(.own-keys) rule of its own -- i.e.
+      // Standard and Scientific, which just use the shared #keys element.
+      await page.click('[data-mode="vector"]');
+      await page.click('[data-mode="standard"]');
+      const hiddenInStandard = await page.evaluate(
+        () => getComputedStyle(document.getElementById('vectorKeys')).display === 'none'
+      );
+      assertTrue(hiddenInStandard, 'vector keypad must stay hidden after switching to Standard mode');
+
+      await page.click('[data-mode="vector"]');
+      await page.click('[data-mode="scientific"]');
+      const hiddenInScientific = await page.evaluate(
+        () => getComputedStyle(document.getElementById('vectorKeys')).display === 'none'
+      );
+      assertTrue(hiddenInScientific, 'vector keypad must stay hidden after switching to Scientific mode');
+    },
+  },
+  {
     name: 'vector fields are keyboard-focusable (role=button, tabindex=0)',
     fn: async (page, baseURL) => {
       await page.goto(`${baseURL}/index.html`);
