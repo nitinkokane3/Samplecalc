@@ -60,9 +60,9 @@
       </div>
 
       <div class="unit-row" id="unitRow">
-        <select class="unit-select" id="fromUnit"></select>
+        <select class="unit-select" id="fromUnit" title="Convert from" data-i18n-title="convFromLabel"></select>
         <button class="swap-btn" id="swapUnits" title="Swap units" data-i18n-title="swapTitle">⇅</button>
-        <select class="unit-select" id="toUnit"></select>
+        <select class="unit-select" id="toUnit" title="Convert to" data-i18n-title="convToLabel"></select>
       </div>
 
       <div class="solver-tabs" id="solverTabs">
@@ -579,20 +579,20 @@
     </div>
   </div>
 
-  <div class="help-overlay" id="helpOverlay">
+  <div class="help-overlay" id="helpOverlay" role="dialog" aria-modal="true" aria-labelledby="helpTitleText">
     <div class="help-modal">
       <div class="help-header">
-        <span data-i18n="helpTitle">Keyboard Shortcuts</span>
+        <span id="helpTitleText" data-i18n="helpTitle">Keyboard Shortcuts</span>
         <button id="helpClose" aria-label="Close">&times;</button>
       </div>
       <div class="help-body" id="helpBody"></div>
     </div>
   </div>
 
-  <div class="help-overlay" id="dataOverlay">
+  <div class="help-overlay" id="dataOverlay" role="dialog" aria-modal="true" aria-labelledby="dataTitleText">
     <div class="help-modal">
       <div class="help-header">
-        <span data-i18n="dataTitle">Backup &amp; Restore</span>
+        <span id="dataTitleText" data-i18n="dataTitle">Backup &amp; Restore</span>
         <button id="dataClose" aria-label="Close">&times;</button>
       </div>
       <div class="help-body">

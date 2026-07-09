@@ -229,6 +229,8 @@
       catTime: 'Time',
       catCurrency: 'Currency',
       swapTitle: 'Swap units',
+      convFromLabel: 'Convert from',
+      convToLabel: 'Convert to',
       statMean: 'Mean',
       statMedian: 'Median',
       statMode: 'Mode',
@@ -352,6 +354,8 @@
       catTime: 'वेळ',
       catCurrency: 'चलन',
       swapTitle: 'एकके बदला',
+      convFromLabel: 'यावरून रूपांतरित करा',
+      convToLabel: 'यावर रूपांतरित करा',
       statMean: 'सरासरी',
       statMedian: 'मध्यम',
       statMode: 'बहुलक',
@@ -1291,7 +1295,9 @@
     solverKEl.textContent = localizeDigits(solver.coeffs.k);
     solverLEl.textContent = localizeDigits(solver.coeffs.l);
     document.querySelectorAll('.solver-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === solver.activeField);
+      const isActive = row.dataset.field === solver.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -1565,7 +1571,9 @@
       const r = parseInt(el.dataset.r, 10);
       const c = parseInt(el.dataset.c, 10);
       el.textContent = localizeDigits(matrix.entries[m][r][c]);
-      el.classList.toggle('active', matrix.activeMat === m && matrix.activeR === r && matrix.activeC === c);
+      const isActive = matrix.activeMat === m && matrix.activeR === r && matrix.activeC === c;
+      el.classList.toggle('active', isActive);
+      el.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -1777,7 +1785,9 @@
     complexBreEl.textContent = localizeDigits(complexNum.entries.b.re);
     complexBimEl.textContent = localizeDigits(complexNum.entries.b.im);
     document.querySelectorAll('.complex-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.num === complexNum.activeNum && row.dataset.part === complexNum.activePart);
+      const isActive = row.dataset.num === complexNum.activeNum && row.dataset.part === complexNum.activePart;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -1945,7 +1955,9 @@
     regrEntryXEl.textContent = localizeDigits(regression.entryX);
     regrEntryYEl.textContent = localizeDigits(regression.entryY);
     document.querySelectorAll('.regr-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === regression.activeField);
+      const isActive = row.dataset.field === regression.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
     regrNEl.textContent = localizeDigits(String(res.n));
     regrSlopeEl.textContent = res.valid ? localizeDigits(formatNumber(res.m)) : '—';
@@ -2152,7 +2164,9 @@
     financeCEl.textContent = localizeDigits(finance.coeffs.c);
     financeDEl.textContent = localizeDigits(finance.coeffs.d);
     document.querySelectorAll('.finance-field').forEach((row) => {
-      row.classList.toggle('active', row.dataset.field === finance.activeField);
+      const isActive = row.dataset.field === finance.activeField;
+      row.classList.toggle('active', isActive);
+      row.setAttribute('aria-pressed', String(isActive));
     });
   }
 
@@ -3733,10 +3747,12 @@
   function openHelp() {
     renderHelpContent();
     helpOverlay.classList.add('open');
+    helpClose.focus();
   }
 
   function closeHelp() {
     helpOverlay.classList.remove('open');
+    helpToggle.focus();
   }
 
   helpToggle.addEventListener('click', openHelp);
@@ -3762,10 +3778,12 @@
   function openData() {
     setDataStatus('', false);
     dataOverlay.classList.add('open');
+    dataClose.focus();
   }
 
   function closeData() {
     dataOverlay.classList.remove('open');
+    dataToggle.focus();
   }
 
   function exportAllData() {
@@ -3897,14 +3915,36 @@
   });
 
   // ---------- Keyboard support ----------
+  function getFocusableElements(container) {
+    return Array.from(container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => !el.disabled && el.offsetParent !== null);
+  }
+
+  function trapFocus(container, e) {
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   window.addEventListener('keydown', (e) => {
     const key = e.key;
     if (helpOverlay.classList.contains('open')) {
-      if (key === 'Escape') closeHelp();
+      if (key === 'Escape') { closeHelp(); return; }
+      trapFocus(helpOverlay, e);
       return;
     }
     if (dataOverlay.classList.contains('open')) {
-      if (key === 'Escape') closeData();
+      if (key === 'Escape') { closeData(); return; }
+      trapFocus(dataOverlay, e);
       return;
     }
     if (isProgrammerMode()) {
@@ -4001,6 +4041,25 @@
     if (key === 'Backspace') { backspace(); return; }
     if (key === 'Escape') { clearAll(); return; }
     if (key === '!') { factValue(); return; }
+  });
+
+  // ---------- Accessibility: make the custom "active field" rows/cells
+  // (solver coefficients, matrix cells, finance/complex/regression fields)
+  // discoverable and operable via keyboard and screen readers, not just
+  // mouse clicks. The app's own Tab-key handling (see keydown support
+  // above) already cycles the logical active field regardless of DOM
+  // focus, so this doesn't change that -- it just lets assistive tech
+  // reach, hear, and activate these controls too.
+  const activeFieldSelector = '.solver-field, .matrix-cell, .finance-field, .complex-field, .regr-field';
+  document.querySelectorAll(activeFieldSelector).forEach((el) => {
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+  });
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches(activeFieldSelector)) {
+      e.preventDefault();
+      e.target.click();
+    }
   });
 
   // ---------- Init ----------
