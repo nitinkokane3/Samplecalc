@@ -1,6 +1,6 @@
 # Advanced Calculator
 
-A multi-mode calculator (Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Complex, Regression, and Finance) built with plain HTML/CSS/JS — no build step, no framework. Installable as a PWA and works offline after the first visit.
+A multi-mode calculator (Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Vector, Complex, Regression, and Finance) built with plain HTML/CSS/JS — no build step, no framework. Installable as a PWA and works offline after the first visit.
 
 Open `index.html` directly, or serve the folder with any static file server.
 
