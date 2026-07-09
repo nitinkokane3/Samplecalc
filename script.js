@@ -62,6 +62,16 @@
   const solverCRow = document.getElementById('solverCRow');
   const solverDEl = document.getElementById('solverD');
   const solverDRow = document.getElementById('solverDRow');
+  const solverEEl = document.getElementById('solverE');
+  const solverERow = document.getElementById('solverERow');
+  const solverFEl = document.getElementById('solverF');
+  const solverFRow = document.getElementById('solverFRow');
+  const solverALabelEl = document.getElementById('solverALabel');
+  const solverBLabelEl = document.getElementById('solverBLabel');
+  const solverCLabelEl = document.getElementById('solverCLabel');
+  const solverDLabelEl = document.getElementById('solverDLabel');
+  const solverELabelEl = document.getElementById('solverELabel');
+  const solverFLabelEl = document.getElementById('solverFLabel');
   const solverKeys = document.getElementById('solverKeys');
   const graphFnTabs = document.getElementById('graphFnTabs');
   const graphToolbar = document.getElementById('graphToolbar');
@@ -73,6 +83,7 @@
   const graphKeys = document.getElementById('graphKeys');
   const matrixToolbar = document.getElementById('matrixToolbar');
   const matrixPanel = document.getElementById('matrixPanel');
+  const matrixSizeTabs = document.getElementById('matrixSizeTabs');
   const matrixKeys = document.getElementById('matrixKeys');
   const complexToolbar = document.getElementById('complexToolbar');
   const complexPanel = document.getElementById('complexPanel');
@@ -91,6 +102,27 @@
   const regrInterceptEl = document.getElementById('regrIntercept');
   const regrREl = document.getElementById('regrR');
   const regrR2El = document.getElementById('regrR2');
+  const financeTabs = document.getElementById('financeTabs');
+  const financeKeys = document.getElementById('financeKeys');
+  const financeInputPanel = document.getElementById('financeInputPanel');
+  const financeAEl = document.getElementById('financeA');
+  const financeBEl = document.getElementById('financeB');
+  const financeCEl = document.getElementById('financeC');
+  const financeDEl = document.getElementById('financeD');
+  const financeALabelEl = document.getElementById('financeALabel');
+  const financeBLabelEl = document.getElementById('financeBLabel');
+  const financeCLabelEl = document.getElementById('financeCLabel');
+  const financeDLabelEl = document.getElementById('financeDLabel');
+  const financeCRow = document.getElementById('financeCRow');
+  const financeDRow = document.getElementById('financeDRow');
+  const financeOut1El = document.getElementById('financeOut1');
+  const financeOut2El = document.getElementById('financeOut2');
+  const financeOut3El = document.getElementById('financeOut3');
+  const financeOut1LabelEl = document.getElementById('financeOut1Label');
+  const financeOut2LabelEl = document.getElementById('financeOut2Label');
+  const financeOut3LabelEl = document.getElementById('financeOut3Label');
+  const financeOut2Row = document.getElementById('financeOut2Row');
+  const financeOut3Row = document.getElementById('financeOut3Row');
 
   const translations = {
     en: {
@@ -109,6 +141,7 @@
       solverInfiniteSolutions: 'Infinite solutions',
       solverComplexNote: '2 complex roots',
       solverRepeatedNote: 'repeated root',
+      solverSystem2x2: 'System 2×2',
       graphing: 'Graph',
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
@@ -135,6 +168,38 @@
       regrPointsLabel: 'points',
       regrNeedMore: 'Need at least 2 points',
       regrVertical: 'x values must vary',
+      financeMode: 'Finance',
+      financePercentOf: '% Of',
+      financePercentChange: '% Change',
+      financeDiscount: 'Discount',
+      financeSimpleInterest: 'Simple Int.',
+      financeCompoundInterest: 'Compound Int.',
+      financeTip: 'Tip Split',
+      financeFieldPercent: 'Percent %',
+      financeFieldValue: 'Value',
+      financeFieldFrom: 'From',
+      financeFieldTo: 'To',
+      financeFieldPrice: 'Price',
+      financeFieldDiscountPct: 'Discount %',
+      financeFieldPrincipal: 'Principal',
+      financeFieldRatePct: 'Rate %',
+      financeFieldYears: 'Years',
+      financeFieldCompounds: 'Compounds/yr',
+      financeFieldBill: 'Bill',
+      financeFieldTipPct: 'Tip %',
+      financeFieldPeople: 'People',
+      financeOutResult: 'Result',
+      financeOutChange: 'Change',
+      financeOutSaved: 'Amount Saved',
+      financeOutFinalPrice: 'Final Price',
+      financeOutInterest: 'Interest',
+      financeOutTotal: 'Total Amount',
+      financeOutTip: 'Tip Amount',
+      financeOutTotalBill: 'Total Bill',
+      financeOutPerPerson: 'Per Person',
+      financeIncrease: 'increase',
+      financeDecrease: 'decrease',
+      financeNeedNonZero: 'Value can\'t be zero',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -197,6 +262,7 @@
       solverInfiniteSolutions: 'अनंत उपाय',
       solverComplexNote: '२ सम्मिश्र मुळे',
       solverRepeatedNote: 'पुनरावृत्त मूळ',
+      solverSystem2x2: 'प्रणाली 2×2',
       graphing: 'आलेख',
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
@@ -223,6 +289,38 @@
       regrPointsLabel: 'बिंदू',
       regrNeedMore: 'किमान २ बिंदू आवश्यक',
       regrVertical: 'x मूल्ये भिन्न असावीत',
+      financeMode: 'वित्त',
+      financePercentOf: '% चे',
+      financePercentChange: '% बदल',
+      financeDiscount: 'सवलत',
+      financeSimpleInterest: 'साधे व्याज',
+      financeCompoundInterest: 'चक्रवाढ व्याज',
+      financeTip: 'टिप वाटणी',
+      financeFieldPercent: 'टक्केवारी %',
+      financeFieldValue: 'मूल्य',
+      financeFieldFrom: 'सुरुवात',
+      financeFieldTo: 'शेवट',
+      financeFieldPrice: 'किंमत',
+      financeFieldDiscountPct: 'सवलत %',
+      financeFieldPrincipal: 'मुद्दल',
+      financeFieldRatePct: 'दर %',
+      financeFieldYears: 'वर्षे',
+      financeFieldCompounds: 'चक्रवाढ/वर्ष',
+      financeFieldBill: 'बिल',
+      financeFieldTipPct: 'टिप %',
+      financeFieldPeople: 'लोक',
+      financeOutResult: 'निकाल',
+      financeOutChange: 'बदल',
+      financeOutSaved: 'बचत रक्कम',
+      financeOutFinalPrice: 'अंतिम किंमत',
+      financeOutInterest: 'व्याज',
+      financeOutTotal: 'एकूण रक्कम',
+      financeOutTip: 'टिप रक्कम',
+      financeOutTotalBill: 'एकूण बिल',
+      financeOutPerPerson: 'प्रत्येकी',
+      financeIncrease: 'वाढ',
+      financeDecrease: 'घट',
+      financeNeedNonZero: 'मूल्य शून्य असू शकत नाही',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -316,7 +414,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"], .key[data-action="regrdigit"], .key[data-action="financedigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -327,6 +425,7 @@
     else if (isMatrixMode()) renderMatrix();
     else if (isComplexMode()) renderComplex();
     else if (isRegressionMode()) renderRegr();
+    else if (isFinanceMode()) renderFinance();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -909,12 +1008,12 @@
   }
 
   // ---------- Equation solver mode ----------
-  const solverTypes = ['linear', 'quadratic', 'cubic'];
+  const solverTypes = ['linear', 'quadratic', 'cubic', 'system2x2'];
   const savedSolverCoeffs = JSON.parse(localStorage.getItem('calc-solver-coeffs') || 'null');
   const savedSolverType = localStorage.getItem('calc-solver-type');
   const solver = {
     type: solverTypes.includes(savedSolverType) ? savedSolverType : 'linear',
-    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0' }, savedSolverCoeffs || {}),
+    coeffs: Object.assign({ a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' }, savedSolverCoeffs || {}),
     activeField: 'a',
   };
 
@@ -923,6 +1022,7 @@
   }
 
   function solverFieldOrder() {
+    if (solver.type === 'system2x2') return ['a', 'b', 'c', 'd', 'e', 'f'];
     if (solver.type === 'cubic') return ['a', 'b', 'c', 'd'];
     if (solver.type === 'quadratic') return ['a', 'b', 'c'];
     return ['a', 'b'];
@@ -940,7 +1040,12 @@
   }
 
   function formatSolverEquation() {
-    const { a, b, c, d } = solver.coeffs;
+    const { a, b, c, d, e, f } = solver.coeffs;
+    if (solver.type === 'system2x2') {
+      const eq1 = `${formatNumber(parseFloat(a) || 0)}x${eqTerm(b, 'y')} = ${formatNumber(parseFloat(c) || 0)}`;
+      const eq2 = `${formatNumber(parseFloat(d) || 0)}x${eqTerm(e, 'y')} = ${formatNumber(parseFloat(f) || 0)}`;
+      return `${eq1}; ${eq2}`;
+    }
     const leadTerm = `${formatNumber(parseFloat(a) || 0)}x`;
     if (solver.type === 'cubic') {
       return `${leadTerm}³${eqTerm(b, 'x²')}${eqTerm(c, 'x')}${eqTerm(d, '')} = 0`;
@@ -1014,12 +1119,29 @@
     return { kind: 'cubic', roots, repeatedReal };
   }
 
+  function computeSystem2x2Result(a, b, c, d, e, f) {
+    const D = a * e - d * b;
+    if (D !== 0) {
+      return { kind: 'system', x: (c * e - f * b) / D, y: (a * f - d * c) / D };
+    }
+    const Dx = c * e - f * b;
+    const Dy = a * f - d * c;
+    if (Dx === 0 && Dy === 0) return { kind: 'system-infinite' };
+    return { kind: 'system-none' };
+  }
+
   function computeSolverResult() {
     const a = parseFloat(solver.coeffs.a) || 0;
     const b = parseFloat(solver.coeffs.b) || 0;
     if (solver.type === 'linear') return computeLinearResult(a, b);
     const c = parseFloat(solver.coeffs.c) || 0;
     if (solver.type === 'quadratic') return computeQuadraticResult(a, b, c);
+    if (solver.type === 'system2x2') {
+      const d = parseFloat(solver.coeffs.d) || 0;
+      const e = parseFloat(solver.coeffs.e) || 0;
+      const f = parseFloat(solver.coeffs.f) || 0;
+      return computeSystem2x2Result(a, b, c, d, e, f);
+    }
     const d = parseFloat(solver.coeffs.d) || 0;
     return computeCubicResult(a, b, c, d);
   }
@@ -1041,6 +1163,9 @@
       }
       case 'none': return t('solverNoSolution');
       case 'infinite': return t('solverInfiniteSolutions');
+      case 'system': return `x = ${formatNumber(res.x)}, y = ${formatNumber(res.y)}`;
+      case 'system-none': return t('solverNoSolution');
+      case 'system-infinite': return t('solverInfiniteSolutions');
       default: return '';
     }
   }
@@ -1053,17 +1178,32 @@
     solverBEl.textContent = localizeDigits(solver.coeffs.b);
     solverCEl.textContent = localizeDigits(solver.coeffs.c);
     solverDEl.textContent = localizeDigits(solver.coeffs.d);
+    solverEEl.textContent = localizeDigits(solver.coeffs.e);
+    solverFEl.textContent = localizeDigits(solver.coeffs.f);
     document.querySelectorAll('.solver-field').forEach((row) => {
       row.classList.toggle('active', row.dataset.field === solver.activeField);
     });
+  }
+
+  function updateSolverLabels() {
+    const isSystem = solver.type === 'system2x2';
+    solverALabelEl.textContent = isSystem ? 'a₁' : 'a';
+    solverBLabelEl.textContent = isSystem ? 'b₁' : 'b';
+    solverCLabelEl.textContent = isSystem ? 'c₁' : 'c';
+    solverDLabelEl.textContent = isSystem ? 'a₂' : 'd';
+    solverELabelEl.textContent = isSystem ? 'b₂' : 'e';
+    solverFLabelEl.textContent = isSystem ? 'c₂' : 'f';
   }
 
   function updateSolverTabsUI() {
     document.querySelectorAll('.solver-type-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.type === solver.type);
     });
-    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' ? '' : 'none';
-    solverDRow.style.display = solver.type === 'cubic' ? '' : 'none';
+    solverCRow.style.display = solver.type === 'quadratic' || solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
+    solverDRow.style.display = solver.type === 'cubic' || solver.type === 'system2x2' ? '' : 'none';
+    solverERow.style.display = solver.type === 'system2x2' ? '' : 'none';
+    solverFRow.style.display = solver.type === 'system2x2' ? '' : 'none';
+    updateSolverLabels();
   }
 
   function setSolverType(type) {
@@ -1117,7 +1257,7 @@
   }
 
   function solverClearAll() {
-    solver.coeffs = { a: '1', b: '0', c: '0', d: '0' };
+    solver.coeffs = { a: '1', b: '0', c: '0', d: '0', e: '0', f: '0' };
     solver.activeField = 'a';
     saveSolver();
     renderSolver();
@@ -1142,12 +1282,26 @@
     renderSolver();
   });
 
-  // ---------- Matrix calculator mode (2x2) ----------
-  const identity2 = () => [['1', '0'], ['0', '1']];
+  // ---------- Matrix calculator mode (2x2 / 3x3) ----------
+  const matrixSizes = [2, 3];
+  const identity3 = () => [['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']];
+  function padMatrixTo3x3(mat) {
+    if (Array.isArray(mat) && mat.length === 3 && mat.every((row) => row.length === 3)) return mat;
+    const id = identity3();
+    if (Array.isArray(mat)) {
+      mat.forEach((row, i) => row.forEach((v, j) => { if (i < 3 && j < 3) id[i][j] = v; }));
+    }
+    return id;
+  }
   const savedMatrixA = JSON.parse(localStorage.getItem('calc-matrix-a') || 'null');
   const savedMatrixB = JSON.parse(localStorage.getItem('calc-matrix-b') || 'null');
+  const savedMatrixSize = parseInt(localStorage.getItem('calc-matrix-size'), 10);
   const matrix = {
-    entries: { a: savedMatrixA || identity2(), b: savedMatrixB || identity2() },
+    entries: {
+      a: savedMatrixA ? padMatrixTo3x3(savedMatrixA) : identity3(),
+      b: savedMatrixB ? padMatrixTo3x3(savedMatrixB) : identity3(),
+    },
+    size: matrixSizes.includes(savedMatrixSize) ? savedMatrixSize : 2,
     activeMat: 'a',
     activeR: 0,
     activeC: 0,
@@ -1162,10 +1316,12 @@
   function saveMatrix() {
     localStorage.setItem('calc-matrix-a', JSON.stringify(matrix.entries.a));
     localStorage.setItem('calc-matrix-b', JSON.stringify(matrix.entries.b));
+    localStorage.setItem('calc-matrix-size', String(matrix.size));
   }
 
   function matrixNumeric(mat) {
-    return matrix.entries[mat].map((row) => row.map((v) => parseFloat(v) || 0));
+    const n = matrix.size;
+    return matrix.entries[mat].slice(0, n).map((row) => row.slice(0, n).map((v) => parseFloat(v) || 0));
   }
 
   function matrixAdd(A, B) {
@@ -1175,25 +1331,44 @@
     return A.map((row, i) => row.map((v, j) => v - B[i][j]));
   }
   function matrixMul(A, B) {
-    const result = [[0, 0], [0, 0]];
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 2; j++) {
-        for (let k = 0; k < 2; k++) result[i][j] += A[i][k] * B[k][j];
+    const n = A.length;
+    const result = Array.from({ length: n }, () => Array(n).fill(0));
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        for (let k = 0; k < n; k++) result[i][j] += A[i][k] * B[k][j];
       }
     }
     return result;
   }
   function matrixDet(A) {
-    return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    const n = A.length;
+    if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    return (
+      A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) -
+      A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) +
+      A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0])
+    );
+  }
+  function matrixMinor(A, row, col) {
+    return A.filter((_, i) => i !== row).map((r) => r.filter((_, j) => j !== col));
   }
   function matrixInverse(A) {
+    const n = A.length;
     const d = matrixDet(A);
     if (d === 0) return null;
-    return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]];
+    if (n === 2) {
+      return [[A[1][1] / d, -A[0][1] / d], [-A[1][0] / d, A[0][0] / d]];
+    }
+    const cofactors = A.map((row, i) => row.map((_, j) => {
+      const sign = (i + j) % 2 === 0 ? 1 : -1;
+      return sign * matrixDet(matrixMinor(A, i, j));
+    }));
+    const adjugate = cofactors[0].map((_, j) => cofactors.map((row) => row[j]));
+    return adjugate.map((row) => row.map((v) => v / d));
   }
 
   function formatMatrixResult(M) {
-    return `[${formatNumber(M[0][0])}, ${formatNumber(M[0][1])}; ${formatNumber(M[1][0])}, ${formatNumber(M[1][1])}]`;
+    return `[${M.map((row) => row.map((v) => formatNumber(v)).join(', ')).join('; ')}]`;
   }
 
   function matrixCompute(op) {
@@ -1228,6 +1403,32 @@
     renderMatrix();
   }
 
+  function updateMatrixSizeUI() {
+    document.querySelectorAll('.matrix-size-btn').forEach((b) => {
+      b.classList.toggle('active', parseInt(b.dataset.size, 10) === matrix.size);
+    });
+    document.querySelectorAll('.matrix-grid').forEach((grid) => {
+      grid.classList.toggle('size3', matrix.size === 3);
+    });
+    matrixPanel.classList.toggle('size3', matrix.size === 3);
+    document.querySelectorAll('.matrix-cell').forEach((el) => {
+      const r = parseInt(el.dataset.r, 10);
+      const c = parseInt(el.dataset.c, 10);
+      el.style.display = (r < matrix.size && c < matrix.size) ? '' : 'none';
+    });
+  }
+
+  function setMatrixSize(size) {
+    matrix.size = size;
+    matrix.activeR = 0;
+    matrix.activeC = 0;
+    matrix.opLabel = '';
+    matrix.resultText = '';
+    updateMatrixSizeUI();
+    saveMatrix();
+    renderMatrix();
+  }
+
   function renderMatrixGrids() {
     document.querySelectorAll('.matrix-cell').forEach((el) => {
       const m = el.dataset.mat;
@@ -1254,11 +1455,12 @@
 
   function matrixNextCell() {
     let { activeMat: m, activeR: r, activeC: c } = matrix;
+    const max = matrix.size - 1;
     c += 1;
-    if (c > 1) {
+    if (c > max) {
       c = 0;
       r += 1;
-      if (r > 1) {
+      if (r > max) {
         r = 0;
         m = m === 'a' ? 'b' : 'a';
       }
@@ -1313,8 +1515,8 @@
   }
 
   function matrixClearAll() {
-    matrix.entries.a = identity2();
-    matrix.entries.b = identity2();
+    matrix.entries.a = identity3();
+    matrix.entries.b = identity3();
     matrix.activeMat = 'a';
     matrix.activeR = 0;
     matrix.activeC = 0;
@@ -1340,6 +1542,12 @@
     const btn = e.target.closest('.graph-tool-btn');
     if (!btn) return;
     handleAction(btn.dataset.action, btn.dataset.value);
+  });
+
+  matrixSizeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.matrix-size-btn');
+    if (!btn) return;
+    setMatrixSize(parseInt(btn.dataset.size, 10));
   });
 
   // ---------- Complex number mode ----------
@@ -1682,6 +1890,212 @@
     if (!row) return;
     regression.activeField = row.dataset.field;
     renderRegr();
+  });
+
+  // ---------- Percentage & Finance mode ----------
+  const financeFieldConfig = {
+    percentof: { fields: ['a', 'b'], labels: ['financeFieldPercent', 'financeFieldValue'] },
+    percentchange: { fields: ['a', 'b'], labels: ['financeFieldFrom', 'financeFieldTo'] },
+    discount: { fields: ['a', 'b'], labels: ['financeFieldPrice', 'financeFieldDiscountPct'] },
+    simpleinterest: { fields: ['a', 'b', 'c'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears'] },
+    compoundinterest: { fields: ['a', 'b', 'c', 'd'], labels: ['financeFieldPrincipal', 'financeFieldRatePct', 'financeFieldYears', 'financeFieldCompounds'] },
+    tip: { fields: ['a', 'b', 'c'], labels: ['financeFieldBill', 'financeFieldTipPct', 'financeFieldPeople'] },
+  };
+  const financeDefaultCoeffs = () => ({ a: '0', b: '0', c: '0', d: '1' });
+  const savedFinanceType = localStorage.getItem('calc-finance-type');
+  const savedFinanceCoeffs = JSON.parse(localStorage.getItem('calc-finance-coeffs') || 'null');
+  const finance = {
+    type: Object.prototype.hasOwnProperty.call(financeFieldConfig, savedFinanceType) ? savedFinanceType : 'percentof',
+    coeffs: Object.assign(financeDefaultCoeffs(), savedFinanceCoeffs || {}),
+    activeField: 'a',
+  };
+
+  function isFinanceMode() {
+    return calculator.classList.contains('finance');
+  }
+
+  function saveFinance() {
+    localStorage.setItem('calc-finance-type', finance.type);
+    localStorage.setItem('calc-finance-coeffs', JSON.stringify(finance.coeffs));
+  }
+
+  function computeFinance() {
+    const a = parseFloat(finance.coeffs.a) || 0;
+    const b = parseFloat(finance.coeffs.b) || 0;
+    const c = parseFloat(finance.coeffs.c) || 0;
+    const d = parseFloat(finance.coeffs.d) || 0;
+    switch (finance.type) {
+      case 'percentof':
+        return { outputs: [{ label: t('financeOutResult'), value: (a * b) / 100 }] };
+      case 'percentchange': {
+        if (a === 0) return { error: t('financeNeedNonZero') };
+        const change = ((b - a) / a) * 100;
+        const dir = change >= 0 ? t('financeIncrease') : t('financeDecrease');
+        return { outputs: [{ label: t('financeOutChange'), text: `${formatNumber(Math.abs(change))}% (${dir})` }] };
+      }
+      case 'discount': {
+        const saved = (a * b) / 100;
+        return { outputs: [{ label: t('financeOutSaved'), value: saved }, { label: t('financeOutFinalPrice'), value: a - saved }] };
+      }
+      case 'simpleinterest': {
+        const interest = (a * b * c) / 100;
+        return { outputs: [{ label: t('financeOutInterest'), value: interest }, { label: t('financeOutTotal'), value: a + interest }] };
+      }
+      case 'compoundinterest': {
+        if (d === 0) return { error: t('financeNeedNonZero') };
+        const amount = a * Math.pow(1 + (b / 100) / d, d * c);
+        return { outputs: [{ label: t('financeOutInterest'), value: amount - a }, { label: t('financeOutTotal'), value: amount }] };
+      }
+      case 'tip': {
+        if (c === 0) return { error: t('financeNeedNonZero') };
+        const tipAmt = (a * b) / 100;
+        const total = a + tipAmt;
+        return { outputs: [
+          { label: t('financeOutTip'), value: tipAmt },
+          { label: t('financeOutTotalBill'), value: total },
+          { label: t('financeOutPerPerson'), value: total / c },
+        ] };
+      }
+      default:
+        return { error: t('error') };
+    }
+  }
+
+  function formatFinanceExpression() {
+    const cfg = financeFieldConfig[finance.type];
+    return cfg.fields.map((f, i) => `${t(cfg.labels[i])}=${finance.coeffs[f]}`).join(', ');
+  }
+
+  function updateFinanceTabsUI() {
+    document.querySelectorAll('.finance-type-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.type === finance.type);
+    });
+    const cfg = financeFieldConfig[finance.type];
+    financeCRow.style.display = cfg.fields.includes('c') ? '' : 'none';
+    financeDRow.style.display = cfg.fields.includes('d') ? '' : 'none';
+  }
+
+  function setFinanceType(type) {
+    finance.type = type;
+    finance.activeField = 'a';
+    updateFinanceTabsUI();
+    saveFinance();
+    renderFinance();
+  }
+
+  function renderFinance() {
+    const cfg = financeFieldConfig[finance.type];
+    const labelEls = { a: financeALabelEl, b: financeBLabelEl, c: financeCLabelEl, d: financeDLabelEl };
+    cfg.fields.forEach((f, i) => { labelEls[f].textContent = t(cfg.labels[i]); });
+
+    expressionEl.textContent = localizeDigits(formatFinanceExpression());
+    const res = computeFinance();
+    const outSlots = [
+      { labelEl: financeOut1LabelEl, valEl: financeOut1El, row: null },
+      { labelEl: financeOut2LabelEl, valEl: financeOut2El, row: financeOut2Row },
+      { labelEl: financeOut3LabelEl, valEl: financeOut3El, row: financeOut3Row },
+    ];
+    if (res.error) {
+      resultEl.textContent = localizeDigits(res.error);
+      financeOut1LabelEl.textContent = t('financeOutResult');
+      financeOut1El.textContent = '—';
+      if (financeOut2Row) financeOut2Row.style.display = 'none';
+      if (financeOut3Row) financeOut3Row.style.display = 'none';
+    } else {
+      const outputs = res.outputs;
+      const primary = outputs[0];
+      resultEl.textContent = localizeDigits(primary.text !== undefined ? primary.text : formatNumber(primary.value));
+      outSlots.forEach((slot, i) => {
+        const out = outputs[i];
+        if (!out) {
+          if (slot.row) slot.row.style.display = 'none';
+          return;
+        }
+        if (slot.row) slot.row.style.display = '';
+        slot.labelEl.textContent = out.label;
+        slot.valEl.textContent = localizeDigits(out.text !== undefined ? out.text : formatNumber(out.value));
+      });
+    }
+    memoryIndicator.textContent = '';
+    financeAEl.textContent = localizeDigits(finance.coeffs.a);
+    financeBEl.textContent = localizeDigits(finance.coeffs.b);
+    financeCEl.textContent = localizeDigits(finance.coeffs.c);
+    financeDEl.textContent = localizeDigits(finance.coeffs.d);
+    document.querySelectorAll('.finance-field').forEach((row) => {
+      row.classList.toggle('active', row.dataset.field === finance.activeField);
+    });
+  }
+
+  function financeFieldOrder() {
+    return financeFieldConfig[finance.type].fields;
+  }
+
+  function financeNextField() {
+    const order = financeFieldOrder();
+    const idx = order.indexOf(finance.activeField);
+    finance.activeField = order[(idx + 1) % order.length];
+    renderFinance();
+  }
+
+  function financeAppendDigit(ch) {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = (cur === '0' ? '' : cur) + ch;
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeAppendDecimal() {
+    const cur = finance.coeffs[finance.activeField];
+    if (cur.includes('.')) return;
+    finance.coeffs[finance.activeField] = cur + '.';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeToggleSign() {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur);
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeBackspace() {
+    const cur = finance.coeffs[finance.activeField];
+    finance.coeffs[finance.activeField] = cur.slice(0, -1) || '0';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeClearEntry() {
+    finance.coeffs[finance.activeField] = '0';
+    saveFinance();
+    renderFinance();
+  }
+
+  function financeClearAll() {
+    finance.coeffs = financeDefaultCoeffs();
+    finance.activeField = 'a';
+    saveFinance();
+    renderFinance();
+  }
+
+  function insertAnsFinance() {
+    finance.coeffs[finance.activeField] = convPlainNumber(lastAnswer);
+    saveFinance();
+    renderFinance();
+  }
+
+  financeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.finance-type-btn');
+    if (!btn) return;
+    setFinanceType(btn.dataset.type);
+  });
+
+  financeInputPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.finance-field');
+    if (!row) return;
+    finance.activeField = row.dataset.field;
+    renderFinance();
   });
 
   // ---------- Safe expression parser (recursive descent) ----------
@@ -2627,6 +3041,7 @@
         else if (isMatrixMode()) matrixClearAll();
         else if (isComplexMode()) complexClearAll();
         else if (isRegressionMode()) regrClearAll();
+        else if (isFinanceMode()) financeClearAll();
         else clearAll();
         break;
       case 'clear-entry':
@@ -2637,6 +3052,7 @@
         else if (isMatrixMode()) matrixClearEntry();
         else if (isComplexMode()) complexClearEntry();
         else if (isRegressionMode()) regrClearEntry();
+        else if (isFinanceMode()) financeClearEntry();
         else clearEntry();
         break;
       case 'backspace':
@@ -2647,6 +3063,7 @@
         else if (isMatrixMode()) matrixBackspace();
         else if (isComplexMode()) complexBackspace();
         else if (isRegressionMode()) regrBackspace();
+        else if (isFinanceMode()) financeBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -2705,6 +3122,10 @@
       case 'regrdecimal': regrAppendDecimal(); break;
       case 'regrsign': regrToggleSign(); break;
       case 'regradd': regrAddPoint(); break;
+      case 'financedigit': financeAppendDigit(value); break;
+      case 'financedecimal': financeAppendDecimal(); break;
+      case 'financesign': financeToggleSign(); break;
+      case 'financenext': financeNextField(); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
@@ -2713,6 +3134,7 @@
         else if (isMatrixMode()) insertAnsMatrix();
         else if (isComplexMode()) insertAnsComplex();
         else if (isRegressionMode()) insertAnsRegr();
+        else if (isFinanceMode()) insertAnsFinance();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -2735,7 +3157,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys, regrKeys, financeKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -2754,6 +3176,7 @@
     calculator.classList.toggle('matrix', mode === 'matrix');
     calculator.classList.toggle('complex', mode === 'complex');
     calculator.classList.toggle('regression', mode === 'regression');
+    calculator.classList.toggle('finance', mode === 'finance');
     if (mode === 'programmer') {
       updateBaseTabsUI();
       updateDigitAvailability();
@@ -2775,6 +3198,7 @@
       drawGraph();
     }
     if (mode === 'matrix') {
+      updateMatrixSizeUI();
       renderMatrix();
     }
     if (mode === 'complex') {
@@ -2782,6 +3206,10 @@
     }
     if (mode === 'regression') {
       renderRegr();
+    }
+    if (mode === 'finance') {
+      updateFinanceTabsUI();
+      renderFinance();
     }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -2829,10 +3257,11 @@
         ],
       },
       solver: {
-        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), or Cubic (ax³+bx²+cx+d=0) equations, including complex roots for quadratics and cubics.',
+        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), Cubic (ax³+bx²+cx+d=0), or a System 2×2 of linear equations (a₁x+b₁y=c₁, a₂x+b₂y=c₂), including complex roots for quadratics and cubics.',
         examples: [
           { steps: 'Quadratic: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'Quadratic: a=1, b=0, c=1', result: 'x = 0 ± 1i (no real roots)' },
+          { steps: 'System 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
         ],
       },
       graphing: {
@@ -2843,10 +3272,11 @@
         ],
       },
       matrix: {
-        description: 'Enter values into 2×2 matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse of whichever matrix is active.',
+        description: 'Switch between 2×2 and 3×3 sizes, enter values into matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse (via cofactor expansion for 3×3) of whichever matrix is active.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
+          { steps: '3×3: Det of A=[1,0,2;-1,3,1;0,2,4]', result: '= 6' },
         ],
       },
       complex: {
@@ -2860,6 +3290,14 @@
         description: 'Add (x, y) pairs to fit a least-squares line y=mx+b, with the correlation coefficient r and r² shown alongside it.',
         examples: [
           { steps: 'Add: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (a perfect fit)' },
+        ],
+      },
+      finance: {
+        description: 'Everyday percentage and money math: what percent of a value, percent change, discounts, simple/compound interest, and splitting a tip. Pick a tab, tap a field to edit it.',
+        examples: [
+          { steps: '% Of: Percent=20, Value=150', result: '= 30' },
+          { steps: 'Discount: Price=200, Discount %=15', result: 'Saved = 30, Final Price = 170' },
+          { steps: 'Tip Split: Bill=100, Tip %=18, People=4', result: 'Tip = 18, Total = 118, Per Person = 29.5' },
         ],
       },
     },
@@ -2900,10 +3338,11 @@
         ],
       },
       solver: {
-        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), किंवा घन (ax³+bx²+cx+d=0) समीकरणे सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
+        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), घन (ax³+bx²+cx+d=0), किंवा रेषीय समीकरणांची प्रणाली 2×2 (a₁x+b₁y=c₁, a₂x+b₂y=c₂) सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
         examples: [
           { steps: 'द्विघात: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
           { steps: 'द्विघात: a=1, b=0, c=1', result: 'x = 0 ± 1i (वास्तव मुळे नाहीत)' },
+          { steps: 'प्रणाली 2×2: 2x+y=5, x-y=1', result: 'x = 2, y = 1' },
         ],
       },
       graphing: {
@@ -2914,10 +3353,11 @@
         ],
       },
       matrix: {
-        description: 'सेलवर टॅप करून 2×2 मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse काढा.',
+        description: '2×2 आणि 3×3 आकारांमध्ये बदला, सेलवर टॅप करून मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse (3×3 साठी कोफॅक्टर विस्तारद्वारे) काढा.',
         examples: [
           { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
           { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
+          { steps: '3×3: A=[1,0,2;-1,3,1;0,2,4] चा Det', result: '= 6' },
         ],
       },
       complex: {
@@ -2931,6 +3371,14 @@
         description: '(x, y) जोड्या जोडून किमान-वर्ग रेषा y=mx+b बसवा, सोबत सहसंबंध गुणांक r आणि r² दाखवले जातात.',
         examples: [
           { steps: 'जोडा: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (परिपूर्ण जुळणी)' },
+        ],
+      },
+      finance: {
+        description: 'दैनंदिन टक्केवारी आणि पैशांचे गणित: टक्केवारी, टक्के बदल, सवलत, साधे/चक्रवाढ व्याज, आणि टिप वाटणी. टॅब निवडा, फील्ड संपादित करण्यासाठी त्यावर टॅप करा.',
+        examples: [
+          { steps: '% चे: टक्केवारी=20, मूल्य=150', result: '= 30' },
+          { steps: 'सवलत: किंमत=200, सवलत %=15', result: 'बचत = 30, अंतिम किंमत = 170' },
+          { steps: 'टिप वाटणी: बिल=100, टिप %=18, लोक=4', result: 'टिप = 18, एकूण = 118, प्रत्येकी = 29.5' },
         ],
       },
     },
@@ -3018,6 +3466,15 @@
         ['Backspace', 'Delete last character'],
         ['Escape', 'Clear all points'],
       ],
+      finance: [
+        ['0–9', 'Enter digits into the active field'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next field'],
+        ['Click field', 'Select that field to edit'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset all fields'],
+      ],
     },
     mr: {
       standard: [
@@ -3100,6 +3557,15 @@
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'सर्व बिंदू साफ करा'],
       ],
+      finance: [
+        ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील फील्डवर जा'],
+        ['फील्डवर क्लिक करा', 'ते फील्ड संपादित करण्यासाठी निवडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'सर्व फील्ड रीसेट करा'],
+      ],
     },
   };
 
@@ -3147,10 +3613,11 @@
 
   // ---------- Backup & Restore ----------
   const backupKeys = [
-    'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-graph-expr',
-    'calc-graph-expr-g', 'calc-history', 'calc-lang', 'calc-matrix-a', 'calc-matrix-b',
-    'calc-memory', 'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs',
-    'calc-solver-type', 'calc-stat-data', 'calc-theme',
+    'calc-active-mode', 'calc-complex-a', 'calc-complex-b', 'calc-finance-coeffs',
+    'calc-finance-type', 'calc-graph-expr', 'calc-graph-expr-g', 'calc-history',
+    'calc-lang', 'calc-matrix-a', 'calc-matrix-b', 'calc-matrix-size', 'calc-memory',
+    'calc-prog-base', 'calc-regr-points', 'calc-solver-coeffs', 'calc-solver-type',
+    'calc-stat-data', 'calc-theme',
   ];
 
   function setDataStatus(msg, isError) {
@@ -3383,6 +3850,15 @@
       if (key === 'Enter' || key === '=') { e.preventDefault(); regrAddPoint(); return; }
       return;
     }
+    if (isFinanceMode()) {
+      if (/[0-9]/.test(key)) { financeAppendDigit(key); return; }
+      if (key === '.') { financeAppendDecimal(); return; }
+      if (key === '-') { financeToggleSign(); return; }
+      if (key === 'Backspace') { financeBackspace(); return; }
+      if (key === 'Escape') { financeClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); financeNextField(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -3400,8 +3876,14 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex', 'regression', 'finance'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
 })();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}

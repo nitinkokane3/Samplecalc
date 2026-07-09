@@ -4,6 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Advanced Calculator</title>
+<meta name="description" content="A multi-mode calculator with Standard, Scientific, Programmer, Converter, Statistics, Equation Solver, Graphing, Matrix, Complex, Regression, and Finance modes." />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#7c5cff" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Calculator" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,6 +29,7 @@
           <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
           <button class="mode-btn" data-mode="complex" data-i18n="complexMode">Complex</button>
           <button class="mode-btn" data-mode="regression" data-i18n="regressionMode">Regression</button>
+          <button class="mode-btn" data-mode="finance" data-i18n="financeMode">Finance</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
@@ -59,6 +68,21 @@
         <button class="solver-type-btn active" data-type="linear" data-i18n="solverLinear">Linear</button>
         <button class="solver-type-btn" data-type="quadratic" data-i18n="solverQuadratic">Quadratic</button>
         <button class="solver-type-btn" data-type="cubic" data-i18n="solverCubic">Cubic</button>
+        <button class="solver-type-btn" data-type="system2x2" data-i18n="solverSystem2x2">System 2×2</button>
+      </div>
+
+      <div class="matrix-size-tabs" id="matrixSizeTabs">
+        <button class="matrix-size-btn active" data-size="2">2×2</button>
+        <button class="matrix-size-btn" data-size="3">3×3</button>
+      </div>
+
+      <div class="finance-tabs" id="financeTabs">
+        <button class="finance-type-btn active" data-type="percentof" data-i18n="financePercentOf">% Of</button>
+        <button class="finance-type-btn" data-type="percentchange" data-i18n="financePercentChange">% Change</button>
+        <button class="finance-type-btn" data-type="discount" data-i18n="financeDiscount">Discount</button>
+        <button class="finance-type-btn" data-type="simpleinterest" data-i18n="financeSimpleInterest">Simple Int.</button>
+        <button class="finance-type-btn" data-type="compoundinterest" data-i18n="financeCompoundInterest">Compound Int.</button>
+        <button class="finance-type-btn" data-type="tip" data-i18n="financeTip">Tip Split</button>
       </div>
 
       <div class="graph-fn-tabs" id="graphFnTabs">
@@ -109,7 +133,7 @@
         <div class="graph-table" id="graphTable"></div>
       </div>
 
-      <div class="conv-panel" id="convPanel">
+      <div class="conv-panel prog-panel" id="convPanel">
         <div class="conv-row"><span class="conv-label">HEX</span><span class="conv-value" id="convHex">0</span></div>
         <div class="conv-row"><span class="conv-label">DEC</span><span class="conv-value" id="convDec">0</span></div>
         <div class="conv-row"><span class="conv-label">OCT</span><span class="conv-value" id="convOct">0</span></div>
@@ -135,29 +159,41 @@
       <div class="stat-chips" id="statChips"></div>
 
       <div class="conv-panel solver-panel" id="solverPanel">
-        <div class="conv-row solver-field" data-field="a"><span class="conv-label">a</span><span class="conv-value" id="solverA">1</span></div>
-        <div class="conv-row solver-field" data-field="b"><span class="conv-label">b</span><span class="conv-value" id="solverB">0</span></div>
-        <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label">c</span><span class="conv-value" id="solverC">0</span></div>
-        <div class="conv-row solver-field" data-field="d" id="solverDRow"><span class="conv-label">d</span><span class="conv-value" id="solverD">0</span></div>
+        <div class="conv-row solver-field" data-field="a"><span class="conv-label" id="solverALabel">a</span><span class="conv-value" id="solverA">1</span></div>
+        <div class="conv-row solver-field" data-field="b"><span class="conv-label" id="solverBLabel">b</span><span class="conv-value" id="solverB">0</span></div>
+        <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label" id="solverCLabel">c</span><span class="conv-value" id="solverC">0</span></div>
+        <div class="conv-row solver-field" data-field="d" id="solverDRow"><span class="conv-label" id="solverDLabel">d</span><span class="conv-value" id="solverD">0</span></div>
+        <div class="conv-row solver-field" data-field="e" id="solverERow"><span class="conv-label" id="solverELabel">e</span><span class="conv-value" id="solverE">0</span></div>
+        <div class="conv-row solver-field" data-field="f" id="solverFRow"><span class="conv-label" id="solverFLabel">f</span><span class="conv-value" id="solverF">0</span></div>
       </div>
 
       <div class="matrix-panel" id="matrixPanel">
         <div class="matrix-block">
           <div class="matrix-label">A</div>
-          <div class="matrix-grid">
+          <div class="matrix-grid" id="matrixGridA">
             <span class="matrix-cell" data-mat="a" data-r="0" data-c="0">1</span>
             <span class="matrix-cell" data-mat="a" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="0" data-c="2">0</span>
             <span class="matrix-cell" data-mat="a" data-r="1" data-c="0">0</span>
             <span class="matrix-cell" data-mat="a" data-r="1" data-c="1">1</span>
+            <span class="matrix-cell" data-mat="a" data-r="1" data-c="2">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="2" data-c="2">1</span>
           </div>
         </div>
         <div class="matrix-block">
           <div class="matrix-label">B</div>
-          <div class="matrix-grid">
+          <div class="matrix-grid" id="matrixGridB">
             <span class="matrix-cell" data-mat="b" data-r="0" data-c="0">1</span>
             <span class="matrix-cell" data-mat="b" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="0" data-c="2">0</span>
             <span class="matrix-cell" data-mat="b" data-r="1" data-c="0">0</span>
             <span class="matrix-cell" data-mat="b" data-r="1" data-c="1">1</span>
+            <span class="matrix-cell" data-mat="b" data-r="1" data-c="2">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="2" data-c="2">1</span>
           </div>
         </div>
       </div>
@@ -180,6 +216,19 @@
       </div>
 
       <div class="stat-chips regr-chips" id="regrChips"></div>
+
+      <div class="finance-panel" id="financeInputPanel">
+        <div class="conv-row finance-field" data-field="a"><span class="conv-label" id="financeALabel">a</span><span class="conv-value" id="financeA">1</span></div>
+        <div class="conv-row finance-field" data-field="b"><span class="conv-label" id="financeBLabel">b</span><span class="conv-value" id="financeB">0</span></div>
+        <div class="conv-row finance-field" data-field="c" id="financeCRow"><span class="conv-label" id="financeCLabel">c</span><span class="conv-value" id="financeC">0</span></div>
+        <div class="conv-row finance-field" data-field="d" id="financeDRow"><span class="conv-label" id="financeDLabel">d</span><span class="conv-value" id="financeD">0</span></div>
+      </div>
+
+      <div class="finance-panel" id="financeOutputPanel">
+        <div class="conv-row"><span class="conv-label" id="financeOut1Label">Result</span><span class="conv-value" id="financeOut1">—</span></div>
+        <div class="conv-row" id="financeOut2Row"><span class="conv-label" id="financeOut2Label">Result</span><span class="conv-value" id="financeOut2">—</span></div>
+        <div class="conv-row" id="financeOut3Row"><span class="conv-label" id="financeOut3Label">Result</span><span class="conv-value" id="financeOut3">—</span></div>
+      </div>
 
       <div class="panels">
         <div class="history-panel" id="historyPanel">
@@ -491,6 +540,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="regradd" data-i18n="statAdd">Add</button>
+          </div>
+
+          <div class="keys finance-keys" id="financeKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="financedigit" data-value="7">7</button>
+            <button class="key num" data-action="financedigit" data-value="8">8</button>
+            <button class="key num" data-action="financedigit" data-value="9">9</button>
+
+            <button class="key num" data-action="financedigit" data-value="4">4</button>
+            <button class="key num" data-action="financedigit" data-value="5">5</button>
+            <button class="key num" data-action="financedigit" data-value="6">6</button>
+
+            <button class="key num" data-action="financedigit" data-value="1">1</button>
+            <button class="key num" data-action="financedigit" data-value="2">2</button>
+            <button class="key num" data-action="financedigit" data-value="3">3</button>
+
+            <button class="key num" data-action="financesign">±</button>
+            <button class="key num" data-action="financedigit" data-value="0">0</button>
+            <button class="key num" data-action="financedecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="financenext" data-i18n="matrixNext">Next</button>
           </div>
         </div>
       </div>
