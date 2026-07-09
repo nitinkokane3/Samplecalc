@@ -33,4 +33,58 @@ module.exports = [
       assertEqual(await page.textContent('#result'), '5', 'complex modulus result');
     },
   },
+  {
+    name: '(3+4i) - (1+2i) = 2+2i',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'a', 're', 3); await setField(page, 'a', 'im', 4);
+      await setField(page, 'b', 're', 1); await setField(page, 'b', 'im', 2);
+      await page.click('[data-action="complexsub"]');
+      assertEqual(await page.textContent('#result'), '2 + 2i', 'complex subtraction result');
+    },
+  },
+  {
+    name: '(3+4i) x (1+2i) = -5+10i',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'a', 're', 3); await setField(page, 'a', 'im', 4);
+      await setField(page, 'b', 're', 1); await setField(page, 'b', 'im', 2);
+      await page.click('[data-action="complexmul"]');
+      assertEqual(await page.textContent('#result'), '-5 + 10i', 'complex multiplication result');
+    },
+  },
+  {
+    name: '(3+4i) / (1+2i) = 2.2-0.4i, and division by zero shows an error',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'a', 're', 3); await setField(page, 'a', 'im', 4);
+      await setField(page, 'b', 're', 1); await setField(page, 'b', 'im', 2);
+      await page.click('[data-action="complexdiv"]');
+      assertEqual(await page.textContent('#result'), '2.2 - 0.4i', 'complex division result');
+
+      await setField(page, 'b', 're', 0); await setField(page, 'b', 'im', 0);
+      await page.click('[data-action="complexdiv"]');
+      assertEqual(await page.textContent('#result'), 'Error', 'division by zero shows an error');
+    },
+  },
+  {
+    name: 'arg and conj operate on whichever number was last selected (A here)',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'a', 're', 3); await setField(page, 'a', 'im', 4);
+      await setField(page, 'b', 're', 1); await setField(page, 'b', 'im', 2);
+
+      await page.click('.complex-field[data-num="a"][data-part="re"]');
+      await page.click('[data-action="complexarg"]');
+      assertEqual(await page.textContent('#result'), '53.1301023542', 'arg(3+4i) result');
+
+      await page.click('.complex-field[data-num="a"][data-part="re"]');
+      await page.click('[data-action="complexconj"]');
+      assertEqual(await page.textContent('#result'), '3 - 4i', 'conj(3+4i) result');
+    },
+  },
 ];
