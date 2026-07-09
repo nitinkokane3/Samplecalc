@@ -423,6 +423,31 @@ body {
   border: 1px solid var(--panel-border);
 }
 
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 5px 6px;
+  border-radius: 7px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.copy-btn:hover {
+  background: var(--fn-bg-hover);
+  color: var(--text);
+}
+
+.copy-btn.copied {
+  color: var(--accent);
+  transform: scale(1.1);
+}
+
 :root[data-theme="light"] .display {
   background: rgba(20, 20, 40, 0.04);
 }
@@ -434,6 +459,7 @@ body {
   overflow-x: auto;
   white-space: nowrap;
   letter-spacing: 0.3px;
+  padding-right: 32px;
 }
 
 .result {

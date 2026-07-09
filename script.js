@@ -3,6 +3,7 @@
   const expressionEl = document.getElementById('expression');
   const resultEl = document.getElementById('result');
   const memoryIndicator = document.getElementById('memoryIndicator');
+  const copyResultBtn = document.getElementById('copyResult');
   const keys = document.getElementById('keys');
   const sciRow = document.getElementById('sciRow');
   const modeButtons = document.querySelectorAll('.mode-btn');
@@ -119,6 +120,7 @@
       langToggleTitle: 'Toggle language',
       helpToggleTitle: 'Keyboard shortcuts',
       helpTitle: 'Keyboard Shortcuts',
+      copyResultTitle: 'Copy result',
       deg: 'DEG',
       rad: 'RAD',
       langButton: 'EN',
@@ -179,6 +181,7 @@
       langToggleTitle: 'भाषा बदला',
       helpToggleTitle: 'कीबोर्ड शॉर्टकट',
       helpTitle: 'कीबोर्ड शॉर्टकट',
+      copyResultTitle: 'निकाल कॉपी करा',
       deg: 'अंश',
       rad: 'रेडियन',
       langButton: 'मर',
@@ -1225,7 +1228,7 @@
         i += 7;
         continue;
       }
-      if (str.startsWith('nCr', i) || str.startsWith('nPr', i)) {
+      if (str.startsWith('nCr', i) || str.startsWith('nPr', i) || str.startsWith('gcd', i) || str.startsWith('lcm', i)) {
         tokens.push({ type: 'op', value: str.slice(i, i + 3) });
         i += 3;
         continue;
@@ -1279,10 +1282,14 @@
     }
     parseCombin() {
       let left = this.parsePow();
-      while (this.peek() && this.peek().type === 'op' && (this.peek().value === 'nCr' || this.peek().value === 'nPr')) {
+      const combinOps = ['nCr', 'nPr', 'gcd', 'lcm'];
+      while (this.peek() && this.peek().type === 'op' && combinOps.includes(this.peek().value)) {
         const op = this.next().value;
         const right = this.parsePow();
-        left = op === 'nCr' ? combinations(left, right) : permutations(left, right);
+        if (op === 'nCr') left = combinations(left, right);
+        else if (op === 'nPr') left = permutations(left, right);
+        else if (op === 'gcd') left = gcdOf(left, right);
+        else left = lcmOf(left, right);
       }
       return left;
     }
@@ -1364,6 +1371,19 @@
   function permutations(n, r) {
     if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) return NaN;
     return Math.round(factorial(n) / factorial(n - r));
+  }
+
+  function gcdOf(a, b) {
+    if (!Number.isInteger(a) || !Number.isInteger(b)) return NaN;
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { [a, b] = [b, a % b]; }
+    return a;
+  }
+
+  function lcmOf(a, b) {
+    if (!Number.isInteger(a) || !Number.isInteger(b)) return NaN;
+    if (a === 0 || b === 0) return 0;
+    return Math.abs(a * b) / gcdOf(a, b);
   }
 
   function applyFunc(name, arg) {
@@ -2372,6 +2392,36 @@
 
   historyToggle.addEventListener('click', () => {
     historyPanel.classList.toggle('open');
+  });
+
+  function fallbackCopyText(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+  }
+
+  copyResultBtn.addEventListener('click', async () => {
+    const text = resultEl.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        fallbackCopyText(text);
+      }
+    } else {
+      fallbackCopyText(text);
+    }
+    copyResultBtn.textContent = '✓';
+    copyResultBtn.classList.add('copied');
+    setTimeout(() => {
+      copyResultBtn.textContent = '📋';
+      copyResultBtn.classList.remove('copied');
+    }, 1000);
   });
 
   clearHistoryBtn.addEventListener('click', () => {
