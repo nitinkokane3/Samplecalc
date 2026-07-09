@@ -19,6 +19,7 @@
           <button class="mode-btn" data-mode="solver" data-i18n="solverMode">Solver</button>
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
           <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
+          <button class="mode-btn" data-mode="complex" data-i18n="complexMode">Complex</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
@@ -79,6 +80,16 @@
         <button class="graph-tool-btn" data-action="matrixmul">A×B</button>
         <button class="graph-tool-btn" data-action="matrixdet" data-i18n="matrixDet">Det</button>
         <button class="graph-tool-btn" data-action="matrixinv" data-i18n="matrixInv">Inverse</button>
+      </div>
+
+      <div class="complex-toolbar" id="complexToolbar">
+        <button class="graph-tool-btn" data-action="complexadd">A+B</button>
+        <button class="graph-tool-btn" data-action="complexsub">A−B</button>
+        <button class="graph-tool-btn" data-action="complexmul">A×B</button>
+        <button class="graph-tool-btn" data-action="complexdiv">A÷B</button>
+        <button class="graph-tool-btn" data-action="complexmod" data-i18n="complexModulus">Mod</button>
+        <button class="graph-tool-btn" data-action="complexarg" data-i18n="complexArgument">Arg</button>
+        <button class="graph-tool-btn" data-action="complexconj" data-i18n="complexConjugate">Conj</button>
       </div>
 
       <div class="display">
@@ -147,6 +158,13 @@
             <span class="matrix-cell" data-mat="b" data-r="1" data-c="1">1</span>
           </div>
         </div>
+      </div>
+
+      <div class="conv-panel complex-panel" id="complexPanel">
+        <div class="conv-row complex-field" data-num="a" data-part="re"><span class="conv-label">Re(A)</span><span class="conv-value" id="complexAre">1</span></div>
+        <div class="conv-row complex-field" data-num="a" data-part="im"><span class="conv-label">Im(A)</span><span class="conv-value" id="complexAim">0</span></div>
+        <div class="conv-row complex-field" data-num="b" data-part="re"><span class="conv-label">Re(B)</span><span class="conv-value" id="complexBre">0</span></div>
+        <div class="conv-row complex-field" data-num="b" data-part="im"><span class="conv-label">Im(B)</span><span class="conv-value" id="complexBim">0</span></div>
       </div>
 
       <div class="panels">
@@ -409,6 +427,31 @@
 
             <button class="key op-light" data-action="ans">ANS</button>
             <button class="key equals span2" data-action="matrixnextcell" data-i18n="matrixNext">Next</button>
+          </div>
+
+          <div class="keys complex-keys" id="complexKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="complexdigit" data-value="7">7</button>
+            <button class="key num" data-action="complexdigit" data-value="8">8</button>
+            <button class="key num" data-action="complexdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="complexdigit" data-value="4">4</button>
+            <button class="key num" data-action="complexdigit" data-value="5">5</button>
+            <button class="key num" data-action="complexdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="complexdigit" data-value="1">1</button>
+            <button class="key num" data-action="complexdigit" data-value="2">2</button>
+            <button class="key num" data-action="complexdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="complexsign">±</button>
+            <button class="key num" data-action="complexdigit" data-value="0">0</button>
+            <button class="key num" data-action="complexdecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="complexnext" data-i18n="matrixNext">Next</button>
           </div>
         </div>
       </div>

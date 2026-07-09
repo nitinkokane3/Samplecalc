@@ -102,6 +102,10 @@ body {
   max-width: 400px;
 }
 
+.calculator.complex {
+  max-width: 400px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -317,6 +321,19 @@ body {
 }
 
 .calculator.matrix .matrix-toolbar {
+  display: flex;
+}
+
+.complex-toolbar {
+  display: none;
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.complex .complex-toolbar {
   display: flex;
 }
 
@@ -565,6 +582,27 @@ body {
   display: flex;
 }
 
+.calculator.complex .complex-panel {
+  display: flex;
+}
+
+.complex-field {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.complex-field.active {
+  background: var(--op-bg);
+}
+
+.complex-field.active .conv-label,
+.complex-field.active .conv-value {
+  color: var(--accent);
+}
+
 .matrix-block {
   display: flex;
   flex-direction: column;
@@ -730,7 +768,8 @@ body {
 .stat-keys,
 .solver-keys,
 .graph-keys,
-.matrix-keys {
+.matrix-keys,
+.complex-keys {
   display: none;
 }
 
@@ -791,6 +830,15 @@ body {
 }
 
 .calculator.matrix .keys:not(.matrix-keys) {
+  display: none;
+}
+
+.calculator.complex .keys.complex-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calculator.complex .keys:not(.complex-keys) {
   display: none;
 }
 
