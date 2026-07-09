@@ -18,6 +18,7 @@
           <button class="mode-btn" data-mode="statistics" data-i18n="statistics">Statistics</button>
           <button class="mode-btn" data-mode="solver" data-i18n="solverMode">Solver</button>
           <button class="mode-btn" data-mode="graphing" data-i18n="graphing">Graph</button>
+          <button class="mode-btn" data-mode="matrix" data-i18n="matrixMode">Matrix</button>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="helpToggle" title="Keyboard shortcuts" data-i18n-title="helpToggleTitle">⌨</button>
@@ -66,6 +67,14 @@
         <button class="graph-tool-btn" data-action="graphfindintersect" data-i18n="graphFindIntersect">Intersect</button>
       </div>
 
+      <div class="matrix-toolbar" id="matrixToolbar">
+        <button class="graph-tool-btn" data-action="matrixadd">A+B</button>
+        <button class="graph-tool-btn" data-action="matrixsub">A−B</button>
+        <button class="graph-tool-btn" data-action="matrixmul">A×B</button>
+        <button class="graph-tool-btn" data-action="matrixdet" data-i18n="matrixDet">Det</button>
+        <button class="graph-tool-btn" data-action="matrixinv" data-i18n="matrixInv">Inverse</button>
+      </div>
+
       <div class="display">
         <div class="expression" id="expression"></div>
         <div class="result" id="result">0</div>
@@ -105,6 +114,27 @@
         <div class="conv-row solver-field" data-field="a"><span class="conv-label">a</span><span class="conv-value" id="solverA">1</span></div>
         <div class="conv-row solver-field" data-field="b"><span class="conv-label">b</span><span class="conv-value" id="solverB">0</span></div>
         <div class="conv-row solver-field" data-field="c" id="solverCRow"><span class="conv-label">c</span><span class="conv-value" id="solverC">0</span></div>
+      </div>
+
+      <div class="matrix-panel" id="matrixPanel">
+        <div class="matrix-block">
+          <div class="matrix-label">A</div>
+          <div class="matrix-grid">
+            <span class="matrix-cell" data-mat="a" data-r="0" data-c="0">1</span>
+            <span class="matrix-cell" data-mat="a" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="1" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="a" data-r="1" data-c="1">1</span>
+          </div>
+        </div>
+        <div class="matrix-block">
+          <div class="matrix-label">B</div>
+          <div class="matrix-grid">
+            <span class="matrix-cell" data-mat="b" data-r="0" data-c="0">1</span>
+            <span class="matrix-cell" data-mat="b" data-r="0" data-c="1">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="1" data-c="0">0</span>
+            <span class="matrix-cell" data-mat="b" data-r="1" data-c="1">1</span>
+          </div>
+        </div>
       </div>
 
       <div class="panels">
@@ -331,6 +361,31 @@
 
             <button class="key num" data-action="graphdigit" data-value="0">0</button>
             <button class="key equals wide-3" data-action="graphplot" data-i18n="graphPlot">Plot</button>
+          </div>
+
+          <div class="keys matrix-keys" id="matrixKeys">
+            <button class="key op-light" data-action="clear">C</button>
+            <button class="key op-light" data-action="clear-entry">CE</button>
+            <button class="key op-light" data-action="backspace">⌫</button>
+
+            <button class="key num" data-action="matrixdigit" data-value="7">7</button>
+            <button class="key num" data-action="matrixdigit" data-value="8">8</button>
+            <button class="key num" data-action="matrixdigit" data-value="9">9</button>
+
+            <button class="key num" data-action="matrixdigit" data-value="4">4</button>
+            <button class="key num" data-action="matrixdigit" data-value="5">5</button>
+            <button class="key num" data-action="matrixdigit" data-value="6">6</button>
+
+            <button class="key num" data-action="matrixdigit" data-value="1">1</button>
+            <button class="key num" data-action="matrixdigit" data-value="2">2</button>
+            <button class="key num" data-action="matrixdigit" data-value="3">3</button>
+
+            <button class="key num" data-action="matrixsign">±</button>
+            <button class="key num" data-action="matrixdigit" data-value="0">0</button>
+            <button class="key num" data-action="matrixdecimal">.</button>
+
+            <button class="key op-light" data-action="ans">ANS</button>
+            <button class="key equals span2" data-action="matrixnextcell" data-i18n="matrixNext">Next</button>
           </div>
         </div>
       </div>

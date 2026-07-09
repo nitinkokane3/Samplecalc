@@ -98,6 +98,10 @@ body {
   max-width: 420px;
 }
 
+.calculator.matrix {
+  max-width: 400px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
@@ -303,6 +307,19 @@ body {
   display: flex;
 }
 
+.matrix-toolbar {
+  display: none;
+  gap: 6px;
+  background: var(--fn-bg);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+}
+
+.calculator.matrix .matrix-toolbar {
+  display: flex;
+}
+
 .graph-tool-btn {
   flex: 1;
   border: none;
@@ -471,6 +488,65 @@ body {
   color: var(--accent);
 }
 
+.matrix-panel {
+  display: none;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  justify-content: center;
+}
+
+:root[data-theme="light"] .matrix-panel {
+  background: rgba(20, 20, 40, 0.04);
+}
+
+.calculator.matrix .matrix-panel {
+  display: flex;
+}
+
+.matrix-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.matrix-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.matrix-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 34px;
+  padding: 4px 6px;
+  background: var(--fn-bg);
+  border-radius: 8px;
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.matrix-cell.active {
+  background: var(--op-bg);
+  color: var(--accent);
+}
+
 .stat-chips {
   display: none;
   flex-wrap: wrap;
@@ -594,7 +670,8 @@ body {
 .conv-keys,
 .stat-keys,
 .solver-keys,
-.graph-keys {
+.graph-keys,
+.matrix-keys {
   display: none;
 }
 
@@ -646,6 +723,15 @@ body {
 }
 
 .calculator.graphing .keys:not(.graph-keys) {
+  display: none;
+}
+
+.calculator.matrix .keys.matrix-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calculator.matrix .keys:not(.matrix-keys) {
   display: none;
 }
 
