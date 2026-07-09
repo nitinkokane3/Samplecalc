@@ -87,4 +87,32 @@ module.exports = [
       assertEqual(await page.textContent('#result'), '3 - 4i', 'conj(3+4i) result');
     },
   },
+  {
+    name: 'polar form: 3+4i is 5 ∠ 53.1301023542° in DEG mode, and 5 ∠ 0.927295218 rad in RAD mode',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'a', 're', 3); await setField(page, 'a', 'im', 4);
+
+      await page.click('.complex-field[data-num="a"][data-part="re"]');
+      await page.click('[data-action="complexpolar"]');
+      assertEqual(await page.textContent('#result'), '5 ∠ 53.1301023542°', 'polar(3+4i) result in DEG');
+
+      await page.click('[data-mode="scientific"]');
+      await page.click('#degRadBtn');
+      await page.click('[data-mode="complex"]');
+      await page.click('[data-action="complexpolar"]');
+      assertEqual(await page.textContent('#result'), '5 ∠ 0.927295218 rad', 'polar(3+4i) result in RAD');
+    },
+  },
+  {
+    name: 'polar form of B=0-5i is 5 ∠ -90° (pure negative imaginary number)',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="complex"]');
+      await setField(page, 'b', 're', 0); await setField(page, 'b', 'im', -5);
+      await page.click('[data-action="complexpolar"]');
+      assertEqual(await page.textContent('#result'), '5 ∠ -90°', 'polar(0-5i) result');
+    },
+  },
 ];

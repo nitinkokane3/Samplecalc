@@ -199,6 +199,7 @@
       complexModulus: 'Mod',
       complexArgument: 'Arg',
       complexConjugate: 'Conj',
+      complexPolar: 'Polar',
       regressionMode: 'Regression',
       regrSlope: 'Slope (m)',
       regrIntercept: 'Intercept (b)',
@@ -339,6 +340,7 @@
       complexModulus: 'मापांक',
       complexArgument: 'कोन',
       complexConjugate: 'संयुग्मी',
+      complexPolar: 'ध्रुवीय',
       regressionMode: 'समाश्रयण',
       regrSlope: 'उतार (m)',
       regrIntercept: 'छेद (b)',
@@ -2036,6 +2038,14 @@
         complexNum.opLabel = `conj(${activeLabel})`;
         complexNum.resultText = formatComplex(cConjugate(activeZ));
         break;
+      case 'polar': {
+        const r = cModulus(activeZ);
+        const theta = cArgument(activeZ);
+        const unit = state.isDegrees ? '°' : ' rad';
+        complexNum.opLabel = `polar(${activeLabel})`;
+        complexNum.resultText = `${formatNumber(r)} ∠ ${formatNumber(theta)}${unit}`;
+        break;
+      }
     }
     renderComplex();
   }
@@ -3561,6 +3571,7 @@
       case 'complexmod': complexCompute('mod'); break;
       case 'complexarg': complexCompute('arg'); break;
       case 'complexconj': complexCompute('conj'); break;
+      case 'complexpolar': complexCompute('polar'); break;
       case 'regrdigit': regrAppendDigit(value); break;
       case 'regrdecimal': regrAppendDecimal(); break;
       case 'regrsign': regrToggleSign(); break;
@@ -3741,10 +3752,11 @@
         ],
       },
       complex: {
-        description: 'Enter two complex numbers A and B by tapping their Re/Im fields, then compute A+B, A-B, A×B, A÷B, or Mod/Arg/Conj of whichever number is active.',
+        description: 'Enter two complex numbers A and B by tapping their Re/Im fields, then compute A+B, A-B, A×B, A÷B, or Mod/Arg/Conj/Polar of whichever number is active. Polar shows r ∠ θ using the current DEG/RAD setting.',
         examples: [
           { steps: 'A=3+4i, B=1-2i, then A+B', result: '= 4 + 2i' },
           { steps: 'Mod of A=3+4i', result: '= 5 (that is, |3+4i|)' },
+          { steps: 'Polar of A=3+4i (in DEG)', result: '= 5 ∠ 53.1301023542°' },
         ],
       },
       regression: {
@@ -3836,10 +3848,11 @@
         ],
       },
       complex: {
-        description: 'Re/Im फील्डवर टॅप करून दोन सम्मिश्र संख्या A आणि B टाका, नंतर A+B, A-B, A×B, A÷B, किंवा सक्रिय संख्येचा Mod/Arg/Conj काढा.',
+        description: 'Re/Im फील्डवर टॅप करून दोन सम्मिश्र संख्या A आणि B टाका, नंतर A+B, A-B, A×B, A÷B, किंवा सक्रिय संख्येचा Mod/Arg/Conj/Polar काढा. Polar सध्याच्या DEG/RAD सेटिंगनुसार r ∠ θ दाखवतो.',
         examples: [
           { steps: 'A=3+4i, B=1-2i, नंतर A+B', result: '= 4 + 2i' },
           { steps: 'A=3+4i चा Mod', result: '= 5 (म्हणजे |3+4i|)' },
+          { steps: 'A=3+4i चा Polar (DEG मध्ये)', result: '= 5 ∠ 53.1301023542°' },
         ],
       },
       regression: {
