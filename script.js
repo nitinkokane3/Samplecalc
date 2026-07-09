@@ -1202,7 +1202,7 @@
   function tokenize(str) {
     const tokens = [];
     let i = 0;
-    const funcs = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'];
+    const funcs = ['asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sin', 'cos', 'tan', 'log', 'ln', 'sqrt'];
     while (i < str.length) {
       const ch = str[i];
       if (/\s/.test(ch)) { i++; continue; }
@@ -1388,10 +1388,17 @@
 
   function applyFunc(name, arg) {
     const toRad = (v) => state.isDegrees ? (v * Math.PI / 180) : v;
+    const fromRad = (v) => state.isDegrees ? (v * 180 / Math.PI) : v;
     switch (name) {
       case 'sin': return Math.sin(toRad(arg));
       case 'cos': return Math.cos(toRad(arg));
       case 'tan': return Math.tan(toRad(arg));
+      case 'asin': return fromRad(Math.asin(arg));
+      case 'acos': return fromRad(Math.acos(arg));
+      case 'atan': return fromRad(Math.atan(arg));
+      case 'sinh': return Math.sinh(arg);
+      case 'cosh': return Math.cosh(arg);
+      case 'tanh': return Math.tanh(arg);
       case 'log': return Math.log10(arg);
       case 'ln': return Math.log(arg);
       case 'sqrt': return Math.sqrt(arg);
