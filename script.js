@@ -66,6 +66,13 @@
   const matrixToolbar = document.getElementById('matrixToolbar');
   const matrixPanel = document.getElementById('matrixPanel');
   const matrixKeys = document.getElementById('matrixKeys');
+  const complexToolbar = document.getElementById('complexToolbar');
+  const complexPanel = document.getElementById('complexPanel');
+  const complexKeys = document.getElementById('complexKeys');
+  const complexAreEl = document.getElementById('complexAre');
+  const complexAimEl = document.getElementById('complexAim');
+  const complexBreEl = document.getElementById('complexBre');
+  const complexBimEl = document.getElementById('complexBim');
 
   const translations = {
     en: {
@@ -100,6 +107,10 @@
       matrixInv: 'Inverse',
       matrixNext: 'Next',
       matrixSingular: 'Singular matrix',
+      complexMode: 'Complex',
+      complexModulus: 'Mod',
+      complexArgument: 'Arg',
+      complexConjugate: 'Conj',
       catLength: 'Length',
       catWeight: 'Weight',
       catTemp: 'Temp',
@@ -165,6 +176,10 @@
       matrixInv: 'व्यस्त',
       matrixNext: 'पुढे',
       matrixSingular: 'व्यस्त अस्तित्वात नाही',
+      complexMode: 'सम्मिश्र',
+      complexModulus: 'मापांक',
+      complexArgument: 'कोन',
+      complexConjugate: 'संयुग्मी',
       catLength: 'लांबी',
       catWeight: 'वजन',
       catTemp: 'तापमान',
@@ -245,7 +260,7 @@
       el.setAttribute('aria-label', label);
     });
     langToggle.textContent = t('langButton');
-    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"]').forEach((btn) => {
+    document.querySelectorAll('.key[data-action="num"], .key[data-action="progdigit"], .key[data-action="convdigit"], .key[data-action="statdigit"], .key[data-action="solverdigit"], .key[data-action="graphdigit"], .key[data-action="matrixdigit"], .key[data-action="complexdigit"]').forEach((btn) => {
       btn.textContent = localizeDigits(btn.dataset.value);
     });
     renderHistory();
@@ -254,6 +269,7 @@
     else if (isStatisticsMode()) renderStat();
     else if (isSolverMode()) renderSolver();
     else if (isMatrixMode()) renderMatrix();
+    else if (isComplexMode()) renderComplex();
     else if (isGraphingMode()) { renderGraphDisplay(); drawGraph(); }
     else render();
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -1269,6 +1285,189 @@
     handleAction(btn.dataset.action, btn.dataset.value);
   });
 
+  // ---------- Complex number mode ----------
+  const savedComplexA = JSON.parse(localStorage.getItem('calc-complex-a') || 'null');
+  const savedComplexB = JSON.parse(localStorage.getItem('calc-complex-b') || 'null');
+  const complexNum = {
+    entries: {
+      a: savedComplexA || { re: '1', im: '0' },
+      b: savedComplexB || { re: '0', im: '0' },
+    },
+    activeNum: 'a',
+    activePart: 're',
+    opLabel: '',
+    resultText: '',
+  };
+
+  function isComplexMode() {
+    return calculator.classList.contains('complex');
+  }
+
+  function saveComplex() {
+    localStorage.setItem('calc-complex-a', JSON.stringify(complexNum.entries.a));
+    localStorage.setItem('calc-complex-b', JSON.stringify(complexNum.entries.b));
+  }
+
+  function complexNumeric(key) {
+    const e = complexNum.entries[key];
+    return { re: parseFloat(e.re) || 0, im: parseFloat(e.im) || 0 };
+  }
+
+  function cAdd(x, y) { return { re: x.re + y.re, im: x.im + y.im }; }
+  function cSub(x, y) { return { re: x.re - y.re, im: x.im - y.im }; }
+  function cMul(x, y) { return { re: x.re * y.re - x.im * y.im, im: x.re * y.im + x.im * y.re }; }
+  function cDiv(x, y) {
+    const denom = y.re * y.re + y.im * y.im;
+    if (denom === 0) return null;
+    return { re: (x.re * y.re + x.im * y.im) / denom, im: (x.im * y.re - x.re * y.im) / denom };
+  }
+  function cModulus(x) { return Math.sqrt(x.re * x.re + x.im * x.im); }
+  function cArgument(x) {
+    const radians = Math.atan2(x.im, x.re);
+    return state.isDegrees ? (radians * 180) / Math.PI : radians;
+  }
+  function cConjugate(x) { return { re: x.re, im: -x.im }; }
+
+  function formatComplex(z) {
+    const sign = z.im < 0 ? '-' : '+';
+    return `${formatNumber(z.re)} ${sign} ${formatNumber(Math.abs(z.im))}i`;
+  }
+
+  function complexCompute(op) {
+    const A = complexNumeric('a');
+    const B = complexNumeric('b');
+    const activeLabel = complexNum.activeNum === 'b' ? 'B' : 'A';
+    const activeZ = complexNum.activeNum === 'b' ? B : A;
+    switch (op) {
+      case 'add':
+        complexNum.opLabel = 'A + B';
+        complexNum.resultText = formatComplex(cAdd(A, B));
+        break;
+      case 'sub':
+        complexNum.opLabel = 'A − B';
+        complexNum.resultText = formatComplex(cSub(A, B));
+        break;
+      case 'mul':
+        complexNum.opLabel = 'A × B';
+        complexNum.resultText = formatComplex(cMul(A, B));
+        break;
+      case 'div': {
+        const result = cDiv(A, B);
+        complexNum.opLabel = 'A ÷ B';
+        complexNum.resultText = result ? formatComplex(result) : t('error');
+        break;
+      }
+      case 'mod':
+        complexNum.opLabel = `|${activeLabel}|`;
+        complexNum.resultText = formatNumber(cModulus(activeZ));
+        break;
+      case 'arg':
+        complexNum.opLabel = `arg(${activeLabel})`;
+        complexNum.resultText = formatNumber(cArgument(activeZ));
+        break;
+      case 'conj':
+        complexNum.opLabel = `conj(${activeLabel})`;
+        complexNum.resultText = formatComplex(cConjugate(activeZ));
+        break;
+    }
+    renderComplex();
+  }
+
+  function renderComplex() {
+    expressionEl.textContent = localizeDigits(complexNum.opLabel);
+    resultEl.textContent = localizeDigits(complexNum.resultText);
+    memoryIndicator.textContent = '';
+    complexAreEl.textContent = localizeDigits(complexNum.entries.a.re);
+    complexAimEl.textContent = localizeDigits(complexNum.entries.a.im);
+    complexBreEl.textContent = localizeDigits(complexNum.entries.b.re);
+    complexBimEl.textContent = localizeDigits(complexNum.entries.b.im);
+    document.querySelectorAll('.complex-field').forEach((row) => {
+      row.classList.toggle('active', row.dataset.num === complexNum.activeNum && row.dataset.part === complexNum.activePart);
+    });
+  }
+
+  function complexActiveValue() {
+    return complexNum.entries[complexNum.activeNum][complexNum.activePart];
+  }
+
+  function complexSetActiveValue(v) {
+    complexNum.entries[complexNum.activeNum][complexNum.activePart] = v;
+  }
+
+  function complexAppendDigit(ch) {
+    const cur = complexActiveValue();
+    complexSetActiveValue((cur === '0' ? '' : cur) + ch);
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexAppendDecimal() {
+    const cur = complexActiveValue();
+    if (cur.includes('.')) return;
+    complexSetActiveValue(cur + '.');
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexToggleSign() {
+    const cur = complexActiveValue();
+    complexSetActiveValue(cur.startsWith('-') ? cur.slice(1) : (cur === '0' ? '0' : '-' + cur));
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexBackspace() {
+    const cur = complexActiveValue();
+    complexSetActiveValue(cur.slice(0, -1) || '0');
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexClearEntry() {
+    complexSetActiveValue('0');
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexClearAll() {
+    complexNum.entries = { a: { re: '1', im: '0' }, b: { re: '0', im: '0' } };
+    complexNum.activeNum = 'a';
+    complexNum.activePart = 're';
+    complexNum.opLabel = '';
+    complexNum.resultText = '';
+    saveComplex();
+    renderComplex();
+  }
+
+  function complexNextField() {
+    const order = [['a', 're'], ['a', 'im'], ['b', 're'], ['b', 'im']];
+    const idx = order.findIndex(([n, p]) => n === complexNum.activeNum && p === complexNum.activePart);
+    const [n, p] = order[(idx + 1) % order.length];
+    complexNum.activeNum = n;
+    complexNum.activePart = p;
+    renderComplex();
+  }
+
+  function insertAnsComplex() {
+    complexSetActiveValue(convPlainNumber(lastAnswer));
+    saveComplex();
+    renderComplex();
+  }
+
+  complexPanel.addEventListener('click', (e) => {
+    const row = e.target.closest('.complex-field');
+    if (!row) return;
+    complexNum.activeNum = row.dataset.num;
+    complexNum.activePart = row.dataset.part;
+    renderComplex();
+  });
+
+  complexToolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.graph-tool-btn');
+    if (!btn) return;
+    handleAction(btn.dataset.action, btn.dataset.value);
+  });
+
   // ---------- Safe expression parser (recursive descent) ----------
   function evaluateExpression(expr, scope) {
     const prepped = expr
@@ -2210,6 +2409,7 @@
         else if (isStatisticsMode()) statClearAll();
         else if (isSolverMode()) solverClearAll();
         else if (isMatrixMode()) matrixClearAll();
+        else if (isComplexMode()) complexClearAll();
         else clearAll();
         break;
       case 'clear-entry':
@@ -2218,6 +2418,7 @@
         else if (isStatisticsMode()) statClearEntry();
         else if (isSolverMode()) solverClearEntry();
         else if (isMatrixMode()) matrixClearEntry();
+        else if (isComplexMode()) complexClearEntry();
         else clearEntry();
         break;
       case 'backspace':
@@ -2226,6 +2427,7 @@
         else if (isStatisticsMode()) statBackspace();
         else if (isSolverMode()) solverBackspace();
         else if (isMatrixMode()) matrixBackspace();
+        else if (isComplexMode()) complexBackspace();
         else backspace();
         break;
       case 'sign': toggleSign(); break;
@@ -2269,12 +2471,24 @@
       case 'matrixmul': matrixCompute('mul'); break;
       case 'matrixdet': matrixCompute('det'); break;
       case 'matrixinv': matrixCompute('inv'); break;
+      case 'complexdigit': complexAppendDigit(value); break;
+      case 'complexdecimal': complexAppendDecimal(); break;
+      case 'complexsign': complexToggleSign(); break;
+      case 'complexnext': complexNextField(); break;
+      case 'complexadd': complexCompute('add'); break;
+      case 'complexsub': complexCompute('sub'); break;
+      case 'complexmul': complexCompute('mul'); break;
+      case 'complexdiv': complexCompute('div'); break;
+      case 'complexmod': complexCompute('mod'); break;
+      case 'complexarg': complexCompute('arg'); break;
+      case 'complexconj': complexCompute('conj'); break;
       case 'ans':
         if (isProgrammerMode()) insertAnsProg();
         else if (isConverterMode()) insertAnsConv();
         else if (isStatisticsMode()) insertAnsStat();
         else if (isSolverMode()) insertAnsSolver();
         else if (isMatrixMode()) insertAnsMatrix();
+        else if (isComplexMode()) insertAnsComplex();
         else insertAnsStandard();
         break;
       case 'graphdigit': graphAppend(value); break;
@@ -2297,7 +2511,7 @@
     }
   }
 
-  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys].forEach(container => {
+  [keys, sciRow, progRow, progKeys, convKeys, statKeys, solverKeys, graphRow, graphKeys, matrixKeys, complexKeys].forEach(container => {
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.key');
       if (!btn) return;
@@ -2314,6 +2528,7 @@
     calculator.classList.toggle('solver', mode === 'solver');
     calculator.classList.toggle('graphing', mode === 'graphing');
     calculator.classList.toggle('matrix', mode === 'matrix');
+    calculator.classList.toggle('complex', mode === 'complex');
     if (mode === 'programmer') {
       updateBaseTabsUI();
       updateDigitAvailability();
@@ -2336,6 +2551,9 @@
     }
     if (mode === 'matrix') {
       renderMatrix();
+    }
+    if (mode === 'complex') {
+      renderComplex();
     }
     localStorage.setItem('calc-active-mode', mode);
     if (helpOverlay.classList.contains('open')) renderHelpContent();
@@ -2409,6 +2627,15 @@
         ['Backspace', 'Delete last character'],
         ['Escape', 'Reset both matrices to identity'],
       ],
+      complex: [
+        ['0–9', 'Enter digits into the active field'],
+        ['.', 'Decimal point'],
+        ['−', 'Toggle sign'],
+        ['Tab', 'Move to next field'],
+        ['Click field', 'Select that field to edit'],
+        ['Backspace', 'Delete last character'],
+        ['Escape', 'Reset both numbers'],
+      ],
     },
     mr: {
       standard: [
@@ -2472,6 +2699,15 @@
         ['सेलवर क्लिक करा', 'तो सेल संपादित करण्यासाठी निवडा'],
         ['Backspace', 'शेवटचे अक्षर काढा'],
         ['Escape', 'दोन्ही मॅट्रिक्स रीसेट करा'],
+      ],
+      complex: [
+        ['0–9', 'सक्रिय फील्डमध्ये अंक टाका'],
+        ['.', 'दशांश बिंदू'],
+        ['−', 'चिन्ह बदला'],
+        ['Tab', 'पुढील फील्डवर जा'],
+        ['फील्डवर क्लिक करा', 'ते फील्ड संपादित करण्यासाठी निवडा'],
+        ['Backspace', 'शेवटचे अक्षर काढा'],
+        ['Escape', 'दोन्ही संख्या रीसेट करा'],
       ],
     },
   };
@@ -2622,6 +2858,15 @@
       if (key === 'Tab') { e.preventDefault(); matrixNextCell(); return; }
       return;
     }
+    if (isComplexMode()) {
+      if (/[0-9]/.test(key)) { complexAppendDigit(key); return; }
+      if (key === '.') { complexAppendDecimal(); return; }
+      if (key === '-') { complexToggleSign(); return; }
+      if (key === 'Backspace') { complexBackspace(); return; }
+      if (key === 'Escape') { complexClearAll(); return; }
+      if (key === 'Tab') { e.preventDefault(); complexNextField(); return; }
+      return;
+    }
     if (/[0-9]/.test(key)) { inputNumber(key); return; }
     if (key === '.') { inputDecimal(); return; }
     if (['+', '-', '*', '/', '^', '%'].includes(key)) { inputOperator(key); return; }
@@ -2639,7 +2884,7 @@
     themeToggle.textContent = savedTheme === 'light' ? '☀️' : '🌙';
     populateUnitSelectors();
     applyLanguage();
-    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix'];
+    const validModes = ['standard', 'scientific', 'programmer', 'converter', 'statistics', 'solver', 'graphing', 'matrix', 'complex'];
     const savedMode = localStorage.getItem('calc-active-mode');
     if (validModes.includes(savedMode)) switchToMode(savedMode);
   })();
