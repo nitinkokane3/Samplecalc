@@ -98,6 +98,7 @@
   const graphToolbar = document.getElementById('graphToolbar');
   const graphCanvasWrap = document.getElementById('graphCanvasWrap');
   const graphCanvas = document.getElementById('graphCanvas');
+  const graphRangeLabelEl = document.getElementById('graphRangeLabel');
   const graphTableWrap = document.getElementById('graphTableWrap');
   const graphTable = document.getElementById('graphTable');
   const graphRow = document.getElementById('graphRow');
@@ -178,6 +179,7 @@
       graphReset: 'Reset',
       graphZoomIn: 'Zoom +',
       graphZoomOut: 'Zoom −',
+      graphZoomFit: 'Fit',
       graphPlot: 'Plot',
       graphFindRoots: 'Roots',
       graphNoRoots: 'No roots found',
@@ -319,6 +321,7 @@
       graphReset: 'रीसेट',
       graphZoomIn: 'झूम +',
       graphZoomOut: 'झूम −',
+      graphZoomFit: 'फिट',
       graphPlot: 'आलेखा करा',
       graphFindRoots: 'मुळे',
       graphNoRoots: 'मुळे आढळली नाहीत',
@@ -2995,9 +2998,18 @@
     graphCanvas.height = Math.max(1, Math.round(rect.height * dpr));
   }
 
+  function renderGraphRangeLabel() {
+    const { xMin, xMax, yMin, yMax } = graphState;
+    const fmt = (n) => formatNumber(Math.round(n * 1e4) / 1e4);
+    graphRangeLabelEl.textContent = localizeDigits(
+      `X: ${fmt(xMin)} – ${fmt(xMax)}   Y: ${fmt(yMin)} – ${fmt(yMax)}`
+    );
+  }
+
   function drawGraph() {
     if (!isGraphingMode()) return;
     resizeGraphCanvas();
+    renderGraphRangeLabel();
     const ctx = graphCanvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const w = graphCanvas.width / dpr;
@@ -3226,6 +3238,32 @@
     const halfY = ((graphState.yMax - graphState.yMin) / 2) * factor;
     graphState.xMin = cx - halfX; graphState.xMax = cx + halfX;
     graphState.yMin = cy - halfY; graphState.yMax = cy + halfY;
+    drawGraph();
+  }
+
+  function graphZoomToFit() {
+    const fns = [];
+    if (graphState.exprF && graphState.exprF.trim()) fns.push(evalFAt);
+    if (graphState.exprG && graphState.exprG.trim()) fns.push(evalGAt);
+    if (fns.length === 0) return;
+
+    const samples = 400;
+    let yMin = Infinity, yMax = -Infinity;
+    for (let i = 0; i <= samples; i++) {
+      const x = graphState.xMin + (graphState.xMax - graphState.xMin) * (i / samples);
+      for (const fn of fns) {
+        const y = fn(x);
+        if (isFinite(y)) {
+          if (y < yMin) yMin = y;
+          if (y > yMax) yMax = y;
+        }
+      }
+    }
+    if (!isFinite(yMin) || !isFinite(yMax)) return;
+    if (yMin === yMax) { yMin -= 1; yMax += 1; }
+    const pad = (yMax - yMin) * 0.1;
+    graphState.yMin = yMin - pad;
+    graphState.yMax = yMax + pad;
     drawGraph();
   }
 
@@ -3608,6 +3646,7 @@
       case 'graphreset': graphResetView(); break;
       case 'graphzoomin': graphZoom(0.7); break;
       case 'graphzoomout': graphZoom(1 / 0.7); break;
+      case 'graphzoomfit': graphZoomToFit(); break;
       case 'graphfindroots': graphFindRoots(); break;
       case 'graphintegral': graphComputeIntegral(); break;
       case 'graphfindintersect': graphFindIntersections(); break;
@@ -3731,10 +3770,11 @@
         ],
       },
       graphing: {
-        description: 'Type f(x) (and optionally g(x)) with the on-screen keypad, then use the toolbar for Roots, ∫dx, Intersect, or Table. Tap the graph itself to trace a point and see its slope.',
+        description: 'Type f(x) (and optionally g(x)) with the on-screen keypad, then use the toolbar for Roots, ∫dx, Intersect, or Table. Fit auto-scales the Y range to the curve within the current X window. Tap the graph itself to trace a point and see its slope.',
         examples: [
           { steps: 'f(x) = x^2 - 4, then Roots', result: 'Roots at x = -2 and x = 2' },
           { steps: 'f(x) = x, g(x) = x^2, then Intersect', result: 'Meets at (0, 0) and (1, 1)' },
+          { steps: 'f(x) = x^2, then Fit (X stays -10 to 10)', result: 'Y range becomes -10 to 110' },
         ],
       },
       matrix: {
@@ -3827,10 +3867,11 @@
         ],
       },
       graphing: {
-        description: 'ऑन-स्क्रीन कीपॅड वापरून f(x) (आणि इच्छित असल्यास g(x)) टाका, नंतर Roots, ∫dx, Intersect किंवा Table साठी टूलबार वापरा. बिंदू ट्रेस करण्यासाठी आलेखावर टॅप करा.',
+        description: 'ऑन-स्क्रीन कीपॅड वापरून f(x) (आणि इच्छित असल्यास g(x)) टाका, नंतर Roots, ∫dx, Intersect किंवा Table साठी टूलबार वापरा. Fit सध्याच्या X श्रेणीतील वक्रानुसार Y श्रेणी आपोआप समायोजित करतो. बिंदू ट्रेस करण्यासाठी आलेखावर टॅप करा.',
         examples: [
           { steps: 'f(x) = x^2 - 4, नंतर Roots', result: 'x = -2 आणि x = 2 वर मुळे' },
           { steps: 'f(x) = x, g(x) = x^2, नंतर Intersect', result: '(0, 0) आणि (1, 1) येथे भेटतात' },
+          { steps: 'f(x) = x^2, नंतर Fit (X -10 ते 10 राहते)', result: 'Y श्रेणी -10 ते 110 होते' },
         ],
       },
       matrix: {
