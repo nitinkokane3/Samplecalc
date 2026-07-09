@@ -1092,7 +1092,7 @@ body {
   background: var(--bg-2);
   border: 1px solid var(--panel-border);
   border-radius: 16px;
-  max-width: 360px;
+  max-width: 400px;
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
@@ -1155,4 +1155,57 @@ body {
 .help-desc {
   color: var(--text-dim);
   text-align: right;
+}
+
+.help-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.help-guide-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.help-example {
+  background: var(--fn-bg);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.help-example-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.help-example-steps {
+  font-family: "Segoe UI Mono", "Courier New", monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.help-example-result {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.help-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-top: 1px solid var(--panel-border);
+  padding-top: 10px;
+  margin-top: 2px;
 }

@@ -153,8 +153,10 @@
       themeToggleTitle: 'Toggle theme',
       historyToggleTitle: 'Toggle history',
       langToggleTitle: 'Toggle language',
-      helpToggleTitle: 'Keyboard shortcuts',
-      helpTitle: 'Keyboard Shortcuts',
+      helpToggleTitle: 'Help',
+      helpTitle: 'Help Guide',
+      helpShortcutsTitle: 'Keyboard Shortcuts',
+      helpExampleLabel: 'Example',
       copyResultTitle: 'Copy result',
       deg: 'DEG',
       rad: 'RAD',
@@ -228,8 +230,10 @@
       themeToggleTitle: 'थीम बदला',
       historyToggleTitle: 'इतिहास दाखवा',
       langToggleTitle: 'भाषा बदला',
-      helpToggleTitle: 'कीबोर्ड शॉर्टकट',
-      helpTitle: 'कीबोर्ड शॉर्टकट',
+      helpToggleTitle: 'मदत',
+      helpTitle: 'मदत मार्गदर्शक',
+      helpShortcutsTitle: 'कीबोर्ड शॉर्टकट',
+      helpExampleLabel: 'उदाहरण',
       copyResultTitle: 'निकाल कॉपी करा',
       deg: 'अंश',
       rad: 'रेडियन',
@@ -2757,6 +2761,151 @@
     btn.addEventListener('click', () => switchToMode(btn.dataset.mode));
   });
 
+  const guideText = {
+    en: {
+      standard: {
+        description: 'Everyday arithmetic with the standard order of operations, memory (MC/MR/M+/M-), and Answer (ANS) recall.',
+        examples: [
+          { steps: '12 + 8 × 2 =', result: '= 28 (multiplication happens before addition)' },
+          { steps: '5, M+, 3, M+, MR', result: '= 8 (recalls the sum stored in memory)' },
+        ],
+      },
+      scientific: {
+        description: 'Everything in Standard mode, plus trig, inverse trig (sin⁻¹/cos⁻¹/tan⁻¹), hyperbolic functions, log/ln, powers, factorial, combinatorics (nCr/nPr), GCD/LCM, and an arbitrary-base logarithm (logb).',
+        examples: [
+          { steps: 'In DEG mode: sin, 30, ), =', result: '= 0.5' },
+          { steps: '5, nCr, 2, =', result: '= 10 (ways to choose 2 items from 5)' },
+          { steps: '8, logb, 2, =', result: '= 3 (log base 2 of 8)' },
+        ],
+      },
+      programmer: {
+        description: 'Work in HEX, DEC, OCT, or BIN using the base tabs above the display, with bitwise AND/OR/XOR/NOT and bit-shift operators.',
+        examples: [
+          { steps: 'In HEX: 1A, AND, 0F, =', result: '= A (0x0A)' },
+          { steps: 'In HEX: A, OR, 5, =', result: '= F' },
+        ],
+      },
+      converter: {
+        description: 'Convert between units across Length, Weight, Temperature, Data, Area, Volume, Speed, and Time. Pick a category tab, choose the From/To units, then type a value.',
+        examples: [
+          { steps: 'Length: 1 Meter → Foot', result: '= 3.280839895 ft' },
+          { steps: 'Temperature: 0 Celsius → Fahrenheit', result: '= 32 °F' },
+        ],
+      },
+      statistics: {
+        description: 'Add a list of numbers to get the count, sum, mean, median, mode, quartiles, IQR, and both population and sample standard deviation.',
+        examples: [
+          { steps: 'Add: 2, 4, 4, 4, 5, 5, 7, 9', result: 'Mean = 5, Median = 4.5, Mode = 4' },
+        ],
+      },
+      solver: {
+        description: 'Solve Linear (ax+b=0), Quadratic (ax²+bx+c=0), or Cubic (ax³+bx²+cx+d=0) equations, including complex roots for quadratics and cubics.',
+        examples: [
+          { steps: 'Quadratic: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
+          { steps: 'Quadratic: a=1, b=0, c=1', result: 'x = 0 ± 1i (no real roots)' },
+        ],
+      },
+      graphing: {
+        description: 'Type f(x) (and optionally g(x)) with the on-screen keypad, then use the toolbar for Roots, ∫dx, Intersect, or Table. Tap the graph itself to trace a point and see its slope.',
+        examples: [
+          { steps: 'f(x) = x^2 - 4, then Roots', result: 'Roots at x = -2 and x = 2' },
+          { steps: 'f(x) = x, g(x) = x^2, then Intersect', result: 'Meets at (0, 0) and (1, 1)' },
+        ],
+      },
+      matrix: {
+        description: 'Enter values into 2×2 matrices A and B by tapping a cell, then compute A+B, A-B, A×B, Det, or Inverse of whichever matrix is active.',
+        examples: [
+          { steps: 'A=[1,2;3,4], B=[5,6;7,8], then A+B', result: '= [6, 8; 10, 12]' },
+          { steps: 'Det of A=[1,2;3,4]', result: '= -2' },
+        ],
+      },
+      complex: {
+        description: 'Enter two complex numbers A and B by tapping their Re/Im fields, then compute A+B, A-B, A×B, A÷B, or Mod/Arg/Conj of whichever number is active.',
+        examples: [
+          { steps: 'A=3+4i, B=1-2i, then A+B', result: '= 4 + 2i' },
+          { steps: 'Mod of A=3+4i', result: '= 5 (that is, |3+4i|)' },
+        ],
+      },
+      regression: {
+        description: 'Add (x, y) pairs to fit a least-squares line y=mx+b, with the correlation coefficient r and r² shown alongside it.',
+        examples: [
+          { steps: 'Add: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (a perfect fit)' },
+        ],
+      },
+    },
+    mr: {
+      standard: {
+        description: 'मानक क्रमानुसार दैनंदिन अंकगणित, मेमरी (MC/MR/M+/M-), आणि उत्तर (ANS) पुन्हा वापरण्याची सुविधा.',
+        examples: [
+          { steps: '12 + 8 × 2 =', result: '= 28 (गुणाकार बेरजेपूर्वी होतो)' },
+          { steps: '5, M+, 3, M+, MR', result: '= 8 (मेमरीमधील बेरीज दाखवते)' },
+        ],
+      },
+      scientific: {
+        description: 'मानक मोडमधील सर्व सुविधांसह त्रिकोणमिती, व्यस्त त्रिकोणमिती (sin⁻¹/cos⁻¹/tan⁻¹), हायपरबॉलिक फंक्शन्स, log/ln, घात, क्रमगुणित, संयोजनशास्त्र (nCr/nPr), GCD/LCM, आणि कोणत्याही पायाचा लॉगरिथम (logb).',
+        examples: [
+          { steps: 'DEG मोडमध्ये: sin, 30, ), =', result: '= 0.5' },
+          { steps: '5, nCr, 2, =', result: '= 10 (5 पैकी 2 निवडण्याचे मार्ग)' },
+          { steps: '8, logb, 2, =', result: '= 3 (2 च्या पायावर 8 चा log)' },
+        ],
+      },
+      programmer: {
+        description: 'डिस्प्लेवरील बेस टॅब वापरून HEX, DEC, OCT किंवा BIN मध्ये काम करा, तसेच बिटवाइज AND/OR/XOR/NOT आणि बिट-शिफ्ट क्रिया वापरा.',
+        examples: [
+          { steps: 'HEX मध्ये: 1A, AND, 0F, =', result: '= A (0x0A)' },
+          { steps: 'HEX मध्ये: A, OR, 5, =', result: '= F' },
+        ],
+      },
+      converter: {
+        description: 'लांबी, वजन, तापमान, डेटा, क्षेत्रफळ, घनफळ, वेग आणि वेळ या श्रेणींमध्ये एकके रूपांतरित करा. श्रेणी टॅब निवडा, From/To एकके निवडा, आणि मूल्य टाका.',
+        examples: [
+          { steps: 'लांबी: 1 मीटर → फूट', result: '= 3.280839895 ft' },
+          { steps: 'तापमान: 0 सेल्सिअस → फॅरनहाइट', result: '= 32 °F' },
+        ],
+      },
+      statistics: {
+        description: 'संख्यांची यादी जोडून N, बेरीज, सरासरी, मध्यम, बहुलक, चतुर्थांश, IQR, तसेच लोकसंख्या आणि नमुना मानक विचलन मिळवा.',
+        examples: [
+          { steps: 'जोडा: 2, 4, 4, 4, 5, 5, 7, 9', result: 'सरासरी = 5, मध्यम = 4.5, बहुलक = 4' },
+        ],
+      },
+      solver: {
+        description: 'रेषीय (ax+b=0), द्विघात (ax²+bx+c=0), किंवा घन (ax³+bx²+cx+d=0) समीकरणे सोडवा, द्विघात व घन समीकरणांसाठी सम्मिश्र मुळांसह.',
+        examples: [
+          { steps: 'द्विघात: a=1, b=-5, c=6', result: 'x₁ = 3, x₂ = 2' },
+          { steps: 'द्विघात: a=1, b=0, c=1', result: 'x = 0 ± 1i (वास्तव मुळे नाहीत)' },
+        ],
+      },
+      graphing: {
+        description: 'ऑन-स्क्रीन कीपॅड वापरून f(x) (आणि इच्छित असल्यास g(x)) टाका, नंतर Roots, ∫dx, Intersect किंवा Table साठी टूलबार वापरा. बिंदू ट्रेस करण्यासाठी आलेखावर टॅप करा.',
+        examples: [
+          { steps: 'f(x) = x^2 - 4, नंतर Roots', result: 'x = -2 आणि x = 2 वर मुळे' },
+          { steps: 'f(x) = x, g(x) = x^2, नंतर Intersect', result: '(0, 0) आणि (1, 1) येथे भेटतात' },
+        ],
+      },
+      matrix: {
+        description: 'सेलवर टॅप करून 2×2 मॅट्रिक्स A आणि B मध्ये मूल्ये टाका, नंतर A+B, A-B, A×B, Det, किंवा सक्रिय मॅट्रिक्सचा Inverse काढा.',
+        examples: [
+          { steps: 'A=[1,2;3,4], B=[5,6;7,8], नंतर A+B', result: '= [6, 8; 10, 12]' },
+          { steps: 'A=[1,2;3,4] चा Det', result: '= -2' },
+        ],
+      },
+      complex: {
+        description: 'Re/Im फील्डवर टॅप करून दोन सम्मिश्र संख्या A आणि B टाका, नंतर A+B, A-B, A×B, A÷B, किंवा सक्रिय संख्येचा Mod/Arg/Conj काढा.',
+        examples: [
+          { steps: 'A=3+4i, B=1-2i, नंतर A+B', result: '= 4 + 2i' },
+          { steps: 'A=3+4i चा Mod', result: '= 5 (म्हणजे |3+4i|)' },
+        ],
+      },
+      regression: {
+        description: '(x, y) जोड्या जोडून किमान-वर्ग रेषा y=mx+b बसवा, सोबत सहसंबंध गुणांक r आणि r² दाखवले जातात.',
+        examples: [
+          { steps: 'जोडा: (1,2), (2,4), (3,6), (4,8)', result: 'y = 2x + 0, r = 1 (परिपूर्ण जुळणी)' },
+        ],
+      },
+    },
+  };
+
   const helpText = {
     en: {
       standard: [
@@ -2927,11 +3076,28 @@
   function renderHelpContent() {
     const activeBtn = document.querySelector('.mode-btn.active');
     const activeMode = activeBtn ? activeBtn.dataset.mode : 'standard';
-    const bucket = activeMode === 'scientific' ? 'standard' : activeMode;
-    const rows = helpText[state.language][bucket] || [];
-    helpBody.innerHTML = rows.map(([keyLabel, desc]) =>
+    const shortcutBucket = activeMode === 'scientific' ? 'standard' : activeMode;
+    const guide = guideText[state.language][activeMode];
+    const rows = helpText[state.language][shortcutBucket] || [];
+
+    let html = '';
+    if (guide) {
+      html += `<div class="help-guide">`;
+      html += `<p class="help-guide-desc">${guide.description}</p>`;
+      guide.examples.forEach((ex) => {
+        html += `<div class="help-example">`;
+        html += `<div class="help-example-label">${t('helpExampleLabel')}</div>`;
+        html += `<div class="help-example-steps">${ex.steps}</div>`;
+        html += `<div class="help-example-result">${ex.result}</div>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+      html += `<div class="help-section-title">${t('helpShortcutsTitle')}</div>`;
+    }
+    html += rows.map(([keyLabel, desc]) =>
       `<div class="help-row"><span class="help-keys">${keyLabel}</span><span class="help-desc">${desc}</span></div>`
     ).join('');
+    helpBody.innerHTML = html;
   }
 
   function openHelp() {
