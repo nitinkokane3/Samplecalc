@@ -61,4 +61,36 @@ module.exports = [
       assertEqual(await page.textContent('#result'), '3.280839895 ft', 'length category unaffected by currency addition');
     },
   },
+  {
+    name: 'the "rates are not live" note only shows for the Currency category',
+    fn: async (page, baseURL) => {
+      await page.goto(`${baseURL}/index.html`);
+      await page.click('[data-mode="converter"]');
+      await page.click('.category-btn[data-category="length"]');
+      assertEqual(
+        await page.evaluate(() => getComputedStyle(document.getElementById('currencyNote')).display),
+        'none',
+        'note hidden for non-currency categories'
+      );
+
+      await page.click('.category-btn[data-category="currency"]');
+      assertEqual(
+        await page.evaluate(() => getComputedStyle(document.getElementById('currencyNote')).display),
+        'block',
+        'note visible for the currency category'
+      );
+      assertEqual(
+        await page.textContent('#currencyNote'),
+        'Rates are static (not live) so this works fully offline.',
+        'note text'
+      );
+
+      await page.click('.category-btn[data-category="weight"]');
+      assertEqual(
+        await page.evaluate(() => getComputedStyle(document.getElementById('currencyNote')).display),
+        'none',
+        'note hides again after switching away from currency'
+      );
+    },
+  },
 ];

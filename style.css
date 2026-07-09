@@ -217,6 +217,15 @@ body {
   display: flex;
 }
 
+.currency-note {
+  display: none;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 2px 4px;
+  margin-top: -6px;
+}
+
 .unit-select {
   flex: 1;
   min-width: 0;

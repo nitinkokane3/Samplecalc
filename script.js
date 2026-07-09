@@ -38,6 +38,7 @@
   const fromUnitSelect = document.getElementById('fromUnit');
   const toUnitSelect = document.getElementById('toUnit');
   const swapUnitsBtn = document.getElementById('swapUnits');
+  const currencyNoteEl = document.getElementById('currencyNote');
   const convKeys = document.getElementById('convKeys');
   const statNEl = document.getElementById('statN');
   const statSumEl = document.getElementById('statSum');
@@ -242,6 +243,7 @@
       catSpeed: 'Speed',
       catTime: 'Time',
       catCurrency: 'Currency',
+      currencyNote: 'Rates are static (not live) so this works fully offline.',
       swapTitle: 'Swap units',
       convFromLabel: 'Convert from',
       convToLabel: 'Convert to',
@@ -372,6 +374,7 @@
       catSpeed: 'वेग',
       catTime: 'वेळ',
       catCurrency: 'चलन',
+      currencyNote: 'दर स्थिर आहेत (लाइव्ह नाहीत) त्यामुळे हे पूर्णपणे ऑफलाइन काम करते.',
       swapTitle: 'एकके बदला',
       convFromLabel: 'यावरून रूपांतरित करा',
       convToLabel: 'यावर रूपांतरित करा',
@@ -834,6 +837,7 @@
     expressionEl.textContent = localizeDigits(`${conv.entry} ${conv.fromUnit}`);
     resultEl.textContent = localizeDigits(`${formatNumber(converted)} ${conv.toUnit}`);
     memoryIndicator.textContent = '';
+    currencyNoteEl.style.display = conv.category === 'currency' ? 'block' : 'none';
   }
 
   function setCategory(category) {
