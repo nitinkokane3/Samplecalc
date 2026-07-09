@@ -16,6 +16,29 @@ itself. `package.json`'s only dependency is `playwright`, and it's a devDependen
 for the test suite — never required to *run* the app. If you need a new file,
 add a `<script>`/`<link>` tag; don't reach for a build tool to avoid one.
 
+## Service worker: stale-while-revalidate, not cache-first
+
+`sw.js` serves `index.html`/`style.css`/`script.js`/etc. from the Cache API
+using **stale-while-revalidate**: return the cached copy instantly (so the app
+stays fully usable offline), but always kick off a real network fetch in the
+background via `event.waitUntil()` and overwrite the cache entry when it
+resolves. Don't change this back to pure cache-first (`if (cached) return
+cached;` with no network attempt) — that was a real, confirmed bug: for a
+whole session's worth of feature work, `script.js`/`style.css`/`index.html`
+changed on every push but `sw.js` itself never did, so any browser that had
+already installed the PWA never re-fetched anything and would have stayed on
+its first-ever-visit version forever, silently, with no error. Verified by
+editing `script.js` on disk, reloading a page with an already-active service
+worker, and confirming the cached copy updated — see the "stale-while-revalidate"
+test in `tests/specs/pwa.spec.js`, which fails against a reverted cache-first
+handler and passes against the current one.
+
+The revalidation fetch uses `{ cache: 'no-store' }` deliberately — without it,
+the *browser's* own HTTP cache can serve a heuristically-fresh response for a
+file with a `Last-Modified` header and no `Cache-Control`, so the "background
+fetch" never actually reaches the network and the Cache API entry never
+updates. `no-store` forces every revalidation to genuinely ask the server.
+
 ## The isolated-mode architecture
 
 Every mode (Solver, Matrix, Vector, Complex, Finance, etc.) follows the same

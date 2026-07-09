@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-cache-v1';
+const CACHE_NAME = 'calc-cache-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -26,15 +26,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
+    caches.open(CACHE_NAME).then((cache) => cache.match(event.request).then((cached) => {
+      const networkUpdate = fetch(event.request, { cache: 'no-store' }).then((response) => {
         if (response.ok && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          cache.put(event.request, response.clone());
         }
         return response;
       }).catch(() => cached);
-    })
+      // Serve the cached copy instantly (offline-first), but always keep the
+      // network request going in the background so the cache -- and the
+      // next load, even offline -- picks up new deploys automatically.
+      event.waitUntil(networkUpdate);
+      return cached || networkUpdate;
+    }))
   );
 });
