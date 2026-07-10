@@ -41,6 +41,7 @@
 html, body {
   min-height: 100%;
   margin: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -578,6 +579,29 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.3px;
+}
+
+/* Below ~420px the five icon buttons (flex-shrink: 0) leave almost no room
+   for .mode-switch's 12 mode names, since it's the only thing in .top-bar
+   that's allowed to shrink. Trim the icon row's footprint a little so the
+   mode strip gets more space to actually show its content. */
+@media (max-width: 420px) {
+  .top-actions {
+    gap: 5px;
+  }
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+  .icon-btn.lang-btn {
+    min-width: 30px;
+    padding: 0 8px;
+  }
+  .mode-btn {
+    padding: 6px 7px;
+    font-size: 0.66rem;
+  }
 }
 
 .display {
