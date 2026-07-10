@@ -3666,6 +3666,8 @@
 
   function switchToMode(mode) {
     modeButtons.forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+    const activeBtn = document.querySelector('.mode-btn.active');
+    if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', inline: 'center' });
     calculator.classList.toggle('scientific', mode === 'scientific');
     calculator.classList.toggle('programmer', mode === 'programmer');
     calculator.classList.toggle('converter', mode === 'converter');

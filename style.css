@@ -36,11 +36,25 @@
 
 * { box-sizing: border-box; }
 
+/* Buttons carry all their styling from this stylesheet, but without this
+   reset, iOS Safari (and some older WebViews) render native OS chrome --
+   shine, default corner radius, default padding -- underneath custom
+   background/border/border-radius. Harmless on Chromium/Firefox, which
+   already respect the custom styles either way. Deliberately excludes
+   <select> -- .unit-select has no custom dropdown-arrow replacement, so it
+   still needs the browser's native arrow. */
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+}
+
 .visually-hidden { display: none; }
 
 html, body {
   min-height: 100%;
   margin: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -67,6 +81,7 @@ body {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   box-shadow: var(--shadow);
   padding: 18px;
@@ -138,6 +153,7 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
   mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
 }
 
@@ -578,6 +594,29 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.3px;
+}
+
+/* Below ~420px the five icon buttons (flex-shrink: 0) leave almost no room
+   for .mode-switch's 12 mode names, since it's the only thing in .top-bar
+   that's allowed to shrink. Trim the icon row's footprint a little so the
+   mode strip gets more space to actually show its content. */
+@media (max-width: 420px) {
+  .top-actions {
+    gap: 5px;
+  }
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+  .icon-btn.lang-btn {
+    min-width: 30px;
+    padding: 0 8px;
+  }
+  .mode-btn {
+    padding: 6px 7px;
+    font-size: 0.66rem;
+  }
 }
 
 .display {
