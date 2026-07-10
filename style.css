@@ -36,6 +36,19 @@
 
 * { box-sizing: border-box; }
 
+/* Buttons carry all their styling from this stylesheet, but without this
+   reset, iOS Safari (and some older WebViews) render native OS chrome --
+   shine, default corner radius, default padding -- underneath custom
+   background/border/border-radius. Harmless on Chromium/Firefox, which
+   already respect the custom styles either way. Deliberately excludes
+   <select> -- .unit-select has no custom dropdown-arrow replacement, so it
+   still needs the browser's native arrow. */
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+}
+
 .visually-hidden { display: none; }
 
 html, body {
@@ -68,6 +81,7 @@ body {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   box-shadow: var(--shadow);
   padding: 18px;
@@ -139,6 +153,7 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
   mask-image: linear-gradient(to right, transparent 0, black 10px, black calc(100% - 10px), transparent 100%);
 }
 
