@@ -1,4 +1,8 @@
-# Advanced Calculator
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Advanced Calculator
 
 Multi-mode calculator: Standard, Scientific, Programmer, Converter, Statistics,
 Solver, Graphing, Matrix, Vector, Complex, Regression, Finance. Plain HTML/CSS/JS,
@@ -8,6 +12,20 @@ works fully offline after the first visit (see `sw.js`).
 `index.html` + `style.css` + `script.js` are the entire app. `script.js` is one
 top-level IIFE; everything (state, DOM refs, functions) lives in its closure —
 there is no module system to import from, just call functions directly.
+`docs/user-manual.html` is a standalone, hand-maintained walkthrough of every
+mode (with screenshots in `docs/manual-images/`) — it is not generated from
+the app, so update it by hand when a mode's UI or behavior changes.
+
+## Commands
+
+```
+npm install                 # installs playwright (devDependency only)
+npm test                    # run the full test suite
+node tests/run.js <substr>  # filter spec files by filename substring, e.g. `node tests/run.js matrix`
+```
+
+There is no build/lint step — open `index.html` directly, or serve the repo
+root with any static file server, to run the app itself.
 
 ## No build step is deliberate
 
@@ -123,12 +141,6 @@ looks fine at desktop width.
 
 ## Testing
 
-```
-npm install
-npm test                    # all specs
-node tests/run.js <substr>  # filter spec files by filename substring
-```
-
 `tests/run.js` is a small custom runner built directly on the `playwright`
 library — not `@playwright/test`, no test-framework dependency. It spins up
 `tests/server.js` (a plain static file server) and a headless Chromium instance
@@ -146,6 +158,16 @@ system classification was mathematically wrong) that a "does it look plausible"
 assertion would have baked in as correct.
 
 CI (`.github/workflows/test.yml`) runs the full suite on every push/PR to `main`.
+
+## Deployment
+
+`.github/workflows/deploy-pages.yml` publishes to GitHub Pages on every push
+to `main`. It does **not** deploy the repo as-is — it copies an explicit
+allowlist (`index.html style.css script.js sw.js manifest.json icon-192.png
+icon-512.png icon.svg` plus the whole `docs/` dir) into a fresh `site/`
+directory and deploys that. If you add a new top-level asset the deployed app
+needs at runtime (a new icon, a new top-level JS/CSS file), add it to that
+`cp` line too — otherwise it works locally/in tests but 404s in production.
 
 ## i18n
 
